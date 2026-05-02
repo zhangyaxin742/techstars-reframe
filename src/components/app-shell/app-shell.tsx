@@ -1,3 +1,4 @@
+import React from "react";
 import { AppSidebar } from "./app-sidebar";
 import type { AppShellProps } from "./types";
 

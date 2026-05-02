@@ -14,4 +14,4 @@ export type {
   CanvasSize,
   CanvasViewportState,
   NodeMoveUpdate,
-} from "@/src/lib/infinite-canvas/types";
+} from "../../lib/infinite-canvas/types";

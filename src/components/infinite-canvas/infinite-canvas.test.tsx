@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import React, { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
-import type { CanvasNode } from "@/src/lib/infinite-canvas/types";
+import type { CanvasNode } from "../../lib/infinite-canvas/types";
 
 const nodes: CanvasNode[] = [
   {

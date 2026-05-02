@@ -1,12 +1,12 @@
-import { memo, useEffect, useRef } from "react";
-import { drawBackground, drawConnections, setupCanvas } from "@/src/lib/infinite-canvas/rendering";
+import React, { memo, useEffect, useRef } from "react";
+import { drawBackground, drawConnections, setupCanvas } from "../../lib/infinite-canvas/rendering";
 import type {
   CanvasConnection,
   CanvasNode,
   CanvasPoint,
   CanvasSize,
   CanvasViewportState,
-} from "@/src/lib/infinite-canvas/types";
+} from "../../lib/infinite-canvas/types";
 
 interface Canvas2DLayerProps {
   nodes: CanvasNode[];

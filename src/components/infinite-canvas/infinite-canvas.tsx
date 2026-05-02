@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   calculateSelectionBounds,
   fitBoundsToViewport,
   getNodesInRect,
   normalizeRect,
   screenToWorld,
-} from "@/src/lib/infinite-canvas/geometry";
-import { useCanvasViewport } from "@/src/lib/infinite-canvas/use-canvas-viewport";
+} from "../../lib/infinite-canvas/geometry";
+import { useCanvasViewport } from "../../lib/infinite-canvas/use-canvas-viewport";
 import type {
   CanvasConnection,
   CanvasNode,
@@ -15,8 +15,8 @@ import type {
   CanvasRect,
   CanvasSize,
   NodeMoveUpdate,
-} from "@/src/lib/infinite-canvas/types";
-import { cn } from "@/src/lib/utils";
+} from "../../lib/infinite-canvas/types";
+import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNodeView } from "./canvas-node-view";
 import { CanvasPromptBox } from "./canvas-prompt-box";

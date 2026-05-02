@@ -1,8 +1,8 @@
 import { ArrowUp } from "@phosphor-icons/react";
-import { memo, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import type { CanvasPromptBoxData } from "@/lib/infinite-canvas/types";
-import { cn } from "@/lib/utils";
+import React, { memo, useEffect, useRef } from "react";
+import { Button } from "../ui/button";
+import type { CanvasPromptBoxData } from "../../lib/infinite-canvas/types";
+import { cn } from "../../lib/utils";
 
 interface CanvasPromptBoxProps {
   title?: string;

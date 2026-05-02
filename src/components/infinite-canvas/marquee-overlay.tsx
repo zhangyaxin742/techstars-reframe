@@ -1,4 +1,5 @@
-import type { CanvasRect } from "@/src/lib/infinite-canvas/types";
+import React from "react";
+import type { CanvasRect } from "../../lib/infinite-canvas/types";
 
 export function MarqueeOverlay({ rect }: { rect: CanvasRect | null }) {
   if (!rect) return null;

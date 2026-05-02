@@ -1,16 +1,16 @@
 "use client";
 
 import { ArrowSquareOut, Gear, Graph, House, SquaresFour, Trash } from "@phosphor-icons/react";
-import { useCallback, useMemo, useState } from "react";
-import { AppShell, type ShellNavItem } from "@/src/components/app-shell";
-import { InfiniteCanvas, type NodeMoveUpdate } from "@/src/components/infinite-canvas";
-import { Button } from "@/src/components/ui/button";
-import { Toaster } from "@/src/components/ui/sonner";
+import React, { useCallback, useMemo, useState } from "react";
+import { AppShell, type ShellNavItem } from "./components/app-shell";
+import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
+import { Button } from "./components/ui/button";
+import { Toaster } from "./components/ui/sonner";
 import {
   demoPromptSourceImageUrl,
   initialDemoConnections,
   initialDemoNodes,
-} from "@/src/data/canvas-demo";
+} from "./data/canvas-demo";
 
 export function App() {
   const [nodes, setNodes] = useState(initialDemoNodes);
