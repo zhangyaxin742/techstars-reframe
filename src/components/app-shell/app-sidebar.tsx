@@ -1,6 +1,6 @@
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
-import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
+import { useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -44,7 +44,18 @@ function SidebarLink({ item, collapsed }: { item: ShellNavItem; collapsed: boole
 }
 
 export function AppSidebar({ brand, navItems, footerItems = [] }: AppSidebarProps) {
-  const [collapsed, setCollapsed] = useState(Boolean(0));
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return Boolean(0);
+    return window.matchMedia("(max-width: 640px)").matches;
+  });
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const query = window.matchMedia("(max-width: 640px)");
+    const handleChange = (event: MediaQueryListEvent) => setCollapsed(event.matches);
+    query.addEventListener("change", handleChange);
+    return () => query.removeEventListener("change", handleChange);
+  }, []);
 
   return (
     <TooltipProvider delayDuration={150}>
