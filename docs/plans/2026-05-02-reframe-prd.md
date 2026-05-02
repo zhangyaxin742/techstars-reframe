@@ -110,9 +110,11 @@ The chat transitions into an infinite creative canvas. The first canvas view sho
 
 - Brand Context node.
 - Trend Recipe cards.
+- Bottom-center chatbox for asking Reframe to refine, explain, or generate from the current canvas context.
+- Collapsible left-side chat history panel for prior onboarding messages, analysis steps, and user prompts.
 - Access to a collapsible media library side panel.
 
-The canvas should feel like the main workspace. Reframe is not a dashboard-first SaaS app.
+The canvas should feel like the main workspace. Reframe is not a dashboard-first SaaS app. After onboarding, chat remains available as a persistent canvas control rather than a separate page.
 
 ### 5. Trend Recipe Selection
 
@@ -202,6 +204,18 @@ Requirements:
 - Scripted follow-up questions.
 - Simulated AI progress.
 - Smooth transition into the canvas.
+
+### Canvas Chat
+
+After the user enters the canvas, chat remains part of the workspace.
+
+Requirements:
+
+- Persistent chatbox anchored at the bottom center of the infinite canvas.
+- Collapsible left-side chat history panel.
+- Chat history panel shows the onboarding conversation, source intake, simulated AI analysis steps, and later canvas prompts.
+- The collapsed state should preserve canvas space while making chat history easy to reopen.
+- The bottom chatbox should feel contextual to the current canvas selection, so users can ask Reframe to adjust trend recipes, explain media matches, regenerate timeline sections, or suggest missing shots.
 
 ### Brand Context Node
 
@@ -358,4 +372,3 @@ Current research suggests:
 - Google Drive, Shopify, and platform/social connectors are more credible product directions than iCloud Photos for a web-first app.
 - Google Photos is better treated as picker-style selection rather than full-library sync because broad library access changed in 2025.
 - Dedicated video editors should remain the final editing/rendering destination. Reframe should own the creative assembly layer.
-
