@@ -55,6 +55,42 @@ export function App() {
     setStatus(`Exported ${nodeIds.size} ${nodeIds.size === 1 ? "node" : "nodes"}`);
   }, []);
 
+  const handlePromptChange = useCallback((nodeId: string, value: string) => {
+    setNodes((currentNodes) =>
+      currentNodes.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              body: value,
+              prompt: {
+                ...node.prompt,
+                value,
+              },
+            }
+          : node
+      )
+    );
+  }, []);
+
+  const handlePromptSubmit = useCallback((nodeId: string, value: string) => {
+    const promptText = value.trim();
+    setNodes((currentNodes) =>
+      currentNodes.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              body: promptText,
+              prompt: {
+                ...node.prompt,
+                value: promptText,
+              },
+            }
+          : node
+      )
+    );
+    setStatus(`Submitted prompt: ${promptText}`);
+  }, []);
+
   const headerSummary = useMemo(
     () => `${nodeCount} nodes - ${connectionCount} links`,
     [connectionCount, nodeCount]
@@ -107,6 +143,8 @@ export function App() {
             onNodeMove={handleNodeMove}
             onDeleteSelected={handleDeleteSelected}
             onExportSelected={handleExportSelected}
+            onPromptChange={handlePromptChange}
+            onPromptSubmit={handlePromptSubmit}
           />
         </div>
       </section>

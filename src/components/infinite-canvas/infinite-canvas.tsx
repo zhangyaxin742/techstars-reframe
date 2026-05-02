@@ -29,6 +29,8 @@ interface InfiniteCanvasProps {
   onNodeMove?: (updates: NodeMoveUpdate[]) => void;
   onDeleteSelected?: (nodeIds: Set<string>) => void;
   onExportSelected?: (nodeIds: Set<string>) => void;
+  onPromptChange?: (nodeId: string, value: string) => void;
+  onPromptSubmit?: (nodeId: string, value: string) => void;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   className?: string;
 }
@@ -48,6 +50,8 @@ export function InfiniteCanvas({
   onNodeMove,
   onDeleteSelected,
   onExportSelected,
+  onPromptChange,
+  onPromptSubmit,
   resolveImageUrl,
   className,
 }: InfiniteCanvasProps) {
@@ -379,6 +383,8 @@ export function InfiniteCanvas({
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
+            onPromptChange={(node, value) => onPromptChange?.(node.id, value)}
+            onPromptSubmit={(node, value) => onPromptSubmit?.(node.id, value)}
           />
         ))}
       </div>

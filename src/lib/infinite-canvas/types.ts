@@ -10,13 +10,25 @@ export interface CanvasSize {
 
 export interface CanvasRect extends CanvasPoint, CanvasSize {}
 
-export type CanvasNodeKind = "image" | "note" | "frame";
+export type CanvasNodeKind = "image" | "note" | "frame" | "prompt";
+
+export interface CanvasPromptBoxData {
+  value?: string;
+  placeholder?: string;
+  actionLabel?: string;
+  busyLabel?: string;
+  badges?: string[];
+  mode?: "editing" | "collapsed";
+  disabled?: boolean;
+  busy?: boolean;
+}
 
 export interface CanvasNode {
   id: string;
   kind: CanvasNodeKind;
   title: string;
   body?: string;
+  prompt?: CanvasPromptBoxData;
   imageUrl?: string;
   position: CanvasPoint;
   size: CanvasSize;

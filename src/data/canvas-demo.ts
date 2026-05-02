@@ -34,6 +34,21 @@ export const initialDemoNodes: CanvasNode[] = [
     size: { width: 280, height: 230 },
   },
   {
+    id: "prompt",
+    kind: "prompt",
+    title: "Reframe prompt",
+    body: "Make this workflow easier to inspect and hand off.",
+    prompt: {
+      value: "Make this workflow easier to inspect and hand off.",
+      placeholder: "Describe the next canvas step...",
+      actionLabel: "Send",
+      badges: ["Canvas", "Draft"],
+      mode: "editing",
+    },
+    position: { x: 720, y: 360 },
+    size: { width: 360, height: 184 },
+  },
+  {
     id: "handoff",
     kind: "frame",
     title: "Handoff",
@@ -46,5 +61,6 @@ export const initialDemoNodes: CanvasNode[] = [
 export const initialDemoConnections: CanvasConnection[] = [
   { id: "brief-concept", sourceNodeId: "brief", targetNodeId: "concept" },
   { id: "concept-prototype", sourceNodeId: "concept", targetNodeId: "prototype" },
+  { id: "prototype-prompt", sourceNodeId: "prototype", targetNodeId: "prompt" },
   { id: "prototype-handoff", sourceNodeId: "prototype", targetNodeId: "handoff" },
 ];
