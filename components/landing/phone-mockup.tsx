@@ -1,6 +1,8 @@
+import React from "react";
+
 export function PhoneMockup() {
   return (
-    <div className="relative mx-auto w-[260px] sm:w-[286px] md:w-[320px]">
+    <div className="landing-phone relative mx-auto w-[260px] sm:w-[286px] md:w-[320px]">
       <div className="pointer-events-none absolute inset-x-6 bottom-[-2rem] h-16 rounded-full bg-[rgba(10,8,5,0.5)] blur-3xl" />
       <div className="relative rotate-[-1deg] rounded-[2.9rem] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(40,29,21,0.18))] p-[7px] shadow-phone backdrop-blur-sm">
         <span className="absolute left-[-3px] top-24 h-12 w-[3px] rounded-l-full bg-white/15" />

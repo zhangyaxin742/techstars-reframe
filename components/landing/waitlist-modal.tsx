@@ -1,7 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type WaitlistModalProps = {
   open: boolean;
@@ -81,15 +80,12 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
     }
   };
 
+  if (!open) {
+    return null;
+  }
+
   return (
-    <AnimatePresence>
-      {open ? (
-        <motion.div
-          className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+        <div className="waitlist-modal fixed inset-0 z-[60] flex items-center justify-center px-4 py-6">
           <button
             type="button"
             aria-label="Close waitlist modal"
@@ -97,13 +93,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
             onClick={() => onOpenChange(false)}
           />
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 18 }}
-            transition={{ duration: 0.28, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-md rounded-[2rem] border border-white/15 bg-[rgba(26,22,14,0.96)] p-6 text-cream shadow-[0_30px_90px_rgba(0,0,0,0.45)] sm:p-8"
-          >
+          <div className="waitlist-card relative z-10 w-full max-w-md rounded-[2rem] border border-white/15 bg-[rgba(26,22,14,0.96)] p-6 text-cream shadow-[0_30px_90px_rgba(0,0,0,0.45)] sm:p-8">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
@@ -155,9 +145,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                 ) : null}
               </form>
             )}
-          </motion.div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
+          </div>
+        </div>
   );
 }
