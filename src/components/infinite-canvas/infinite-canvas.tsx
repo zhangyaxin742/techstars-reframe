@@ -64,6 +64,7 @@ export function InfiniteCanvas({
   const [marqueeStart, setMarqueeStart] = useState<CanvasPoint | null>(null);
   const [marqueeRect, setMarqueeRect] = useState<CanvasRect | null>(null);
   const lastPointerRef = useRef<CanvasPoint | null>(null);
+  const suppressNextCanvasClickRef = useRef(Boolean(0));
 
   const selection = selectedNodeIds ?? internalSelection;
 
@@ -246,6 +247,9 @@ export function InfiniteCanvas({
         };
         const nextRect = normalizeRect(marqueeStart, current);
         setMarqueeRect(nextRect);
+        if (nextRect.width > 4 || nextRect.height > 4) {
+          suppressNextCanvasClickRef.current = true;
+        }
 
         const worldStart = screenToWorld({ x: nextRect.x, y: nextRect.y }, viewport);
         const worldEnd = screenToWorld(
@@ -334,6 +338,10 @@ export function InfiniteCanvas({
       )}
       tabIndex={0}
       onClick={() => {
+        if (suppressNextCanvasClickRef.current) {
+          suppressNextCanvasClickRef.current = Boolean(0);
+          return;
+        }
         if (!dragState && !marqueeStart) {
           setSelection(new Set());
         }

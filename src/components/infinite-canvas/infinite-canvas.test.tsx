@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
 import type { CanvasNode } from "@/lib/infinite-canvas/types";
 
@@ -56,17 +57,42 @@ describe("InfiniteCanvas", () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
-  it("selects nodes with a marquee drag", () => {
-    const onSelectionChange = vi.fn();
-    const { canvas } = renderCanvas({ onSelectionChange });
+  it("selects nodes with a marquee drag", async () => {
+    function ControlledCanvas() {
+      const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
+      return (
+        <div style={{ width: 900, height: 600 }}>
+          <InfiniteCanvas
+            nodes={nodes}
+            selectedNodeIds={selectedNodeIds}
+            onSelectionChange={setSelectedNodeIds}
+            onExportSelected={vi.fn()}
+          />
+        </div>
+      );
+    }
+
+    render(<ControlledCanvas />);
+    const canvas = screen.getByTestId("infinite-canvas");
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 900,
+      height: 600,
+      top: 0,
+      left: 0,
+      right: 900,
+      bottom: 600,
+      toJSON: () => ({}),
+    });
 
     fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 1 });
+    await waitFor(() => expect(screen.getByTestId("marquee-overlay")).toBeInTheDocument());
     fireEvent.pointerMove(canvas, { clientX: 220, clientY: 170, pointerId: 1 });
     fireEvent.pointerUp(canvas, { clientX: 220, clientY: 170, pointerId: 1 });
+    fireEvent.click(canvas);
 
-    expect(onSelectionChange).toHaveBeenCalled();
-    const lastSelection = onSelectionChange.mock.calls.at(-1)?.[0] as Set<string>;
-    expect(Array.from(lastSelection)).toContain("a");
+    expect(screen.getByLabelText("Export selected nodes")).toBeEnabled();
   });
 
   it("reports node drag updates", () => {
