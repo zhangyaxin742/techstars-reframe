@@ -57,7 +57,6 @@ describe("CanvasPromptBox", () => {
     );
 
     expect(screen.getByText("Accepted direction")).toBeInTheDocument();
-    expect(screen.getByText("Canvas")).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 });

@@ -6,12 +6,17 @@ import { AppShell, type ShellNavItem } from "@/src/components/app-shell";
 import { InfiniteCanvas, type NodeMoveUpdate } from "@/src/components/infinite-canvas";
 import { Button } from "@/src/components/ui/button";
 import { Toaster } from "@/src/components/ui/sonner";
-import { initialDemoConnections, initialDemoNodes } from "@/src/data/canvas-demo";
+import {
+  demoPromptSourceImageUrl,
+  initialDemoConnections,
+  initialDemoNodes,
+} from "@/src/data/canvas-demo";
 
 export function App() {
   const [nodes, setNodes] = useState(initialDemoNodes);
   const [connections, setConnections] = useState(initialDemoConnections);
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
+  const [bottomPrompt, setBottomPrompt] = useState("Make this workflow easier to inspect and hand off.");
   const [status, setStatus] = useState("Ready");
 
   const navItems: ShellNavItem[] = [
@@ -55,39 +60,13 @@ export function App() {
     setStatus(`Exported ${nodeIds.size} ${nodeIds.size === 1 ? "node" : "nodes"}`);
   }, []);
 
-  const handlePromptChange = useCallback((nodeId: string, value: string) => {
-    setNodes((currentNodes) =>
-      currentNodes.map((node) =>
-        node.id === nodeId
-          ? {
-              ...node,
-              body: value,
-              prompt: {
-                ...node.prompt,
-                value,
-              },
-            }
-          : node
-      )
-    );
+  const handleBottomPromptChange = useCallback((value: string) => {
+    setBottomPrompt(value);
   }, []);
 
-  const handlePromptSubmit = useCallback((nodeId: string, value: string) => {
+  const handleBottomPromptSubmit = useCallback((value: string) => {
     const promptText = value.trim();
-    setNodes((currentNodes) =>
-      currentNodes.map((node) =>
-        node.id === nodeId
-          ? {
-              ...node,
-              body: promptText,
-              prompt: {
-                ...node.prompt,
-                value: promptText,
-              },
-            }
-          : node
-      )
-    );
+    setBottomPrompt(promptText);
     setStatus(`Submitted prompt: ${promptText}`);
   }, []);
 
@@ -143,8 +122,18 @@ export function App() {
             onNodeMove={handleNodeMove}
             onDeleteSelected={handleDeleteSelected}
             onExportSelected={handleExportSelected}
-            onPromptChange={handlePromptChange}
-            onPromptSubmit={handlePromptSubmit}
+            bottomPromptBox={{
+              value: bottomPrompt,
+              placeholder: "Describe your edit...",
+              actionLabel: "Generate",
+              busyLabel: "Starting",
+              sourceImageUrl: demoPromptSourceImageUrl,
+              sourceAlt: "",
+              badges: ["Model", "Seed"],
+              count: 4,
+            }}
+            onBottomPromptChange={handleBottomPromptChange}
+            onBottomPromptSubmit={handleBottomPromptSubmit}
           />
         </div>
       </section>

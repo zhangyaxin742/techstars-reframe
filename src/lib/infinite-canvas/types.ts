@@ -18,6 +18,9 @@ export interface CanvasPromptBoxData {
   actionLabel?: string;
   busyLabel?: string;
   badges?: string[];
+  sourceImageUrl?: string;
+  sourceAlt?: string;
+  count?: number;
   mode?: "editing" | "collapsed";
   disabled?: boolean;
   busy?: boolean;

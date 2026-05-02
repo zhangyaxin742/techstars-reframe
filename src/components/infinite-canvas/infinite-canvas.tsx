@@ -11,6 +11,7 @@ import type {
   CanvasConnection,
   CanvasNode,
   CanvasPoint,
+  CanvasPromptBoxData,
   CanvasRect,
   CanvasSize,
   NodeMoveUpdate,
@@ -18,6 +19,7 @@ import type {
 import { cn } from "@/src/lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNodeView } from "./canvas-node-view";
+import { CanvasPromptBox } from "./canvas-prompt-box";
 import { MarqueeOverlay } from "./marquee-overlay";
 import { SelectionToolbar } from "./selection-toolbar";
 
@@ -29,6 +31,9 @@ interface InfiniteCanvasProps {
   onNodeMove?: (updates: NodeMoveUpdate[]) => void;
   onDeleteSelected?: (nodeIds: Set<string>) => void;
   onExportSelected?: (nodeIds: Set<string>) => void;
+  bottomPromptBox?: CanvasPromptBoxData;
+  onBottomPromptChange?: (value: string) => void;
+  onBottomPromptSubmit?: (value: string) => void;
   onPromptChange?: (nodeId: string, value: string) => void;
   onPromptSubmit?: (nodeId: string, value: string) => void;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
@@ -50,6 +55,9 @@ export function InfiniteCanvas({
   onNodeMove,
   onDeleteSelected,
   onExportSelected,
+  bottomPromptBox,
+  onBottomPromptChange,
+  onBottomPromptSubmit,
   onPromptChange,
   onPromptSubmit,
   resolveImageUrl,
@@ -396,6 +404,17 @@ export function InfiniteCanvas({
         onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
         onExport={selection.size > 0 && onExportSelected ? () => onExportSelected(new Set(selection)) : undefined}
       />
+      {bottomPromptBox ? (
+        <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 w-full max-w-[672px] -translate-x-1/2 px-4">
+          <div className="pointer-events-auto">
+            <CanvasPromptBox
+              data={bottomPromptBox}
+              onChange={onBottomPromptChange}
+              onSubmit={onBottomPromptSubmit}
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

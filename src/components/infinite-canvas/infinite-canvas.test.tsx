@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
 import type { CanvasNode } from "@/src/lib/infinite-canvas/types";
@@ -107,5 +108,36 @@ describe("InfiniteCanvas", () => {
 
     expect(onNodeMove).toHaveBeenCalledTimes(1);
     expect(onNodeMove.mock.calls[0][0][0].nodeId).toBe("a");
+  });
+
+  it("renders the sticky bottom prompt composer", async () => {
+    const user = userEvent.setup();
+    const onBottomPromptSubmit = vi.fn();
+
+    function ControlledCanvas() {
+      const [prompt, setPrompt] = useState("Start here");
+      return (
+        <div style={{ width: 900, height: 600 }}>
+          <InfiniteCanvas
+            nodes={nodes}
+            bottomPromptBox={{
+              value: prompt,
+              placeholder: "Describe your edit...",
+              actionLabel: "Generate",
+            }}
+            onBottomPromptChange={setPrompt}
+            onBottomPromptSubmit={onBottomPromptSubmit}
+          />
+        </div>
+      );
+    }
+
+    render(<ControlledCanvas />);
+
+    await user.clear(screen.getByPlaceholderText("Describe your edit..."));
+    await user.type(screen.getByPlaceholderText("Describe your edit..."), "Refine this path");
+    await user.click(screen.getByRole("button", { name: "Generate" }));
+
+    expect(onBottomPromptSubmit).toHaveBeenCalledWith("Refine this path");
   });
 });
