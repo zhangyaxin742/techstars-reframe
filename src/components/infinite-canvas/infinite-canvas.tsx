@@ -5,8 +5,8 @@ import {
   getNodesInRect,
   normalizeRect,
   screenToWorld,
-} from "@/lib/infinite-canvas/geometry";
-import { useCanvasViewport } from "@/lib/infinite-canvas/use-canvas-viewport";
+} from "@/src/lib/infinite-canvas/geometry";
+import { useCanvasViewport } from "@/src/lib/infinite-canvas/use-canvas-viewport";
 import type {
   CanvasConnection,
   CanvasNode,
@@ -14,8 +14,8 @@ import type {
   CanvasRect,
   CanvasSize,
   NodeMoveUpdate,
-} from "@/lib/infinite-canvas/types";
-import { cn } from "@/lib/utils";
+} from "@/src/lib/infinite-canvas/types";
+import { cn } from "@/src/lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNodeView } from "./canvas-node-view";
 import { MarqueeOverlay } from "./marquee-overlay";

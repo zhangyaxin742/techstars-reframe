@@ -1,11 +1,11 @@
 import { ArrowSquareOut, Trash } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import { worldToScreen } from "@/lib/infinite-canvas/geometry";
+import { Button } from "@/src/components/ui/button";
+import { worldToScreen } from "@/src/lib/infinite-canvas/geometry";
 import type {
   CanvasRect,
   CanvasSize,
   CanvasViewportState,
-} from "@/lib/infinite-canvas/types";
+} from "@/src/lib/infinite-canvas/types";
 
 interface SelectionToolbarProps {
   bounds: CanvasRect | null;

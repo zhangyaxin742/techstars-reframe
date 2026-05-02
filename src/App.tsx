@@ -1,10 +1,12 @@
+"use client";
+
 import { ArrowSquareOut, Gear, Graph, House, SquaresFour, Trash } from "@phosphor-icons/react";
 import { useCallback, useMemo, useState } from "react";
-import { AppShell, type ShellNavItem } from "@/components/app-shell";
-import { InfiniteCanvas, type NodeMoveUpdate } from "@/components/infinite-canvas";
-import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
-import { initialDemoConnections, initialDemoNodes } from "@/data/canvas-demo";
+import { AppShell, type ShellNavItem } from "@/src/components/app-shell";
+import { InfiniteCanvas, type NodeMoveUpdate } from "@/src/components/infinite-canvas";
+import { Button } from "@/src/components/ui/button";
+import { Toaster } from "@/src/components/ui/sonner";
+import { initialDemoConnections, initialDemoNodes } from "@/src/data/canvas-demo";
 
 export function App() {
   const [nodes, setNodes] = useState(initialDemoNodes);
@@ -54,7 +56,7 @@ export function App() {
   }, []);
 
   const headerSummary = useMemo(
-    () => `${nodeCount} nodes · ${connectionCount} links`,
+    () => `${nodeCount} nodes - ${connectionCount} links`,
     [connectionCount, nodeCount]
   );
 
@@ -72,7 +74,7 @@ export function App() {
           </div>
           <div className="flex items-center gap-2">
             <div className="hidden rounded-md border px-2 py-1 text-xs text-muted-foreground md:block">
-              <span className="tabular-nums tracking-tight">{selectedCount}</span> selected · {status}
+              <span className="tabular-nums tracking-tight">{selectedCount}</span> selected - {status}
             </div>
             <Button
               type="button"

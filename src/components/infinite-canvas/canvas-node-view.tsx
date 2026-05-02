@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { cn } from "@/lib/utils";
-import type { CanvasNode, CanvasPoint } from "@/lib/infinite-canvas/types";
+import { cn } from "@/src/lib/utils";
+import type { CanvasNode, CanvasPoint } from "@/src/lib/infinite-canvas/types";
 
 interface CanvasNodeViewProps {
   node: CanvasNode;

@@ -1,13 +1,13 @@
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+} from "@/src/components/ui/tooltip";
+import { cn } from "@/src/lib/utils";
 import type { ShellBrand, ShellNavItem } from "./types";
 
 interface AppSidebarProps {

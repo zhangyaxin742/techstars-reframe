@@ -1,4 +1,4 @@
-import type { CanvasConnection, CanvasNode } from "@/components/infinite-canvas";
+import type { CanvasConnection, CanvasNode } from "@/src/components/infinite-canvas";
 
 const previewOne =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360'%3E%3Crect width='640' height='360' fill='%23e2e8f0'/%3E%3Ccircle cx='180' cy='140' r='88' fill='%230e7490' opacity='.82'/%3E%3Crect x='300' y='72' width='210' height='210' rx='28' fill='%23334155' opacity='.9'/%3E%3Cpath d='M0 300 C150 240 250 350 420 285 C520 247 575 260 640 220 L640 360 L0 360 Z' fill='%23f8fafc'/%3E%3C/svg%3E";
