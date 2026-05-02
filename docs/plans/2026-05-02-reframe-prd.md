@@ -332,6 +332,38 @@ The primary reaction Reframe should produce is:
 
 > This saves me from figuring out which clips to use and how to structure them for trends.
 
+## Pricing And Packaging Direction
+
+Pricing is not part of the frontend-only demo MVP. The demo should still make the post-demo business model legible by showing the product's paid value: Reframe is a creative assembly layer, not a full video editor or final renderer.
+
+The primary pricing meter should be timeline assemblies. A timeline assembly is one AI-generated short-form video plan that maps a brand, trend recipe, media matches, text overlays, audio timing, missing-shot prompts, and export handoff into an editable timeline. This aligns pricing with the product's core customer value instead of charging by render minutes or generic AI credits.
+
+### Recommended Plans
+
+| Plan | Price | Best for | Core limits | Includes |
+| --- | ---: | --- | --- | --- |
+| Launch | $49/month or $39/month annually | Solo founders validating a repeatable content workflow | 1 brand, 3 connected sources, 250 indexed assets, 10 timeline assemblies/month | Brand context, AI media labels, curated trend recipes, editable timeline, missing-shot prompts, generic export handoff |
+| Growth | $149/month or $119/month annually | Founder-led ecommerce brands posting consistently | 1 brand, 7 connected sources, 2,000 indexed assets, 40 timeline assemblies/month | Everything in Launch, plus competitor/reference video recipes, hook and caption variants, alternate clip matching, CapCut/Premiere/DaVinci handoff, reusable brand voice |
+| Studio | $399/month or $319/month annually | Brands with a creator, agency, or fractional marketer | 5 brands, 10 seats, 10,000 indexed assets, 150 timeline assemblies/month | Everything in Growth, plus team workspace, approval flows, custom recipe library, priority processing, advanced asset organization, shared export packages |
+
+Growth should be the default recommended plan. Launch reduces signup friction, but the strongest product value requires enough assemblies, sources, and export options to become part of a weekly content workflow.
+
+### Trial Strategy
+
+Reframe should avoid a permanently generous free plan at launch. Instead, offer a free trial that produces one fully assembled timeline. The strongest activation event is seeing the user's own media mapped into a trend-native short-form timeline; a generic free tier would likely hide the product's differentiated value behind limits.
+
+### Upgrade Triggers
+
+- More timeline assemblies for teams publishing more frequently.
+- More indexed media for brands with larger clip libraries.
+- More connected sources for brands spreading assets across social, storefront, and drive tools.
+- Dedicated export handoff for teams that finish in CapCut, Premiere, DaVinci Resolve, or similar tools.
+- Team workspaces, approvals, and multi-brand support for agencies and content operators.
+
+### Positioning
+
+Reframe should sit above commodity editing tools and below recurring creator/editor labor. CapCut, Premiere, and DaVinci own detailed editing and rendering. Reframe owns the pre-editing creative decision: which trend to use, which clips fit, what is missing, how the timeline should be structured, and how to hand the assembly to a dedicated editor.
+
 ## Future Connector Direction
 
 The first real connector priorities are:
