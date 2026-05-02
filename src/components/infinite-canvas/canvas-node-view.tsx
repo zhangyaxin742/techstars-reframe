@@ -45,7 +45,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           src={imageUrl}
           alt=""
           className="h-24 w-full object-cover"
-          draggable={false}
+          draggable={Boolean(0)}
         />
       ) : null}
       <div className="space-y-1 p-3">

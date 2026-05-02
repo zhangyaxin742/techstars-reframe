@@ -131,7 +131,7 @@ export function InfiniteCanvas({
       wheelPan({ x: event.deltaX, y: event.deltaY });
     };
 
-    element.addEventListener("wheel", handleWheel, { passive: false });
+    element.addEventListener("wheel", handleWheel, { passive: Boolean(0) });
     return () => element.removeEventListener("wheel", handleWheel);
   }, [containerRef, wheelPan, zoomAtPoint]);
 

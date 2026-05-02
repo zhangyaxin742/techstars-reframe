@@ -44,7 +44,7 @@ function SidebarLink({ item, collapsed }: { item: ShellNavItem; collapsed: boole
 }
 
 export function AppSidebar({ brand, navItems, footerItems = [] }: AppSidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(Boolean(0));
 
   return (
     <TooltipProvider delayDuration={150}>
