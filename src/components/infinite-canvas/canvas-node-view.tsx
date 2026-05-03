@@ -52,6 +52,24 @@ function NodeLoadingSkeleton({
   );
 }
 
+function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
+  if (mode === "loading") {
+    return (
+      <NodeLoadingSkeleton
+        label="Loading timeline"
+        className="rounded-xl border border-dashed border-muted-foreground/45"
+      />
+    );
+  }
+
+  return (
+    <div
+      aria-label="Timeline preview"
+      className="h-full w-full rounded-xl border border-dashed border-muted-foreground/45 bg-muted-foreground/25"
+    />
+  );
+}
+
 function TimelineGhostPreview({
   nodeId,
   persistent,
@@ -62,6 +80,7 @@ function TimelineGhostPreview({
   return (
     <div
       data-testid={`canvas-node-timeline-ghost-${nodeId}`}
+      data-preview-mode="preview"
       className={cn(
         "pointer-events-none absolute left-full top-0 z-10 ml-24 h-[280px] w-[480px] origin-left",
         "transition-[opacity,transform] duration-200",
@@ -70,10 +89,7 @@ function TimelineGhostPreview({
           : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
       )}
     >
-      <NodeLoadingSkeleton
-        label="Loading timeline"
-        className="rounded-xl border border-dashed border-muted-foreground/45"
-      />
+      <TimelinePreviewSurface mode="preview" />
     </div>
   );
 }
@@ -289,7 +305,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               >
-                <NodeLoadingSkeleton label="Loading timeline" />
+                <TimelinePreviewSurface mode="loading" />
               </motion.div>
             ) : (
               <motion.div
