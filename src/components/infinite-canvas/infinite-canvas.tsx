@@ -146,7 +146,8 @@ export function InfiniteCanvas({
       }
 
       if (event.shiftKey) {
-        wheelPan({ x: event.deltaY, y: 0 });
+        const horizontalDelta = event.deltaX !== 0 ? event.deltaX : event.deltaY;
+        wheelPan({ x: horizontalDelta, y: 0 });
         return;
       }
 

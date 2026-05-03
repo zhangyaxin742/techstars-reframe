@@ -78,6 +78,26 @@ describe("InfiniteCanvas", () => {
     });
   });
 
+  it("uses horizontal wheel delta for shift panning when the browser supplies it", async () => {
+    const { canvas } = renderCanvas();
+    const transformLayer = screen.getByTestId("canvas-node-a").parentElement;
+    const initialTransform = transformLayer?.style.transform;
+    const event = new WheelEvent("wheel", {
+      deltaX: 120,
+      deltaY: 0,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    canvas.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    await waitFor(() => {
+      expect(transformLayer?.style.transform).not.toBe(initialTransform);
+    });
+  });
+
   it("pans instead of marquee selecting while space is held", async () => {
     const { canvas } = renderCanvas();
     const transformLayer = screen.getByTestId("canvas-node-a").parentElement;
