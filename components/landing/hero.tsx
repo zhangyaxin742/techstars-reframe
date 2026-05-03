@@ -1,31 +1,18 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LandingIntakeChat } from "./landing-intake-chat";
 import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
-const AUTO_ZOOM_DELAY_MS = 2000;
-
-function BackgroundStill({ frame }: { frame: "start-frame" | "final-frame" }) {
-  if (frame === "start-frame") {
-    return (
-      <img
-        src="/assets/start-frame.png"
-        alt=""
-        aria-hidden="true"
-        className="landing-background-image h-full w-full object-cover object-center sepia-[0.2] saturate-[0.85] brightness-[0.7]"
-      />
-    );
-  }
-
+function BackgroundStill() {
   return (
     <picture className="block h-full w-full">
       <source srcSet="/assets/final-frame.avif" type="image/avif" />
       <source srcSet="/assets/final-frame.webp" type="image/webp" />
       <img
-        src="/assets/final-frame.png"
+        src="/assets/final-frame.webp"
         alt=""
         aria-hidden="true"
         className="landing-background-image h-full w-full object-cover object-center sepia-[0.2] saturate-[0.85] brightness-[0.7]"
@@ -36,48 +23,36 @@ function BackgroundStill({ frame }: { frame: "start-frame" | "final-frame" }) {
 
 export function Hero() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
-  const [backgroundState, setBackgroundState] = useState<"idle" | "playing" | "settled">("idle");
+  const [backgroundState, setBackgroundState] = useState<"playing" | "settled">("playing");
   const videoRef = useRef<HTMLVideoElement>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-
-    const timerId = window.setTimeout(() => {
-      setBackgroundState((current) => (current === "idle" ? "playing" : current));
-    }, AUTO_ZOOM_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, [prefersReducedMotion]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (backgroundState !== "playing") {
+    if (prefersReducedMotion) {
       video.pause();
       video.currentTime = 0;
+      setBackgroundState("settled");
       return;
     }
 
+    setBackgroundState("playing");
     const playPromise = video.play();
     if (playPromise) {
       playPromise.catch(() => {
         setBackgroundState("settled");
       });
     }
-  }, [backgroundState]);
-
-  const stillFrame = backgroundState === "settled" ? "final-frame" : "start-frame";
+  }, [prefersReducedMotion]);
 
   return (
     <>
       <div className="landing-page relative min-h-screen overflow-hidden bg-ink text-cream">
         <div className="absolute inset-0">
           <div className="absolute inset-[-4%] will-change-transform">
-            <BackgroundStill frame={stillFrame} />
+            <BackgroundStill />
             <video
               ref={videoRef}
               muted
