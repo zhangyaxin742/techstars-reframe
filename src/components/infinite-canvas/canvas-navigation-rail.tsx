@@ -89,7 +89,7 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
             }}
           >
             <div
-              className="pointer-events-auto flex h-64 w-12 flex-col items-center rounded-full border border-border bg-card px-1 py-2 shadow-[rgba(0,0,0,0.15)_0px_2px_6px_0px]"
+              className="pointer-events-auto flex w-12 flex-col items-center rounded-full border border-border bg-card px-1 py-2 shadow-[rgba(0,0,0,0.15)_0px_2px_6px_0px]"
               onClick={stopCanvas}
               onMouseDown={stopCanvas}
               onPointerDown={stopCanvas}
@@ -122,7 +122,7 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
               <button
                 type="button"
                 aria-label="Open profile"
-                className="mt-auto flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary p-0.5 outline-none ring-1 ring-border transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-2.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary p-0.5 outline-none ring-1 ring-border transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <span className="block size-full overflow-hidden rounded-full">
                   <img
