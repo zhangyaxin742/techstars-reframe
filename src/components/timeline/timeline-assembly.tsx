@@ -132,7 +132,11 @@ export function TimelineAssembly({
 
             {/* Scrollable track area */}
             <div className="scrollbar-hover-visible min-w-0 flex-1 overflow-x-auto">
-              <div className="relative" style={{ width: trackWidth }}>
+              <div
+                className="relative"
+                data-testid="timeline-track-surface"
+                style={{ width: "100%", minWidth: trackWidth }}
+              >
 
                 {/* Timecode ruler */}
                 <div className="relative h-8 border-b border-border bg-secondary/20">

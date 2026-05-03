@@ -76,6 +76,10 @@ describe("TimelineAssembly", () => {
     expect(screen.getByText("Audio (Beat)")).toBeInTheDocument();
     expect(screen.getByText("0:18")).toBeInTheDocument();
     expect(screen.queryByText("0:21")).not.toBeInTheDocument();
+    expect(screen.getByTestId("timeline-track-surface")).toHaveStyle({
+      width: "100%",
+      minWidth: "1120px",
+    });
     expect(screen.getByTestId("timeline-segment-ts-4")).toHaveClass("border-yellow-500/50");
     expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");
   });
