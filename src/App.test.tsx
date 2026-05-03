@@ -213,6 +213,7 @@ describe("App", () => {
       "rgb(0, 129, 192)"
     );
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-connector-timeline-1-preview")).toBeInTheDocument();
     expect(screen.getByText("Side-by-Side Fit Failure Demo — Timeline")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-nodes",

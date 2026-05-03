@@ -290,6 +290,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   const meta = kindMeta[node.kind];
   const isTrendRecipe = node.kind === "trend-recipe" && trendRecipePhase === "revealing";
   const isTimelineSource = isTrendRecipe && timelineSourceNodeId === node.id;
+  const isRevealedTimeline = node.kind === "timeline" && timelinePhase === "revealing";
 
   return (
     <motion.article
@@ -341,6 +342,20 @@ export const CanvasNodeView = memo(function CanvasNodeView({
             initial={{ scaleX: 0, opacity: 0 }}
             animate={{ scaleX: 1, opacity: 1 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
+            style={{ transformOrigin: "left center" }}
+          />
+        </div>
+      ) : null}
+      {isRevealedTimeline ? (
+        <div
+          data-testid={`canvas-node-connector-${node.id}-preview`}
+          className="pointer-events-none absolute left-full top-1/2 z-20 w-16 -translate-y-1/2"
+        >
+          <motion.div
+            className="h-0.5 w-full rounded-full bg-accent shadow-[rgba(0,129,192,0.22)_0px_0px_0px_1px]"
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
             style={{ transformOrigin: "left center" }}
           />
         </div>
