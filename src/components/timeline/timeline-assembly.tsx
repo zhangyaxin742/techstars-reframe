@@ -20,8 +20,6 @@ function formatMs(ms: number): string {
 }
 
 const WAVE_HEIGHTS = [20, 42, 74, 56, 30, 88, 64, 36, 52, 76, 44, 68, 25, 90, 58, 38];
-const DRAWER_TIMELINE_LABELED_TAIL_MS = 3000;
-const DRAWER_TIMELINE_VISUAL_TAIL_MS = 6000;
 
 function getClipTransitionMarkers(segments: TimelineSegment[], totalMs: number): number[] {
   const markers = new Set<number>();
@@ -106,11 +104,9 @@ export function TimelineAssembly({
 
   if (variant === "drawer") {
     const rulerStep = 3000;
-    const drawerRulerMs = totalMs + DRAWER_TIMELINE_LABELED_TAIL_MS;
-    const drawerVisualMs = totalMs + DRAWER_TIMELINE_VISUAL_TAIL_MS;
     const rulerMarks: number[] = [];
-    for (let t = 0; t <= drawerRulerMs; t += rulerStep) rulerMarks.push(t);
-    if (rulerMarks[rulerMarks.length - 1] < drawerRulerMs) rulerMarks.push(drawerRulerMs);
+    for (let t = 0; t <= totalMs; t += rulerStep) rulerMarks.push(t);
+    if (rulerMarks[rulerMarks.length - 1] < totalMs) rulerMarks.push(totalMs);
     const trackWidth = 1120;
 
     return (
@@ -144,7 +140,7 @@ export function TimelineAssembly({
                     <div
                       key={mark}
                       className="absolute inset-y-0 border-l border-border/50"
-                      style={{ left: `${(mark / drawerVisualMs) * 100}%` }}
+                      style={{ left: `${(mark / totalMs) * 100}%` }}
                     >
                       <span className="absolute left-1.5 top-1.5 text-[10px] tabular-nums text-muted-foreground">
                         {formatMs(mark)}
@@ -156,8 +152,8 @@ export function TimelineAssembly({
                 {/* Video track */}
                 <div className="relative h-[72px] border-b border-border bg-secondary/20">
                   {clipSegments.map((seg) => {
-                    const widthPct = ((seg.endMs - seg.startMs) / drawerVisualMs) * 100;
-                    const leftPct = (seg.startMs / drawerVisualMs) * 100;
+                    const widthPct = ((seg.endMs - seg.startMs) / totalMs) * 100;
+                    const leftPct = (seg.startMs / totalMs) * 100;
                     const isSelected = seg.id === selectedSegmentId;
                     const segmentLabel = seg.selectedAssetLabel ?? seg.label;
                     return (
@@ -207,8 +203,8 @@ export function TimelineAssembly({
                 {/* Text overlay track */}
                 <div className="relative h-14 border-b border-border bg-secondary/20">
                   {overlaySegments.map((seg) => {
-                    const widthPct = ((seg.endMs - seg.startMs) / drawerVisualMs) * 100;
-                    const leftPct = (seg.startMs / drawerVisualMs) * 100;
+                    const widthPct = ((seg.endMs - seg.startMs) / totalMs) * 100;
+                    const leftPct = (seg.startMs / totalMs) * 100;
                     const isCta = seg.label.toLowerCase().includes("cta");
                     return (
                       <button
@@ -261,7 +257,7 @@ export function TimelineAssembly({
                             key={markerMs}
                             data-testid={`audio-beat-marker-${markerMs}`}
                             className="absolute top-1/2 size-1.5 -translate-y-1/2 rotate-45 bg-accent"
-                            style={{ left: `${(markerMs / drawerVisualMs) * 100}%` }}
+                            style={{ left: `${(markerMs / totalMs) * 100}%` }}
                           />
                         ))}
                       </div>
