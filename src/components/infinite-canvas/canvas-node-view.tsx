@@ -277,33 +277,30 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
 
           <div className="grid grid-cols-3 gap-2 text-[10px]">
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-              <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/72">
+              <div className="flex items-center text-foreground/72">
                 <span className="flex size-5 items-center justify-center rounded-full bg-rose-500/14 text-rose-600">
                   <Heart className="size-3" weight="fill" />
                 </span>
-                Likes
               </div>
               <div className="mt-1 text-sm font-semibold text-foreground">
                 <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />
               </div>
             </div>
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-              <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/72">
+              <div className="flex items-center text-foreground/72">
                 <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500/14 text-emerald-700">
                   <BookmarkSimple className="size-3" weight="fill" />
                 </span>
-                Saves
               </div>
               <div className="mt-1 text-sm font-semibold text-foreground">
                 <AnimatedMetricNumber value={state.saves} testId="preview-publish-saves-count" />
               </div>
             </div>
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-              <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/72">
+              <div className="flex items-center text-foreground/72">
                 <span className="flex size-5 items-center justify-center rounded-full bg-amber-500/16 text-amber-700">
                   <PaperPlaneTilt className="size-3" weight="fill" />
                 </span>
-                Shares
               </div>
               <div className="mt-1 text-sm font-semibold text-foreground">
                 <AnimatedMetricNumber value={state.shares} testId="preview-publish-shares-count" />

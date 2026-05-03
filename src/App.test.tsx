@@ -390,9 +390,6 @@ describe("App", () => {
     });
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Published");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Views");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Likes");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Saves");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Shares");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Reach");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Engagement");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48");
