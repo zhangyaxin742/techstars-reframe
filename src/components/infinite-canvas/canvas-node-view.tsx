@@ -58,6 +58,45 @@ function TrendRecipeCardSkeleton() {
   );
 }
 
+function TimelineGhostSkeleton() {
+  return (
+    <div className="h-36 w-60 rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-3 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="h-2 w-20 rounded bg-muted/80" />
+        <div className="h-2 w-10 rounded bg-muted/70" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-6 rounded bg-muted/70" />
+        <div className="h-6 rounded bg-muted/60" />
+        <div className="h-6 rounded bg-muted/50" />
+      </div>
+    </div>
+  );
+}
+
+function TimelineGhostPreview({
+  nodeId,
+  persistent,
+}: {
+  nodeId: string;
+  persistent: boolean;
+}) {
+  return (
+    <div
+      data-testid={`canvas-node-timeline-ghost-${nodeId}`}
+      className={cn(
+        "pointer-events-none absolute left-full top-1/2 z-10 ml-14 -translate-y-1/2 origin-left",
+        "transition-[opacity,transform] duration-200",
+        persistent
+          ? "scale-100 opacity-100"
+          : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
+      )}
+    >
+      <TimelineGhostSkeleton />
+    </div>
+  );
+}
+
 export const CanvasNodeView = memo(function CanvasNodeView({
   node,
   position,
@@ -151,28 +190,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               transition={{ duration: 0.35, ease: "easeOut" }}
             />
           ) : null}
-          <div
-            data-testid={`canvas-node-timeline-ghost-${node.id}`}
-            className={cn(
-              "pointer-events-none absolute left-full top-1/2 z-10 ml-14 -translate-y-1/2 origin-left",
-              "transition-[opacity,transform] duration-200",
-              isTimelineSource
-                ? "scale-100 opacity-100"
-                : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
-            )}
-          >
-            <div className="h-36 w-60 rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-3 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]">
-              <div className="mb-2 flex items-center justify-between">
-                <div className="h-2 w-20 rounded bg-muted/80" />
-                <div className="h-2 w-10 rounded bg-muted/70" />
-              </div>
-              <div className="space-y-2">
-                <div className="h-6 rounded bg-muted/70" />
-                <div className="h-6 rounded bg-muted/60" />
-                <div className="h-6 rounded bg-muted/50" />
-              </div>
-            </div>
-          </div>
+          <TimelineGhostPreview nodeId={node.id} persistent={isTimelineSource} />
         </>
       ) : null}
 
