@@ -329,7 +329,7 @@ export const chatHistory: ChatMessage[] = [
   {
     id: "msg-2",
     role: "user",
-    content: "Create a preorder launch video for Petite Outdoors. Here are the brand links and product media.",
+    content: "Create a pre-order launch video for Petite Outdoors. Here are the brand links and product media.",
     timestamp: 2,
     badges: [
       ...brandContext.sources.slice(0, 3),

@@ -32,13 +32,6 @@ type ToolSequenceConfig = {
   onDone?: () => void;
 };
 
-type TimedAssistantMessageConfig = {
-  message: ChatMessage;
-  startDelay: number;
-  thinkingDelay: number;
-  thinkingText: string;
-};
-
 function toolCallsThroughIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
@@ -66,7 +59,7 @@ export function App() {
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
   const [brandCtxPhase, setBrandCtxPhase] = useState<"skeleton" | "revealing">("skeleton");
   const [trendRecipePhase, setTrendRecipePhase] = useState<"hidden" | "skeleton" | "revealing">("hidden");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [chatHistory[1]]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [timelineSourceNodeId, setTimelineSourceNodeId] = useState<string | null>(null);
   const [animatedConnectionIds, setAnimatedConnectionIds] = useState<Set<string>>(new Set());
@@ -103,47 +96,6 @@ export function App() {
     const timeoutId = window.setTimeout(callback, delay);
     timeoutIdsRef.current.push(timeoutId);
   }, []);
-
-  const queueMessage = useCallback(
-    (message: ChatMessage, delay: number) => {
-      queueTimeout(() => {
-        setMessages((currentMessages) =>
-          upsertMessageById(currentMessages, { ...message, timestamp: Date.now() })
-        );
-      }, delay);
-    },
-    [queueTimeout, upsertMessageById]
-  );
-
-  const queueAssistantMessage = useCallback(
-    ({ message, startDelay, thinkingDelay, thinkingText }: TimedAssistantMessageConfig) => {
-      queueTimeout(() => {
-        setMessages((currentMessages) =>
-          upsertMessageById(currentMessages, {
-            ...message,
-            content: "",
-            timestamp: Date.now(),
-            thinkingText,
-          })
-        );
-      }, startDelay);
-
-      queueTimeout(() => {
-        setMessages((currentMessages) =>
-          currentMessages.map((currentMessage) =>
-            currentMessage.id === message.id
-              ? {
-                  ...currentMessage,
-                  content: message.content,
-                  thinkingText: undefined,
-                }
-              : currentMessage
-          )
-        );
-      }, startDelay + thinkingDelay);
-    },
-    [queueTimeout, upsertMessageById]
-  );
 
   const startToolSequence = useCallback(
     ({
@@ -236,50 +188,39 @@ export function App() {
     if (initialSequenceStartedRef.current) return;
     initialSequenceStartedRef.current = true;
 
-    queueAssistantMessage({
-      message: chatHistory[0],
-      startDelay: 300,
-      thinkingDelay: 900,
-      thinkingText: "Starting Reframe",
+    startToolSequence({
+      messageId: "auto-analysis",
+      content: "I am reading those sources and connected clips now.",
+      thinkingText: "Building brand context",
+      step: "analysis",
+      toolCalls: initialAiToolCalls,
+      doneContent: chatHistory[2].content,
+      onDone: () => {
+        setFlowStep("brand-context-ready");
+        setBrandCtxPhase("revealing");
+        queueTimeout(() => {
+          setFlowStep("trend-search");
+          setTrendRecipePhase("skeleton");
+          startToolSequence({
+            messageId: "auto-trend-search",
+            content: chatHistory[3].content,
+            thinkingText: "Searching for trend recipes",
+            step: "trend-search",
+            toolCalls: trendSearchAiToolCalls,
+            doneContent: chatHistory[4].content,
+            onDone: () => {
+              setFlowStep("recipes-ready");
+              setTrendRecipePhase("revealing");
+            },
+          });
+        }, 2400);
+      },
     });
-    queueMessage(chatHistory[1], 2600);
-    queueTimeout(() => {
-      startToolSequence({
-        messageId: "auto-analysis",
-        content: "I am reading those sources and connected clips now.",
-        thinkingText: "Building brand context",
-        step: "analysis",
-        toolCalls: initialAiToolCalls,
-        doneContent: chatHistory[2].content,
-        onDone: () => {
-          setFlowStep("brand-context-ready");
-          setBrandCtxPhase("revealing");
-          queueTimeout(() => {
-            setFlowStep("trend-search");
-            setTrendRecipePhase("skeleton");
-            startToolSequence({
-              messageId: "auto-trend-search",
-              content: chatHistory[3].content,
-              thinkingText: "Searching for trend recipes",
-              step: "trend-search",
-              toolCalls: trendSearchAiToolCalls,
-              doneContent: chatHistory[4].content,
-              onDone: () => {
-                setFlowStep("recipes-ready");
-                setTrendRecipePhase("revealing");
-              },
-            });
-          }, 2400);
-        },
-      });
-    }, 4200);
 
     return () => {
       initialSequenceStartedRef.current = false;
     };
   }, [
-    queueAssistantMessage,
-    queueMessage,
     queueTimeout,
     startToolSequence,
   ]);
