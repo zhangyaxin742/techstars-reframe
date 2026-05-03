@@ -58,6 +58,81 @@ describe("InfiniteCanvas", () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
+  it("uses vertical wheel delta for horizontal panning when shift is held", async () => {
+    const { canvas } = renderCanvas();
+    const transformLayer = screen.getByTestId("canvas-node-a").parentElement;
+    const initialTransform = transformLayer?.style.transform;
+    const event = new WheelEvent("wheel", {
+      deltaX: 0,
+      deltaY: 120,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    canvas.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    await waitFor(() => {
+      expect(transformLayer?.style.transform).not.toBe(initialTransform);
+    });
+  });
+
+  it("pans instead of marquee selecting while space is held", async () => {
+    const { canvas } = renderCanvas();
+    const transformLayer = screen.getByTestId("canvas-node-a").parentElement;
+    const initialTransform = transformLayer?.style.transform;
+
+    fireEvent.keyDown(window, { key: " ", code: "Space" });
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 100, clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(canvas, { clientX: 160, clientY: 130, pointerId: 1 });
+
+    expect(screen.queryByTestId("marquee-overlay")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(transformLayer?.style.transform).not.toBe(initialTransform);
+    });
+
+    fireEvent.pointerUp(canvas, { clientX: 160, clientY: 130, pointerId: 1 });
+    fireEvent.keyUp(window, { key: " ", code: "Space" });
+  });
+
+  it("pans instead of dragging a node while space is held", async () => {
+    const onNodeMove = vi.fn();
+    const { canvas } = renderCanvas({ selectedNodeIds: new Set(["a"]), onNodeMove });
+    const node = screen.getByTestId("canvas-node-a");
+    const transformLayer = node.parentElement;
+    const initialTransform = transformLayer?.style.transform;
+
+    fireEvent.keyDown(window, { key: " ", code: "Space" });
+    fireEvent.pointerDown(node, { button: 0, clientX: 100, clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(canvas, { clientX: 160, clientY: 130, pointerId: 1 });
+    fireEvent.pointerUp(canvas, { clientX: 160, clientY: 130, pointerId: 1 });
+    fireEvent.click(node);
+    fireEvent.keyUp(window, { key: " ", code: "Space" });
+
+    expect(onNodeMove).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(transformLayer?.style.transform).not.toBe(initialTransform);
+    });
+  });
+
+  it("keeps space key handling out of text editing targets", async () => {
+    const { canvas } = renderCanvas({
+      bottomPromptBox: {
+        value: "Start here",
+        placeholder: "Describe your edit...",
+        actionLabel: "Generate",
+      },
+    });
+    const textarea = screen.getByPlaceholderText("Describe your edit...");
+
+    fireEvent.keyDown(textarea, { key: " ", code: "Space" });
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 10, clientY: 10, pointerId: 1 });
+
+    await waitFor(() => expect(screen.getByTestId("marquee-overlay")).toBeInTheDocument());
+    fireEvent.pointerUp(canvas, { clientX: 10, clientY: 10, pointerId: 1 });
+  });
+
   it("selects nodes with a marquee drag", async () => {
     function ControlledCanvas() {
       const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());

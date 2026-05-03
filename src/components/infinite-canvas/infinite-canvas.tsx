@@ -47,6 +47,13 @@ interface DragState {
   startPositions: Map<string, CanvasPoint>;
 }
 
+function isTextEditingTarget(target: EventTarget | null) {
+  return (
+    target instanceof HTMLElement &&
+    Boolean(target.closest("input, textarea, select, [contenteditable]"))
+  );
+}
+
 export function InfiniteCanvas({
   nodes,
   connections = [],
@@ -73,6 +80,7 @@ export function InfiniteCanvas({
   const [localPositions, setLocalPositions] = useState<Map<string, CanvasPoint>>(new Map());
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [panStart, setPanStart] = useState<CanvasPoint | null>(null);
+  const [spacePanMode, setSpacePanMode] = useState(Boolean(0));
   const [marqueeStart, setMarqueeStart] = useState<CanvasPoint | null>(null);
   const [marqueeRect, setMarqueeRect] = useState<CanvasRect | null>(null);
   const lastPointerRef = useRef<CanvasPoint | null>(null);
@@ -153,10 +161,20 @@ export function InfiniteCanvas({
     [localPositions]
   );
 
+  const startPanning = useCallback((event: React.PointerEvent<Element>) => {
+    const target = event.currentTarget as HTMLElement;
+    target.setPointerCapture(event.pointerId);
+    setPanStart({ x: event.clientX, y: event.clientY });
+    lastPointerRef.current = { x: event.clientX, y: event.clientY };
+  }, []);
+
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode) => {
       event.stopPropagation();
-      if (dragState) return;
+      if (dragState || panStart || spacePanMode || suppressNextCanvasClickRef.current) {
+        suppressNextCanvasClickRef.current = Boolean(0);
+        return;
+      }
 
       if (event.shiftKey || event.metaKey || event.ctrlKey) {
         const next = new Set(selection);
@@ -171,13 +189,19 @@ export function InfiniteCanvas({
 
       setSelection(new Set([node.id]));
     },
-    [dragState, selection, setSelection]
+    [dragState, panStart, selection, setSelection, spacePanMode]
   );
 
   const handleNodePointerDown = useCallback(
     (event: React.PointerEvent, node: CanvasNode) => {
       if (event.button !== 0) return;
       event.stopPropagation();
+
+      if (spacePanMode) {
+        startPanning(event);
+        return;
+      }
+
       event.currentTarget.setPointerCapture(event.pointerId);
 
       const nodeIds = selection.has(node.id) ? Array.from(selection) : [node.id];
@@ -196,15 +220,13 @@ export function InfiniteCanvas({
         startPositions,
       });
     },
-    [nodePosition, nodes, selection]
+    [nodePosition, nodes, selection, spacePanMode, startPanning]
   );
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (event.button === 1 || (event.button === 0 && event.altKey)) {
-        event.currentTarget.setPointerCapture(event.pointerId);
-        setPanStart({ x: event.clientX, y: event.clientY });
-        lastPointerRef.current = { x: event.clientX, y: event.clientY };
+      if (event.button === 1 || (event.button === 0 && (event.altKey || spacePanMode))) {
+        startPanning(event);
         return;
       }
 
@@ -218,7 +240,7 @@ export function InfiniteCanvas({
       setMarqueeStart(start);
       setMarqueeRect({ x: start.x, y: start.y, width: 0, height: 0 });
     },
-    []
+    [spacePanMode, startPanning]
   );
 
   const handlePointerMove = useCallback(
@@ -243,9 +265,16 @@ export function InfiniteCanvas({
 
       if (panStart && lastPointerRef.current) {
         const current = { x: event.clientX, y: event.clientY };
-        panByScreenDelta({
+        const delta = {
           x: current.x - lastPointerRef.current.x,
           y: current.y - lastPointerRef.current.y,
+        };
+        if (Math.abs(delta.x) > 4 || Math.abs(delta.y) > 4) {
+          suppressNextCanvasClickRef.current = true;
+        }
+        panByScreenDelta({
+          x: delta.x,
+          y: delta.y,
         });
         lastPointerRef.current = current;
         return;
@@ -306,11 +335,13 @@ export function InfiniteCanvas({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (
-        target instanceof HTMLElement &&
-        target.closest("input, textarea, select, [contenteditable]")
-      ) {
+      if (isTextEditingTarget(event.target)) {
+        return;
+      }
+
+      if (event.code === "Space" || event.key === " ") {
+        event.preventDefault();
+        setSpacePanMode(true);
         return;
       }
 
@@ -327,8 +358,27 @@ export function InfiniteCanvas({
       }
     };
 
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (isTextEditingTarget(event.target)) {
+        return;
+      }
+
+      if (event.code === "Space" || event.key === " ") {
+        event.preventDefault();
+        setSpacePanMode(Boolean(0));
+      }
+    };
+
+    const handleWindowBlur = () => setSpacePanMode(Boolean(0));
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
   }, [onDeleteSelected, onExportSelected, selection]);
 
   const positions = useMemo(() => {
@@ -345,7 +395,8 @@ export function InfiniteCanvas({
       data-testid="infinite-canvas"
       className={cn(
         "relative h-full min-h-0 w-full overflow-hidden bg-background outline-none",
-        "cursor-grab active:cursor-grabbing",
+        spacePanMode || panStart ? "cursor-grab active:cursor-grabbing" : "cursor-default",
+        panStart && "cursor-grabbing",
         className
       )}
       tabIndex={0}
