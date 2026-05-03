@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ArrowRight,
+  ArrowUp,
   CaretDown,
   CaretUpDown,
   ChatCircleDots,
@@ -12,7 +12,7 @@ import {
   ImageSquare,
   InstagramLogo,
   Microphone,
-  Plus,
+  Paperclip,
   ShoppingBag,
   TiktokLogo,
   VideoCamera,
@@ -239,18 +239,9 @@ export function ChatHistoryPanel({
             {/* Input area */}
             {onPromptSubmit || onPromptChange ? (
               <div className="shrink-0 border-t p-2">
-                <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-2 py-1.5 shadow-[rgba(0,0,0,0.05)_0px_1px_8px_0px]">
-                  <button
-                    type="button"
-                    aria-label="Add"
-                    className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                  >
-                    <Plus className="size-4" weight="bold" />
-                  </button>
-
-                  <div className="min-w-0 flex-1">
+                <div className="flex flex-col rounded-xl border border-border bg-background shadow-[rgba(0,0,0,0.05)_0px_1px_8px_0px]">
                   {promptSourceImageUrl && (
-                    <div className="pb-1 pl-1">
+                    <div className="px-3 pt-2.5">
                       <img
                         src={promptSourceImageUrl}
                         alt="Selected asset"
@@ -259,13 +250,15 @@ export function ChatHistoryPanel({
                     </div>
                   )}
 
+                  {/* Textarea */}
+                  <div className="px-3 pt-2.5">
                     <textarea
                       ref={textareaRef}
                       value={promptValue}
-                      rows={1}
+                      rows={2}
                       disabled={promptBusy}
                       placeholder={promptPlaceholder}
-                      className="max-h-10 min-h-[2rem] w-full resize-none bg-transparent py-1 text-xs leading-5 text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-40"
+                      className="max-h-[3rem] w-full resize-none bg-transparent text-xs leading-relaxed text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-40"
                       onChange={(e) => onPromptChange?.(e.target.value)}
                       onKeyDown={(e) => {
                         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -276,40 +269,55 @@ export function ChatHistoryPanel({
                     />
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-1">
-                    <button
-                      type="button"
-                      aria-label="Select model"
-                      className="flex h-8 items-center gap-1 rounded-lg px-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                    >
-                      <span className="text-[10px] font-medium">Auto</span>
-                      <CaretUpDown className="size-2.5" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Voice input"
-                      className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                    >
-                      <Microphone className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={!canSubmit}
-                      aria-label="Send"
-                      className={cn(
-                        "flex size-8 items-center justify-center rounded-lg transition",
-                        canSubmit
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : "text-muted-foreground opacity-40"
-                      )}
-                    >
-                      {promptBusy ? (
-                        <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      ) : (
-                        <ArrowRight className="size-3.5" weight="bold" />
-                      )}
-                    </button>
+                  {/* Toolbar */}
+                  <div className="flex items-center justify-between px-2 pb-2 pt-1">
+                    {/* Left: attachment + model selector */}
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        aria-label="Attach media"
+                        className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                      >
+                        <Paperclip className="size-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Select model"
+                        className="flex h-7 items-center gap-1 rounded-lg px-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                      >
+                        <span className="text-[10px] font-medium">Auto</span>
+                        <CaretUpDown className="size-2.5" />
+                      </button>
+                    </div>
+
+                    {/* Right: microphone + send */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        aria-label="Voice input"
+                        className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                      >
+                        <Microphone className="size-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={!canSubmit}
+                        aria-label="Send"
+                        className={cn(
+                          "flex size-7 items-center justify-center rounded-lg transition",
+                          canSubmit
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                            : "text-muted-foreground opacity-40"
+                        )}
+                      >
+                        {promptBusy ? (
+                          <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        ) : (
+                          <ArrowUp className="size-3.5" weight="bold" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

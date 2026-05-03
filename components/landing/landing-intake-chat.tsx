@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ArrowUp,
+  ArrowRight,
   Cloud,
   CloudArrowUp,
   CaretLeft,
@@ -215,7 +215,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
 
         {phase === "input" && (
           <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-[rgba(26,22,14,0.8)] shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-            <div className="flex min-h-[128px] flex-col px-4 py-4 sm:min-h-[136px] sm:px-5 sm:py-5">
+            <div className="flex min-h-[96px] flex-col px-4 py-3 sm:min-h-[104px] sm:px-5 sm:py-4">
               {queuedImports.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2" data-testid="queued-imports">
                   {queuedImports.map((source) => {
@@ -233,24 +233,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                 </div>
               )}
 
-              <textarea
-                data-testid="intake-input"
-                ref={textareaRef}
-                rows={1}
-                value={inputValue}
-                onChange={(event) => setInputValue(event.target.value)}
-                onPaste={handlePaste}
-                placeholder={rotatingPlaceholders[placeholderIndex]}
-                className="min-h-[3.75rem] w-full resize-none overflow-hidden bg-transparent text-sm leading-relaxed text-cream outline-none placeholder:text-cream/35 sm:text-[0.95rem]"
-                onKeyDown={(event) => {
-                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-                    event.preventDefault();
-                    handleInputSubmit();
-                  }
-                }}
-              />
-
-              <div className="mt-4 flex items-center gap-3">
+              <div className="flex items-end gap-3">
                 <DropdownMenu open={isImportMenuOpen} onOpenChange={handleImportMenuOpenChange}>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -337,6 +320,23 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
+                <textarea
+                  data-testid="intake-input"
+                  ref={textareaRef}
+                  rows={1}
+                  value={inputValue}
+                  onChange={(event) => setInputValue(event.target.value)}
+                  onPaste={handlePaste}
+                  placeholder={rotatingPlaceholders[placeholderIndex]}
+                  className="min-h-[3rem] max-h-20 flex-1 resize-none overflow-hidden bg-transparent py-1 text-sm leading-6 text-cream outline-none placeholder:text-cream/35 sm:text-[0.95rem]"
+                  onKeyDown={(event) => {
+                    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                      event.preventDefault();
+                      handleInputSubmit();
+                    }
+                  }}
+                />
+
                 <button
                   type="button"
                   onClick={handleInputSubmit}
@@ -344,7 +344,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                   className="flex size-10 shrink-0 items-center justify-center rounded-full bg-cream text-ink transition hover:bg-gold disabled:opacity-30"
                   aria-label="Submit"
                 >
-                  <ArrowUp className="size-4" weight="bold" />
+                  <ArrowRight className="size-4" weight="bold" />
                 </button>
               </div>
             </div>
