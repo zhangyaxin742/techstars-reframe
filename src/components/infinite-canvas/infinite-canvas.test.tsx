@@ -59,6 +59,32 @@ function mockCanvasBounds(width = 900, height = 600) {
   });
 }
 
+function readTranslate(element: HTMLElement) {
+  const match = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(element.style.transform);
+  if (!match) {
+    throw new Error(`Expected translate transform, received: ${element.style.transform}`);
+  }
+
+  return {
+    x: Number(match[1]),
+    y: Number(match[2]),
+  };
+}
+
+function readLayerTransform(element: HTMLElement) {
+  const match =
+    /translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([-\d.]+)\)/.exec(element.style.transform);
+  if (!match) {
+    throw new Error(`Expected layer transform, received: ${element.style.transform}`);
+  }
+
+  return {
+    x: Number(match[1]),
+    y: Number(match[2]),
+    zoom: Number(match[3]),
+  };
+}
+
 describe("InfiniteCanvas", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -116,6 +142,55 @@ describe("InfiniteCanvas", () => {
     await waitFor(() => {
       expect(transformLayer?.style.transform).not.toBe(initialTransform);
     });
+  });
+
+  it("draws brand-to-trend connections from the brand right edge to the trend left edge", () => {
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    const brandTrendNodes: CanvasNode[] = [
+      {
+        id: "brand-ctx",
+        kind: "brand-context",
+        title: "Brand Context",
+        position: { x: 0, y: 0 },
+        size: { width: 1000, height: 700 },
+      },
+      {
+        id: "recipe-1",
+        kind: "video",
+        title: "Founder confessional",
+        video: { src: "/videos/trend1.mp4", label: "trend" },
+        position: { x: 1096, y: 0 },
+        size: { width: 220, height: 391 },
+      },
+    ];
+    const connections: CanvasConnection[] = [
+      { id: "ctx-r1", sourceNodeId: "brand-ctx", targetNodeId: "recipe-1" },
+    ];
+
+    renderCanvas({ nodes: brandTrendNodes, connections });
+
+    const layer = screen.getByTestId("canvas-node-brand-ctx").parentElement;
+    if (!layer) {
+      throw new Error("Expected a canvas transform layer");
+    }
+
+    const layerTransform = readLayerTransform(layer);
+    const brandPosition = readTranslate(screen.getByTestId("canvas-node-brand-ctx"));
+    const recipePosition = readTranslate(screen.getByTestId("canvas-node-recipe-1"));
+    const path = screen.getByTestId("canvas-connection-ctx-r1").getAttribute("d") ?? "";
+    const numbers = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+    const [sourceX, sourceY, firstControlX, firstControlY, secondControlX, secondControlY, targetX, targetY] =
+      numbers;
+
+    expect(path).toMatch(/^M /);
+    expect(sourceX).toBeCloseTo(layerTransform.x + (brandPosition.x + 1000) * layerTransform.zoom);
+    expect(sourceY).toBeCloseTo(layerTransform.y + (brandPosition.y + 350) * layerTransform.zoom);
+    expect(targetX).toBeCloseTo(layerTransform.x + recipePosition.x * layerTransform.zoom);
+    expect(targetY).toBeCloseTo(layerTransform.y + (recipePosition.y + 195.5) * layerTransform.zoom);
+    expect(firstControlX).toBeGreaterThan(sourceX);
+    expect(secondControlX).toBeLessThan(targetX);
+    expect(firstControlY).toBe(sourceY);
+    expect(secondControlY).toBe(targetY);
   });
 
   it("draws trend-to-timeline connections from the source bottom to timeline top", () => {

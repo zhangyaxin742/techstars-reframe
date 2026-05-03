@@ -196,6 +196,9 @@ describe("App", () => {
     });
     expect(screen.getByTestId("canvas-node-recipe-2").style.transform).toBe("translate(1356px, 0px)");
     expect(screen.getByTestId("canvas-node-recipe-3").style.transform).toBe("translate(1616px, 0px)");
+    expect(screen.getByTestId("canvas-connection-ctx-r1")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-connection-ctx-r2")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-connection-ctx-r3")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).toHaveAttribute(
       "data-preview-mode",
       "preview"

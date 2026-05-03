@@ -75,11 +75,73 @@ interface DragState {
   startPositions: Map<string, CanvasPoint>;
 }
 
+interface ConnectionPathSpec {
+  d: string;
+  isTimelineConnection: boolean;
+  isBrandFeedConnection: boolean;
+}
+
 function isTextEditingTarget(target: EventTarget | null) {
   return (
     target instanceof HTMLElement &&
     Boolean(target.closest("input, textarea, select, [contenteditable]"))
   );
+}
+
+function buildConnectionPath({
+  sourceNode,
+  targetNode,
+  sourcePosition,
+  targetPosition,
+  viewport,
+}: {
+  sourceNode: CanvasNode;
+  targetNode: CanvasNode;
+  sourcePosition: CanvasPoint;
+  targetPosition: CanvasPoint;
+  viewport: { offset: CanvasPoint; zoom: number };
+}): ConnectionPathSpec {
+  const connectsTrendToTimeline = isTrendSourceNode(sourceNode) && targetNode.kind === "timeline";
+  const connectsBrandToTrend =
+    sourceNode.kind === "brand-context" && isTrendSourceNode(targetNode);
+
+  const sourceX = connectsTrendToTimeline
+    ? (sourcePosition.x + sourceNode.size.width / 2 - viewport.offset.x) * viewport.zoom
+    : (sourcePosition.x + sourceNode.size.width - viewport.offset.x) * viewport.zoom;
+  const sourceY = connectsTrendToTimeline
+    ? (sourcePosition.y + sourceNode.size.height - viewport.offset.y) * viewport.zoom
+    : (sourcePosition.y + sourceNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+  const targetX = connectsTrendToTimeline
+    ? (targetPosition.x + targetNode.size.width / 2 - viewport.offset.x) * viewport.zoom
+    : (targetPosition.x - viewport.offset.x) * viewport.zoom;
+  const targetY = connectsTrendToTimeline
+    ? (targetPosition.y - viewport.offset.y) * viewport.zoom
+    : (targetPosition.y + targetNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+
+  if (connectsTrendToTimeline) {
+    const midpointY = (sourceY + targetY) / 2;
+    return {
+      d: `M ${sourceX} ${sourceY} C ${sourceX} ${midpointY}, ${targetX} ${midpointY}, ${targetX} ${targetY}`,
+      isTimelineConnection: true,
+      isBrandFeedConnection: false,
+    };
+  }
+
+  if (connectsBrandToTrend) {
+    const controlOffset = Math.min(Math.max((targetX - sourceX) * 0.22, 88), 168);
+    return {
+      d: `M ${sourceX} ${sourceY} C ${sourceX + controlOffset} ${sourceY}, ${targetX - controlOffset} ${targetY}, ${targetX} ${targetY}`,
+      isTimelineConnection: false,
+      isBrandFeedConnection: true,
+    };
+  }
+
+  const midpointX = (sourceX + targetX) / 2;
+  return {
+    d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
+    isTimelineConnection: sourceNode.kind === "timeline" && targetNode.kind === "preview",
+    isBrandFeedConnection: false,
+  };
 }
 
 export function InfiniteCanvas({
@@ -489,35 +551,30 @@ export function InfiniteCanvas({
 
           const sourcePosition = positions.get(sourceNode.id) ?? sourceNode.position;
           const targetPosition = positions.get(targetNode.id) ?? targetNode.position;
-          const connectsTrendToTimeline = isTrendSourceNode(sourceNode) && targetNode.kind === "timeline";
-          const sourceX = connectsTrendToTimeline
-            ? (sourcePosition.x + sourceNode.size.width / 2 - viewport.offset.x) * viewport.zoom
-            : (sourcePosition.x + sourceNode.size.width - viewport.offset.x) * viewport.zoom;
-          const sourceY = connectsTrendToTimeline
-            ? (sourcePosition.y + sourceNode.size.height - viewport.offset.y) * viewport.zoom
-            : (sourcePosition.y + sourceNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
-          const targetX = connectsTrendToTimeline
-            ? (targetPosition.x + targetNode.size.width / 2 - viewport.offset.x) * viewport.zoom
-            : (targetPosition.x - viewport.offset.x) * viewport.zoom;
-          const targetY = connectsTrendToTimeline
-            ? (targetPosition.y - viewport.offset.y) * viewport.zoom
-            : (targetPosition.y + targetNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
-          const midpointX = (sourceX + targetX) / 2;
-          const midpointY = (sourceY + targetY) / 2;
-          const pathD = connectsTrendToTimeline
-            ? `M ${sourceX} ${sourceY} C ${sourceX} ${midpointY}, ${targetX} ${midpointY}, ${targetX} ${targetY}`
-            : `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`;
+          const path = buildConnectionPath({
+            sourceNode,
+            targetNode,
+            sourcePosition,
+            targetPosition,
+            viewport,
+          });
 
           return {
             id: connection.id,
-            d: pathD,
-            isTimelineConnection:
-              connectsTrendToTimeline ||
-              (sourceNode.kind === "timeline" && targetNode.kind === "preview"),
+            d: path.d,
+            isTimelineConnection: path.isTimelineConnection,
+            isBrandFeedConnection: path.isBrandFeedConnection,
           };
         })
         .filter(
-          (path): path is { id: string; d: string; isTimelineConnection: boolean } =>
+          (
+            path
+          ): path is {
+            id: string;
+            d: string;
+            isTimelineConnection: boolean;
+            isBrandFeedConnection: boolean;
+          } =>
             path !== null
         ),
     [connections, nodeMap, positions, viewport.offset.x, viewport.offset.y, viewport.zoom]
@@ -574,9 +631,17 @@ export function InfiniteCanvas({
               stroke={
                 connectionPath.isTimelineConnection
                   ? "rgb(0, 129, 192)"
+                  : connectionPath.isBrandFeedConnection
+                    ? "rgba(180, 184, 180, 0.9)"
                   : "rgba(180, 184, 180, 0.78)"
               }
-              strokeWidth={connectionPath.isTimelineConnection ? 2 : 1.5}
+              strokeWidth={
+                connectionPath.isTimelineConnection
+                  ? 2
+                  : connectionPath.isBrandFeedConnection
+                    ? 1.75
+                    : 1.5
+              }
               strokeLinecap="round"
               initial={animateIn ? { pathLength: 0, opacity: 0.4 } : false}
               animate={{ pathLength: 1, opacity: 1 }}
