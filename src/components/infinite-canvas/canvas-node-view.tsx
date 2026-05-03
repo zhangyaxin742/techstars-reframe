@@ -158,6 +158,27 @@ function formatMetricCount(value: number) {
   }).format(value);
 }
 
+function AnimatedMetricNumber({ value, testId }: { value: number; testId: string }) {
+  return (
+    <span
+      key={value}
+      className="t-digit-group is-animating tabular-nums tracking-tight text-foreground"
+      data-testid={testId}
+    >
+      {formatMetricCount(value).split("").map((digit, index) => (
+        <span
+          key={`${digit}-${index}`}
+          className="t-digit"
+          data-stagger={index}
+          style={{ "--digit-delay": `calc(var(--digit-stagger) * ${index})` } as React.CSSProperties}
+        >
+          {digit}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
   if (state.status === "idle") return null;
 
@@ -201,15 +222,11 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
       {isPublished ? (
         <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] font-medium text-muted-foreground">
           <div className="rounded-md border border-border bg-secondary/40 px-2 py-1">
-            <span className="tabular-nums tracking-tight text-foreground">
-              {formatMetricCount(state.views)}
-            </span>{" "}
+            <AnimatedMetricNumber value={state.views} testId="preview-publish-views-count" />{" "}
             views
           </div>
           <div className="rounded-md border border-border bg-secondary/40 px-2 py-1">
-            <span className="tabular-nums tracking-tight text-foreground">
-              {formatMetricCount(state.likes)}
-            </span>{" "}
+            <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />{" "}
             likes
           </div>
         </div>

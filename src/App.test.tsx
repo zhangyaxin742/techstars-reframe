@@ -298,6 +298,13 @@ describe("App", () => {
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Published");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48 views");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9 likes");
+    expect(screen.getByTestId("preview-publish-views-count")).toHaveClass("t-digit-group");
+    expect(screen.getByTestId("preview-publish-views-count")).toHaveClass("is-animating");
+    expect(screen.getByTestId("preview-publish-views-count").children[1]).toHaveAttribute(
+      "data-stagger",
+      "1"
+    );
+    expect(screen.getByTestId("preview-publish-likes-count")).toHaveClass("t-digit-group");
 
     act(() => {
       vi.advanceTimersByTime(1500);
