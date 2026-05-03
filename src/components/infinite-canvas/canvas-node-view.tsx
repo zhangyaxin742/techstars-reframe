@@ -21,6 +21,7 @@ interface CanvasNodeViewProps {
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   onPointerDown: (event: React.PointerEvent, node: CanvasNode) => void;
   onClick: (event: React.MouseEvent, node: CanvasNode) => void;
+  onCreateTimelineFromTrend?: (node: CanvasNode) => void;
   onPromptChange?: (node: CanvasNode, value: string) => void;
   onPromptSubmit?: (node: CanvasNode, value: string) => void;
 }
@@ -66,6 +67,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   resolveImageUrl,
   onPointerDown,
   onClick,
+  onCreateTimelineFromTrend,
   onPromptChange,
   onPromptSubmit,
 }: CanvasNodeViewProps) {
@@ -112,6 +114,29 @@ export const CanvasNodeView = memo(function CanvasNodeView({
       onPointerDown={(event) => onPointerDown(event, node)}
       onClick={(event) => onClick(event, node)}
     >
+      {node.kind === "trend-recipe" && trendRecipePhase === "revealing" ? (
+        <button
+          type="button"
+          data-testid={`canvas-node-create-timeline-${node.id}`}
+          aria-label={`Generate timeline from ${node.title}`}
+          className={cn(
+            "absolute right-0 top-1/2 z-10 size-8 -translate-y-1/2 translate-x-1/2 rounded-full border",
+            "border-accent bg-card text-accent shadow-[rgba(0,0,0,0.1)_0px_4px_10px_0px]",
+            "transition-colors hover:bg-accent hover:text-accent-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          )}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onCreateTimelineFromTrend?.(node);
+          }}
+        >
+          <span aria-hidden="true" className="text-base leading-none">+</span>
+        </button>
+      ) : null}
+
       {/* ── Floating kind label (Figma section-header style) ────────────────
           Zero-height anchor at the card's top-left edge; inner div sits below
           that anchor and inverse-scales from its bottom-left corner so the

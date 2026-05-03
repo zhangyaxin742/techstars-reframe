@@ -6,6 +6,7 @@ import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
 import { MockVideoPreview } from "./components/preview/mock-video-preview";
 import { Toaster } from "./components/ui/sonner";
+import type { CanvasConnection, CanvasNode } from "./lib/infinite-canvas/types";
 import {
   type AiFlowStep,
   type ChatMessage,
@@ -18,7 +19,6 @@ import {
   reframeDemoConnections,
   reframeDemoNodes,
   timelineSegments,
-  trendRecipes,
   trendSearchAiToolCalls,
 } from "./data/reframe-demo";
 
@@ -68,6 +68,7 @@ export function App() {
   const [trendRecipePhase, setTrendRecipePhase] = useState<"hidden" | "skeleton" | "revealing">("hidden");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
+  const [animatedConnectionIds, setAnimatedConnectionIds] = useState<Set<string>>(new Set());
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const timeoutIdsRef = useRef<number[]>([]);
@@ -343,24 +344,46 @@ export function App() {
     setExportOpen(true);
   }, []);
 
-  const handleSelectionChange = useCallback(
-    (nodeIds: Set<string>) => {
-      setSelectedNodeIds(nodeIds);
-      const selectedRecipe = nodes.find(
-        (node) => nodeIds.has(node.id) && node.kind === "trend-recipe"
-      );
-      if (!selectedRecipe || recipeSequenceStarted || flowStep !== "recipes-ready") {
+  const handleSelectionChange = useCallback((nodeIds: Set<string>) => {
+    setSelectedNodeIds(nodeIds);
+  }, []);
+
+  const upsertTimelineConnection = useCallback((currentConnections: CanvasConnection[], recipeId: string) => {
+    const connectionId = recipeId === "recipe-1" ? "r1-tl" : `${recipeId}-tl`;
+    const filteredConnections = currentConnections.filter(
+      (connection) =>
+        !(connection.sourceNodeId.startsWith("recipe-") && connection.targetNodeId === "timeline-1")
+    );
+    return [
+      ...filteredConnections,
+      {
+        id: connectionId,
+        sourceNodeId: recipeId,
+        targetNodeId: "timeline-1",
+      },
+    ];
+  }, []);
+
+  const startTimelineFromRecipe = useCallback(
+    (recipeNode: CanvasNode) => {
+      if (recipeSequenceStarted || flowStep !== "recipes-ready") {
         return;
       }
 
+      const recipeNodeId = recipeNode.id;
+      const connectionId = recipeNodeId === "recipe-1" ? "r1-tl" : `${recipeNodeId}-tl`;
+      setSelectedNodeIds(new Set([recipeNodeId]));
       setRecipeSequenceStarted(true);
       setFlowStep("recipe-selected");
+      setConnections((currentConnections) => upsertTimelineConnection(currentConnections, recipeNodeId));
+      setAnimatedConnectionIds(new Set([connectionId]));
+      queueTimeout(() => setAnimatedConnectionIds(new Set()), 550);
       setMessages((currentMessages) => [
         ...currentMessages,
         {
           id: "recipe-choice",
           role: "user",
-          content: `Use ${trendRecipes[0].title}.`,
+          content: `Use ${recipeNode.title}.`,
           timestamp: Date.now(),
           step: "recipe-selected",
         },
@@ -378,7 +401,7 @@ export function App() {
         },
       });
     },
-    [flowStep, nodes, recipeSequenceStarted, startToolSequence]
+    [flowStep, queueTimeout, recipeSequenceStarted, startToolSequence, upsertTimelineConnection]
   );
 
   const handleBottomPromptChange = useCallback((value: string) => {
@@ -434,6 +457,8 @@ export function App() {
           onNodeMove={handleNodeMove}
           onDeleteSelected={handleDeleteSelected}
           onExportSelected={handleExportSelected}
+          onCreateTimelineFromTrend={startTimelineFromRecipe}
+          animatedConnectionIds={animatedConnectionIds}
           brandCtxPhase={brandCtxPhase}
           trendRecipePhase={trendRecipePhase}
         />

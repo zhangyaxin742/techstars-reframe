@@ -82,14 +82,14 @@ describe("App", () => {
     expect(screen.queryByTestId("trend-recipe-skeleton-recipe-1")).not.toBeInTheDocument();
   });
 
-  it("selecting a trend recipe runs the timeline generation flow", () => {
+  it("clicking a trend recipe plus action runs the timeline generation flow", () => {
     vi.useFakeTimers();
     render(<App />);
 
     act(() => {
       vi.advanceTimersByTime(22000);
     });
-    fireEvent.click(screen.getByTestId("canvas-node-recipe-1"));
+    fireEvent.click(screen.getByTestId("canvas-node-create-timeline-recipe-1"));
 
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();
     expect(screen.getByTestId("simulated-tool-tool-match-clips")).toHaveAttribute(
@@ -105,6 +105,20 @@ describe("App", () => {
     });
 
     expect(screen.getByText(/Timeline is filled/)).toBeInTheDocument();
+  });
+
+  it("does not start timeline generation when clicking the recipe card body", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    act(() => {
+      vi.advanceTimersByTime(22000);
+    });
+
+    fireEvent.click(screen.getByTestId("canvas-node-recipe-1"));
+
+    expect(screen.queryByText("Auto-filling the timeline")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("simulated-tool-tool-match-clips")).not.toBeInTheDocument();
   });
 
   it("bottom prompt submit appends user prompt and simulated tool activity", async () => {

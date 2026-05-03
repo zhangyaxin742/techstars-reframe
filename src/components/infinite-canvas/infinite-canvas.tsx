@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   calculateSelectionBounds,
   fitBoundsToViewport,
+  getNodeCenter,
   getNodesInRect,
   normalizeRect,
   screenToWorld,
@@ -37,6 +39,8 @@ interface InfiniteCanvasProps {
   onBottomPromptSubmit?: (value: string) => void;
   onPromptChange?: (nodeId: string, value: string) => void;
   onPromptSubmit?: (nodeId: string, value: string) => void;
+  onCreateTimelineFromTrend?: (node: CanvasNode) => void;
+  animatedConnectionIds?: Set<string>;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
@@ -70,6 +74,8 @@ export function InfiniteCanvas({
   onBottomPromptSubmit,
   onPromptChange,
   onPromptSubmit,
+  onCreateTimelineFromTrend,
+  animatedConnectionIds,
   resolveImageUrl,
   brandCtxPhase,
   trendRecipePhase,
@@ -399,6 +405,33 @@ export function InfiniteCanvas({
   }, [nodePosition, nodes]);
 
   const selectionBounds = calculateSelectionBounds(nodes, selection, positions);
+  const nodeMap = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
+  const connectionPaths = useMemo(
+    () =>
+      connections
+        .map((connection) => {
+          const sourceNode = nodeMap.get(connection.sourceNodeId);
+          const targetNode = nodeMap.get(connection.targetNodeId);
+          if (!sourceNode || !targetNode) {
+            return null;
+          }
+
+          const sourceCenter = getNodeCenter(sourceNode, positions.get(sourceNode.id));
+          const targetCenter = getNodeCenter(targetNode, positions.get(targetNode.id));
+          const sourceX = (sourceCenter.x - viewport.offset.x) * viewport.zoom;
+          const sourceY = (sourceCenter.y - viewport.offset.y) * viewport.zoom;
+          const targetX = (targetCenter.x - viewport.offset.x) * viewport.zoom;
+          const targetY = (targetCenter.y - viewport.offset.y) * viewport.zoom;
+          const midpointX = (sourceX + targetX) / 2;
+
+          return {
+            id: connection.id,
+            d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
+          };
+        })
+        .filter((path): path is { id: string; d: string } => path !== null),
+    [connections, nodeMap, positions, viewport.offset.x, viewport.offset.y, viewport.zoom]
+  );
 
   return (
     <div
@@ -437,6 +470,24 @@ export function InfiniteCanvas({
         size={containerSize}
         positions={positions}
       />
+      <svg className="pointer-events-none absolute inset-0" aria-hidden="true">
+        {connectionPaths.map((connectionPath) => {
+          const animateIn = animatedConnectionIds?.has(connectionPath.id) ?? false;
+          return (
+            <motion.path
+              key={`${connectionPath.id}-${animateIn ? "animated" : "static"}`}
+              d={connectionPath.d}
+              fill="none"
+              stroke="rgba(180, 184, 180, 0.78)"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              initial={animateIn ? { pathLength: 0, opacity: 0.4 } : false}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={animateIn ? { duration: 0.45, ease: "easeOut" } : { duration: 0 }}
+            />
+          );
+        })}
+      </svg>
       <div
         className="absolute left-0 top-0 origin-top-left"
         style={{
@@ -455,6 +506,7 @@ export function InfiniteCanvas({
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
+            onCreateTimelineFromTrend={onCreateTimelineFromTrend}
             onPromptChange={(node, value) => onPromptChange?.(node.id, value)}
             onPromptSubmit={(node, value) => onPromptSubmit?.(node.id, value)}
           />
