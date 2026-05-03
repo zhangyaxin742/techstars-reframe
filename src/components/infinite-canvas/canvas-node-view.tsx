@@ -395,10 +395,12 @@ function TrendDetailsDialog({
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay asChild>
             <motion.div
+              data-testid={`trend-details-overlay-${node.id}`}
               className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={exiting ? { opacity: 0 } : { opacity: 1 }}
               transition={dialogMotionTransition}
+              onPointerDown={requestClose}
             />
           </DialogPrimitive.Overlay>
           <DialogPrimitive.Content asChild>

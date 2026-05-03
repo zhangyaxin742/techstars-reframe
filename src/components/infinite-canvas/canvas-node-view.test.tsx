@@ -161,6 +161,18 @@ describe("CanvasNodeView", () => {
     });
 
     expect(screen.queryByRole("dialog", { name: /founder confessional trend breakdown/i })).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(moreDetailsButton);
+    fireEvent.click(moreDetailsButton);
+
+    expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
+
+    fireEvent.pointerDown(screen.getByTestId("trend-details-overlay-recipe-1"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByRole("dialog", { name: /founder confessional trend breakdown/i })).not.toBeInTheDocument();
   });
 
   it("renders media nodes as a compact Library photo grid", () => {
