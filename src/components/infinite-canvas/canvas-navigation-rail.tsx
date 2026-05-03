@@ -99,7 +99,7 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
                   <button
                     type="button"
                     aria-label="Add new canvas item"
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm outline-none transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm outline-none transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Plus className="size-4" weight="bold" />
                   </button>
