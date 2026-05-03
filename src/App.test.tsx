@@ -311,6 +311,12 @@ describe("App", () => {
     act(() => {
       vi.advanceTimersByTime(1500);
     });
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48 views");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9 likes");
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("312 views");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("58 likes");
   });
