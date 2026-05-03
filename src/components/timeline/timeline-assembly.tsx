@@ -20,7 +20,8 @@ function formatMs(ms: number): string {
 }
 
 const WAVE_HEIGHTS = [20, 42, 74, 56, 30, 88, 64, 36, 52, 76, 44, 68, 25, 90, 58, 38];
-const DRAWER_TIMELINE_TAIL_MS = 3000;
+const DRAWER_TIMELINE_LABELED_TAIL_MS = 3000;
+const DRAWER_TIMELINE_VISUAL_TAIL_MS = 6000;
 
 function getClipTransitionMarkers(segments: TimelineSegment[], totalMs: number): number[] {
   const markers = new Set<number>();
@@ -105,10 +106,11 @@ export function TimelineAssembly({
 
   if (variant === "drawer") {
     const rulerStep = 3000;
-    const drawerVisualMs = totalMs + DRAWER_TIMELINE_TAIL_MS;
+    const drawerRulerMs = totalMs + DRAWER_TIMELINE_LABELED_TAIL_MS;
+    const drawerVisualMs = totalMs + DRAWER_TIMELINE_VISUAL_TAIL_MS;
     const rulerMarks: number[] = [];
-    for (let t = 0; t <= totalMs; t += rulerStep) rulerMarks.push(t);
-    if (rulerMarks[rulerMarks.length - 1] < totalMs) rulerMarks.push(totalMs);
+    for (let t = 0; t <= drawerRulerMs; t += rulerStep) rulerMarks.push(t);
+    if (rulerMarks[rulerMarks.length - 1] < drawerRulerMs) rulerMarks.push(drawerRulerMs);
     const trackWidth = 1120;
 
     return (
