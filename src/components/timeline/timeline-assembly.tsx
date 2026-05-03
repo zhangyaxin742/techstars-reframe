@@ -277,10 +277,7 @@ export function TimelineAssembly({
                           <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2">
                             <FilmSlate className="size-5 shrink-0 text-white/40" weight="thin" />
                             <p className="text-center text-[9px] font-medium leading-tight text-white/60">
-                              film missing shot
-                            </p>
-                            <p className="text-center text-[8px] leading-tight text-white/35">
-                              Drop media here
+                              shot missing
                             </p>
                           </div>
                         )}

@@ -158,6 +158,8 @@ describe("TimelineAssembly", () => {
       minWidth: "1120px",
     });
     expect(screen.getByTestId("timeline-segment-ts-4")).toHaveClass("border-yellow-500/50");
+    expect(screen.getByTestId("timeline-segment-ts-4")).toHaveTextContent("shot missing");
+    expect(screen.getByTestId("timeline-segment-ts-4")).not.toHaveTextContent("Drop media here");
     expect(screen.getByTestId("timeline-segment-ts-7")).toHaveClass("bg-transparent");
     expect(screen.getByTestId("timeline-segment-ts-7")).not.toHaveClass("bg-accent");
     expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");

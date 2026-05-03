@@ -334,10 +334,7 @@ function TimelineRevealCard({
                   <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2 text-center">
                     <FilmSlate className="size-5 text-white/40" weight="thin" />
                     <span className="text-[9px] font-medium leading-tight text-white/60">
-                      film missing shot
-                    </span>
-                    <span className="text-[8px] leading-tight text-white/35">
-                      Drop media here
+                      shot missing
                     </span>
                   </div>
                 )}
