@@ -486,7 +486,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[0].title,
     body: `${trendRecipes[0].hook}\n\nFormat: ${trendRecipes[0].format}\nLength: ${trendRecipes[0].estimatedLength}\nMatch: ${trendRecipes[0].matchScore}%`,
-    position: { x: 980, y: -40 },
+    position: { x: 1096, y: 0 },
     size: { width: 300, height: 200 },
   },
   {
@@ -494,7 +494,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[1].title,
     body: `${trendRecipes[1].hook}\n\nFormat: ${trendRecipes[1].format}\nLength: ${trendRecipes[1].estimatedLength}\nMatch: ${trendRecipes[1].matchScore}%`,
-    position: { x: 980, y: 200 },
+    position: { x: 1096, y: 240 },
     size: { width: 300, height: 200 },
   },
   {
@@ -502,7 +502,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[2].title,
     body: `${trendRecipes[2].hook}\n\nFormat: ${trendRecipes[2].format}\nLength: ${trendRecipes[2].estimatedLength}\nMatch: ${trendRecipes[2].matchScore}%`,
-    position: { x: 980, y: 440 },
+    position: { x: 1096, y: 480 },
     size: { width: 300, height: 200 },
   },
   {
@@ -510,7 +510,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "timeline",
     title: "Side-by-Side Fit Failure Demo — Timeline",
     body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
-    position: { x: 1360, y: -20 },
+    position: { x: 1492, y: 0 },
     size: { width: 480, height: 280 },
   },
   {
@@ -519,7 +519,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
     imageUrl: mediaAssets[0].thumbnail,
-    position: { x: 1920, y: 20 },
+    position: { x: 2068, y: 0 },
     size: { width: 260, height: 180 },
   },
 ];

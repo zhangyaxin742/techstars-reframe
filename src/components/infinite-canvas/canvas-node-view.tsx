@@ -98,7 +98,7 @@ function TimelineGhostPreview({
     <div
       data-testid={`canvas-node-timeline-ghost-${nodeId}`}
       className={cn(
-        "pointer-events-none absolute left-full top-1/2 z-10 ml-20 h-[280px] w-[480px] -translate-y-1/2 origin-left",
+        "pointer-events-none absolute left-full top-0 z-10 ml-24 h-[280px] w-[480px] origin-left",
         "transition-[opacity,transform] duration-200",
         persistent
           ? "scale-100 opacity-100"

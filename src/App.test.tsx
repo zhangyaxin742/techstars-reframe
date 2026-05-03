@@ -72,6 +72,8 @@ describe("App", () => {
       "completed"
     );
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-brand-ctx").style.transform).toBe("translate(0px, 0px)");
+    expect(screen.getByTestId("canvas-node-recipe-1").style.transform).toBe("translate(1096px, 0px)");
     expect(screen.getByText("Side-by-Side Fit Failure Demo")).toBeInTheDocument();
     expect(screen.queryByTestId("trend-recipe-skeleton-recipe-1")).not.toBeInTheDocument();
   });
@@ -89,6 +91,7 @@ describe("App", () => {
     expect(screen.queryByTestId("canvas-node-create-timeline-recipe-1")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-node-skeleton-timeline-1")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1492px, 0px)");
     expect(screen.getByTestId("simulated-tool-tool-match-clips")).toHaveAttribute(
       "data-tool-state",
       "running"

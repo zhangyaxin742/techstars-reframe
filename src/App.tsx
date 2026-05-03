@@ -326,6 +326,7 @@ export function App() {
       const connectionId = recipeNodeId === "recipe-1" ? "r1-tl" : `${recipeNodeId}-tl`;
       const timelineWidth = 480;
       const timelineHeight = 280;
+      const canvasNodeGap = 96;
       setSelectedNodeIds(new Set([recipeNodeId]));
       setTimelineSourceNodeId(recipeNodeId);
       setRecipeSequenceStarted(true);
@@ -337,8 +338,8 @@ export function App() {
             ? {
                 ...node,
                 position: {
-                  x: recipeNode.position.x + recipeNode.size.width + 80,
-                  y: recipeNode.position.y + (recipeNode.size.height - timelineHeight) / 2,
+                  x: recipeNode.position.x + recipeNode.size.width + canvasNodeGap,
+                  y: recipeNode.position.y,
                 },
                 size: {
                   width: timelineWidth,
