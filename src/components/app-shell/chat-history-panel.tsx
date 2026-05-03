@@ -174,7 +174,7 @@ export function ChatHistoryPanel({
             </div>
 
             {/* Messages */}
-            <ChatContainerRoot className="min-h-0 flex-1 px-3 py-3">
+            <ChatContainerRoot className="scrollbar-hover-visible min-h-0 flex-1 px-3 py-3">
               <ChatContainerContent className="space-y-3">
                 {messages.map((message, index) => {
                   const previousStep = messages[index - 1]?.step;
