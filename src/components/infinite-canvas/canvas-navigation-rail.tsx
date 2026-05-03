@@ -37,8 +37,11 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
             aria-current="page"
             className={cn(railItemClass, "text-foreground")}
           >
-            <span className="absolute left-1 h-4 w-0.5 rounded-full bg-accent" aria-hidden="true" />
-            <FolderSimple className="h-4 w-5" weight="regular" />
+            <span
+              className="pointer-events-none absolute -left-1 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-accent"
+              aria-hidden="true"
+            />
+            <FolderSimple className="size-5" weight="regular" />
           </button>
           <button
             type="button"
