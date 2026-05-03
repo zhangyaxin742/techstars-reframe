@@ -19,11 +19,11 @@ describe("LandingIntakeChat", () => {
     expect(screen.getByTestId("intake-input")).toBeInTheDocument();
   });
 
-  it("queues import sources from the plus menu", async () => {
+  it("queues import sources from the attach menu", async () => {
     const user = userEvent.setup();
     render(<LandingIntakeChat />);
 
-    await user.click(screen.getByRole("button", { name: "Add import source" }));
+    await user.click(screen.getByRole("button", { name: "Attach" }));
     expect(screen.getByText("Link")).toBeInTheDocument();
     expect(screen.getByText("Upload")).toBeInTheDocument();
     expect(screen.queryByText("Google Drive")).not.toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("LandingIntakeChat", () => {
     const user = userEvent.setup();
     render(<LandingIntakeChat />);
 
-    await user.click(screen.getByRole("button", { name: "Add import source" }));
+    await user.click(screen.getByRole("button", { name: "Attach" }));
     await user.click(screen.getByText("Link"));
 
     expect(screen.getByText("Instagram")).toBeInTheDocument();
@@ -49,11 +49,11 @@ describe("LandingIntakeChat", () => {
     expect(screen.queryByText("iCloud Drive")).not.toBeInTheDocument();
   });
 
-  it("highlights the plus trigger while the import menu is open", async () => {
+  it("highlights the attach trigger while the import menu is open", async () => {
     const user = userEvent.setup();
     render(<LandingIntakeChat />);
 
-    const trigger = screen.getByRole("button", { name: "Add import source" });
+    const trigger = screen.getByRole("button", { name: "Attach" });
     expect(trigger).toHaveAttribute("aria-pressed", "false");
 
     await user.click(trigger);

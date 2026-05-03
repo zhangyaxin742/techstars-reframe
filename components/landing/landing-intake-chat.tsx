@@ -11,7 +11,6 @@ import {
   GoogleDriveLogo,
   ImageSquare,
   InstagramLogo,
-  Plus,
   ShoppingBag,
   TiktokLogo,
   VideoCamera,
@@ -86,6 +85,23 @@ const rotatingPlaceholders = [
   "I launched a Notion template and got 3 sales. What am I doing wrong?",
   "My SaaS has 200 users but zero organic growth :(",
 ];
+
+function AttachIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.2a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+  );
+}
 
 interface LandingIntakeChatProps {
   className?: string;
@@ -233,20 +249,38 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                 </div>
               )}
 
-              <div className="flex items-end gap-3">
+              <textarea
+                data-testid="intake-input"
+                ref={textareaRef}
+                rows={1}
+                value={inputValue}
+                onChange={(event) => setInputValue(event.target.value)}
+                onPaste={handlePaste}
+                placeholder={rotatingPlaceholders[placeholderIndex]}
+                className="min-h-[3.25rem] max-h-24 w-full resize-none overflow-hidden bg-transparent py-1 text-sm leading-6 text-cream outline-none placeholder:text-cream/35 sm:text-[0.95rem]"
+                onKeyDown={(event) => {
+                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                    event.preventDefault();
+                    handleInputSubmit();
+                  }
+                }}
+              />
+
+              <div className="mt-2 flex items-center justify-between gap-3">
                 <DropdownMenu open={isImportMenuOpen} onOpenChange={handleImportMenuOpenChange}>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      aria-label="Add import source"
+                      aria-label="Attach"
                       aria-pressed={isImportMenuOpen}
-                      className={`flex size-8 shrink-0 items-center justify-center rounded-full text-cream/72 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 ${
+                      className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/8 px-4 text-sm font-medium text-cream/72 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 ${
                         isImportMenuOpen
                           ? "bg-gold/12 text-gold ring-1 ring-gold/35"
                           : "hover:bg-white/8 hover:text-gold"
                       }`}
                     >
-                      <Plus className="size-5" weight="bold" />
+                      <AttachIcon />
+                      <span>Attach</span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -320,28 +354,11 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <textarea
-                  data-testid="intake-input"
-                  ref={textareaRef}
-                  rows={1}
-                  value={inputValue}
-                  onChange={(event) => setInputValue(event.target.value)}
-                  onPaste={handlePaste}
-                  placeholder={rotatingPlaceholders[placeholderIndex]}
-                  className="min-h-[3rem] max-h-20 flex-1 resize-none overflow-hidden bg-transparent py-1 text-sm leading-6 text-cream outline-none placeholder:text-cream/35 sm:text-[0.95rem]"
-                  onKeyDown={(event) => {
-                    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-                      event.preventDefault();
-                      handleInputSubmit();
-                    }
-                  }}
-                />
-
                 <button
                   type="button"
                   onClick={handleInputSubmit}
                   disabled={!canSubmit}
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-cream text-ink transition hover:bg-gold disabled:opacity-30"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-cream text-ink transition hover:bg-gold active:bg-gold/12 active:text-gold active:ring-1 active:ring-gold/35 disabled:opacity-30"
                   aria-label="Submit"
                 >
                   <ArrowRight className="size-4" weight="bold" />
