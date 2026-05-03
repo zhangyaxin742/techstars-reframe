@@ -36,7 +36,10 @@ type ToolSequenceConfig = {
   onDone?: () => void;
 };
 
-type PreviewCameraIntentKind = "preview-close-handoff" | "preview-publish-status";
+type PreviewCameraIntentKind =
+  | "preview-close-handoff"
+  | "preview-publish-status"
+  | "visible-canvas-overview";
 
 type PreviewCameraIntent = {
   kind: PreviewCameraIntentKind;
@@ -45,6 +48,7 @@ type PreviewCameraIntent = {
 
 const BRAND_CONTEXT_HANDOFF_PAUSE_MS = 4200;
 const CONNECTION_DRAW_IN_MS = 550;
+const PREVIEW_PUBLISH_OVERVIEW_DELAY_MS = 2200;
 function toolCallsThroughIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
@@ -305,7 +309,21 @@ export function App() {
     );
   }, [connections, visibleNodes]);
 
+  const visibleNodeIds = useMemo(() => visibleNodes.map((node) => node.id), [visibleNodes]);
+
   const viewportFocus = useMemo<CanvasViewportFocus>(() => {
+    if (previewCameraIntent?.kind === "visible-canvas-overview") {
+      return {
+        id: `visible-canvas-overview-${previewCameraIntent.sequence}`,
+        nodeIds: visibleNodeIds,
+        padding: { top: 88, right: 384, bottom: 120, left: 88 },
+        minZoom: 0.24,
+        maxZoom: 0.82,
+        delayMs: 220,
+        durationMs: 1150,
+      };
+    }
+
     if (previewCameraIntent?.kind === "preview-publish-status") {
       return {
         id: `preview-publish-status-${previewCameraIntent.sequence}`,
@@ -365,7 +383,14 @@ export function App() {
       delayMs: 180,
       durationMs: 950,
     };
-  }, [flowStep, previewCameraIntent, timelinePhase, timelineSourceNodeId, trendRecipePhase]);
+  }, [
+    flowStep,
+    previewCameraIntent,
+    timelinePhase,
+    timelineSourceNodeId,
+    trendRecipePhase,
+    visibleNodeIds,
+  ]);
 
   const isAiBusy = messages.some((message) =>
     Boolean(message.thinkingText) ||
@@ -469,6 +494,11 @@ export function App() {
         likes: 58,
       }));
     }, 5300);
+
+    queueTimeout(() => {
+      if (previewPublishRunRef.current !== runId) return;
+      triggerPreviewCameraIntent("visible-canvas-overview");
+    }, 5300 + PREVIEW_PUBLISH_OVERVIEW_DELAY_MS);
     setPendingPreviewCloseHandoff(false);
     triggerPreviewCameraIntent("preview-publish-status");
   }, [queueTimeout, triggerPreviewCameraIntent]);

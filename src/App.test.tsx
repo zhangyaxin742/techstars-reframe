@@ -411,6 +411,27 @@ describe("App", () => {
     });
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("312 views");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("58 likes");
+
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2200);
+    });
+
+    const canvas = screen.getByTestId("infinite-canvas");
+    expect(canvas.getAttribute("data-viewport-focus-id")).toMatch(/^visible-canvas-overview-/);
+    expect(canvas.getAttribute("data-viewport-focus-nodes")?.split(" ")).toEqual([
+      "brand-ctx",
+      "library",
+      "recipe-1",
+      "recipe-2",
+      "recipe-3",
+      "timeline-1",
+      "preview-1",
+    ]);
   });
 
   it("does not start timeline generation when clicking the recipe card body", () => {
