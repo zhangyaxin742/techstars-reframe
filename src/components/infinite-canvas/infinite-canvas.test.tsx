@@ -274,6 +274,39 @@ describe("InfiniteCanvas", () => {
     expect(canvas).toBeInTheDocument();
   });
 
+  it("opens a compact trending video drawer from the navigation rail", async () => {
+    const user = userEvent.setup();
+    renderCanvas();
+
+    await user.click(screen.getByLabelText("Trends"));
+
+    expect(screen.getByText("Trending")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole("navigation", { name: "Canvas navigation" })).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("trending-rail-grid")).toHaveClass("grid-cols-2");
+    expect(screen.queryByText("Private")).not.toBeInTheDocument();
+    expect(screen.queryByText("Team")).not.toBeInTheDocument();
+    expect(screen.queryByText("Favorite")).not.toBeInTheDocument();
+    expect(screen.queryByText("Trail Clips")).not.toBeInTheDocument();
+
+    const videos = screen.getAllByTestId("trending-rail-video") as HTMLVideoElement[];
+    expect(videos).toHaveLength(8);
+    for (const video of videos) {
+      expect(video.loop).toBe(true);
+      expect(video.muted).toBe(true);
+      expect(video.autoplay).toBe(true);
+      expect(video.playsInline).toBe(true);
+    }
+
+    await user.click(screen.getByLabelText("Back"));
+
+    await waitFor(() => {
+      expect(screen.queryByText("Trending")).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();
+  });
+
   it("shows hover tooltips for navigation rail items", async () => {
     const user = userEvent.setup();
 
