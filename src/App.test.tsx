@@ -11,7 +11,7 @@ describe("App", () => {
     vi.useFakeTimers();
     render(<App />);
 
-    expect(screen.getByText("Chat History")).toBeInTheDocument();
+    expect(screen.getByTestId("chat-history-panel")).toHaveTextContent("Chat History");
     expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
     expect(screen.getByText("Preparing your creative canvas")).toBeInTheDocument();
     expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
@@ -74,10 +74,10 @@ describe("App", () => {
       vi.advanceTimersByTime(13000);
     });
 
-    fireEvent.change(screen.getByPlaceholderText("Ask Reframe to build, edit, or remix..."), {
+    fireEvent.change(screen.getByPlaceholderText("Ask Reframe anything..."), {
       target: { value: "Suggest missing shots" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Generate" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
     expect(screen.getByText("Suggest missing shots")).toBeInTheDocument();
     expect(screen.getByTestId("simulated-tool-tool-refine-current-canvas")).toHaveAttribute(
