@@ -378,6 +378,7 @@ export function App() {
         segment.id === segmentId
           ? {
               ...segment,
+              kind: "clip" as const,
               mediaAssetId: newAsset.id,
               selectedAssetLabel: newAsset.label,
               thumbnail: newAsset.thumbnail,

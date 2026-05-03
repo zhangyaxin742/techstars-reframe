@@ -1,4 +1,12 @@
-import { ArrowsClockwise, Eye, FilmSlate, SpeakerHigh, TextT } from "@phosphor-icons/react";
+import {
+  ArrowsClockwise,
+  Eye,
+  FilmSlate,
+  MagicWand,
+  SpeakerHigh,
+  TextT,
+  UploadSimple,
+} from "@phosphor-icons/react";
 import React, { useCallback, useState } from "react";
 import type { MediaAsset, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
@@ -88,10 +96,51 @@ export function TimelineAssembly({
   const audioSegments = segments.filter((s) => s.kind === "audio");
   const clipTransitionMarkers = getClipTransitionMarkers(clipSegments, totalMs);
 
-  const renderAlternates = () => {
+  const renderSelectedSegmentActions = () => {
     if (!selectedSegmentId) return null;
     const seg = segments.find((s) => s.id === selectedSegmentId);
-    if (!seg || !seg.alternates || seg.alternates.length === 0) return null;
+    if (!seg) return null;
+
+    if (seg.kind === "missing") {
+      const fillAsset = seg.alternates?.[0];
+      if (!fillAsset) return null;
+
+      return (
+        <div
+          data-testid="missing-shot-actions"
+          className={cn(
+            "rounded-lg border bg-card",
+            variant === "drawer" ? "p-3" : "border-transparent bg-transparent"
+          )}
+        >
+          <p className="mb-2 text-[10px] font-medium text-muted-foreground">
+            Fill missing shot: {seg.label}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => onSwapClip?.(selectedSegmentId, fillAsset)}
+              className="flex h-16 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              data-testid="missing-shot-generate-ai"
+            >
+              <MagicWand className="size-4 shrink-0 text-accent" weight="bold" />
+              <span className="text-pretty">Generate with AI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onSwapClip?.(selectedSegmentId, fillAsset)}
+              className="flex h-16 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              data-testid="missing-shot-upload"
+            >
+              <UploadSimple className="size-4 shrink-0 text-accent" weight="bold" />
+              <span className="text-pretty">Drag and drop or click to upload video</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (!seg.alternates || seg.alternates.length === 0) return null;
 
     return (
       <div
@@ -333,7 +382,7 @@ export function TimelineAssembly({
             </div>
           </div>
         </div>
-        {renderAlternates()}
+        {renderSelectedSegmentActions()}
       </div>
     );
   }
@@ -432,7 +481,7 @@ export function TimelineAssembly({
       )}
 
       {/* Alternate clips for selected segment */}
-      {renderAlternates()}
+      {renderSelectedSegmentActions()}
     </div>
   );
 }

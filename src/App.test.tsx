@@ -301,7 +301,7 @@ describe("App", () => {
     expect(
       within(screen.getByTestId("timeline-floating-preview")).getByTestId("mock-video-preview")
     ).toHaveAttribute("data-preview-variant", "floating");
-    expect(screen.getByText("Hook – Trail energy")).toBeInTheDocument();
+    expect(screen.getByText("Hook - Fit problem")).toBeInTheDocument();
     expect(screen.getByText(/Upbeat acoustic/)).toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toHaveAttribute("data-chrome-hidden", "true");
     expect(screen.queryByRole("navigation", { name: "Canvas navigation" })).not.toBeInTheDocument();
@@ -333,17 +333,33 @@ describe("App", () => {
     expect(screen.getByTestId("workspace-top-fade")).toBeInTheDocument();
   });
 
-  it("updates the drawer timeline when swapping a selected clip", () => {
+  it("fills the missing shot from the drawer demo action", () => {
     vi.useFakeTimers();
     render(<App />);
 
     revealTimeline();
     fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
-    fireEvent.click(screen.getByTestId("timeline-segment-ts-1"));
-    fireEvent.click(screen.getByTestId("alternate-ma-7"));
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    expect(screen.getByTestId("missing-shot-actions")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
 
-    expect(screen.getByTestId("timeline-segment-ts-1")).toHaveTextContent(
-      "Kids running through meadow"
+    expect(screen.getByTestId("timeline-segment-ts-4")).toHaveTextContent(
+      "Final 3 - Generated missing shot"
+    );
+    expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("0 gaps");
+  });
+
+  it("updates the drawer timeline when swapping final 4", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    revealTimeline();
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-5"));
+    fireEvent.click(screen.getByTestId("alternate-final-4-alt-1"));
+
+    expect(screen.getByTestId("timeline-segment-ts-5")).toHaveTextContent(
+      "Final 4 alternative 1"
     );
   });
 

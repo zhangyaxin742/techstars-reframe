@@ -28,8 +28,12 @@ describe("TimelineAssembly", () => {
       />
     );
     expect(screen.getByTestId("timeline-assembly")).toBeInTheDocument();
-    expect(screen.getByText("Hook – Trail energy")).toBeInTheDocument();
+    expect(screen.getByText("Hook - Fit problem")).toBeInTheDocument();
     expect(screen.getByText("Product reveal")).toBeInTheDocument();
+    expect(screen.getByAltText("Hook - Fit problem")).toHaveAttribute(
+      "src",
+      "/assets/trending%20demo%20timeline/final_1.jpg"
+    );
   });
 
   it("selects a segment on click", async () => {
@@ -46,33 +50,92 @@ describe("TimelineAssembly", () => {
     expect(onSelectSegment).toHaveBeenCalledWith("ts-1");
   });
 
-  it("shows alternate clips when a segment is selected", () => {
+  it("shows alternate clips when final 4 is selected", () => {
     render(
       <TimelineAssembly
         segments={timelineSegments}
-        selectedSegmentId="ts-1"
+        selectedSegmentId="ts-5"
         onSelectSegment={vi.fn()}
         onSwapClip={vi.fn()}
       />
     );
     expect(screen.getByTestId("alternate-clips")).toBeInTheDocument();
-    expect(screen.getByText("Alternate trail angle")).toBeInTheDocument();
+    expect(screen.getByText("Final 4 alternative 1")).toBeInTheDocument();
+    expect(screen.getByText("Final 4 alternative 2")).toBeInTheDocument();
   });
 
-  it("calls onSwapClip when an alternate is clicked", async () => {
+  it("calls onSwapClip when a final 4 alternate is clicked", async () => {
     const onSwapClip = vi.fn();
     const user = userEvent.setup();
     render(
       <TimelineAssembly
         segments={timelineSegments}
-        selectedSegmentId="ts-1"
+        selectedSegmentId="ts-5"
         onSelectSegment={vi.fn()}
         onSwapClip={onSwapClip}
       />
     );
-    await user.click(screen.getByTestId("alternate-alt-1"));
+    await user.click(screen.getByTestId("alternate-final-4-alt-1"));
     expect(onSwapClip).toHaveBeenCalledTimes(1);
-    expect(onSwapClip).toHaveBeenCalledWith("ts-1", expect.objectContaining({ id: "alt-1" }));
+    expect(onSwapClip).toHaveBeenCalledWith(
+      "ts-5",
+      expect.objectContaining({
+        id: "final-4-alt-1",
+        thumbnail: "/assets/trending%20demo%20timeline/final_4_alternative_1.jpg",
+      })
+    );
+  });
+
+  it("shows missing-shot fill actions when the missing segment is selected", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId="ts-4"
+        onSelectSegment={vi.fn()}
+        onSwapClip={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("missing-shot-actions")).toBeInTheDocument();
+    expect(screen.getByTestId("missing-shot-generate-ai")).toHaveClass("h-16");
+    expect(screen.getByTestId("missing-shot-upload")).toHaveClass("h-16");
+    expect(screen.getByText("Generate with AI")).toBeInTheDocument();
+    expect(screen.getByText("Drag and drop or click to upload video")).toBeInTheDocument();
+  });
+
+  it("fills the missing shot from either demo action", async () => {
+    const onSwapClip = vi.fn();
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId="ts-4"
+        onSelectSegment={vi.fn()}
+        onSwapClip={onSwapClip}
+      />
+    );
+
+    await user.click(screen.getByTestId("missing-shot-generate-ai"));
+    expect(onSwapClip).toHaveBeenCalledWith(
+      "ts-4",
+      expect.objectContaining({
+        id: "final-3",
+        thumbnail: "/assets/trending%20demo%20timeline/final_3.jpg",
+      })
+    );
+
+    onSwapClip.mockClear();
+    rerender(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId="ts-4"
+        onSelectSegment={vi.fn()}
+        onSwapClip={onSwapClip}
+      />
+    );
+
+    await user.click(screen.getByTestId("missing-shot-upload"));
+    expect(onSwapClip).toHaveBeenCalledWith("ts-4", expect.objectContaining({ id: "final-3" }));
   });
 
   it("renders the drawer variant with separate timeline tracks", () => {
@@ -192,8 +255,8 @@ describe("TimelineAssembly", () => {
     render(
       <TimelineAssembly
         segments={timelineSegments.map((segment) =>
-          segment.id === "ts-1"
-            ? { ...segment, selectedAssetLabel: "Alternate trail angle" }
+          segment.id === "ts-5"
+            ? { ...segment, selectedAssetLabel: "Final 4 alternative 1" }
             : segment
         )}
         selectedSegmentId={null}
@@ -202,6 +265,6 @@ describe("TimelineAssembly", () => {
       />
     );
 
-    expect(screen.getByTestId("timeline-segment-ts-1")).toHaveTextContent("Alternate trail angle");
+    expect(screen.getByTestId("timeline-segment-ts-5")).toHaveTextContent("Final 4 alternative 1");
   });
 });

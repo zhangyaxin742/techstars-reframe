@@ -261,20 +261,15 @@ export const mediaImportOptions: MediaImportOption[] = [
   { id: "imp-yt", platform: "youtube", label: "YouTube", description: "Import shorts & clips", icon: "youtube" },
 ];
 
-// Placeholder SVG thumbnails using brand colors
-function makeThumbnail(color: string, label: string): string {
-  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'%3E%3Crect width='320' height='180' fill='${encodeURIComponent(color)}'/%3E%3Ctext x='160' y='98' text-anchor='middle' font-family='system-ui' font-size='14' fill='white'%3E${encodeURIComponent(label)}%3C/text%3E%3C/svg%3E`;
-}
+const trendingTimelineAssetBase = "/assets/trending%20demo%20timeline";
 
 export const mediaAssets: MediaAsset[] = [
-  { id: "ma-1", label: "Kids hiking trail", thumbnail: makeThumbnail("#3B6B4A", "Trail Hike"), tags: ["outdoors", "hiking", "kids"], shotType: "Wide establishing", trendFit: "Hook visual", matchReason: "High-energy opening shot", duration: 3200 },
-  { id: "ma-2", label: "Backpack product close-up", thumbnail: makeThumbnail("#264653", "Backpack"), tags: ["product", "backpack", "detail"], shotType: "Close-up", trendFit: "Product reveal", matchReason: "Hero product detail at 0:03", duration: 2800 },
-  { id: "ma-3", label: "Family campsite setup", thumbnail: makeThumbnail("#E9C46A", "Campsite"), tags: ["camping", "family", "lifestyle"], shotType: "Medium wide", trendFit: "Lifestyle context", matchReason: "Relatable family moment", duration: 4100 },
-  { id: "ma-4", label: "Kid opening backpack", thumbnail: makeThumbnail("#F4A261", "Unboxing"), tags: ["unboxing", "product", "reaction"], shotType: "Medium close", trendFit: "Social proof", matchReason: "Authentic kid reaction", duration: 3500 },
-  { id: "ma-5", label: "Sunset mountain view", thumbnail: makeThumbnail("#264653", "Sunset"), tags: ["nature", "scenic", "sunset"], shotType: "Wide", trendFit: "Closing beauty", matchReason: "Aspirational closer", duration: 2200 },
-  { id: "ma-6", label: "Water bottle in stream", thumbnail: makeThumbnail("#3B6B4A", "Water Bottle"), tags: ["product", "nature", "detail"], shotType: "Close-up", trendFit: "B-roll filler", matchReason: "Product in context", duration: 2000 },
-  { id: "ma-7", label: "Kids running through meadow", thumbnail: makeThumbnail("#E9C46A", "Meadow Run"), tags: ["kids", "play", "energy"], shotType: "Tracking", trendFit: "Energy burst", matchReason: "High-energy transition", duration: 2600 },
-  { id: "ma-8", label: "Parent helping with gear", thumbnail: makeThumbnail("#F4A261", "Gear Prep"), tags: ["family", "gear", "prep"], shotType: "Medium", trendFit: "Trust builder", matchReason: "Parental endorsement", duration: 3000 },
+  { id: "final-1", label: "Final 1 - Hook fit problem", thumbnail: `${trendingTimelineAssetBase}/final_1.jpg`, tags: ["fit proof", "hook"], shotType: "Opening hook", trendFit: "Hook visual", matchReason: "Opens with the fit problem immediately", duration: 3200 },
+  { id: "final-2", label: "Final 2 - Product reveal", thumbnail: `${trendingTimelineAssetBase}/final_2.jpg`, tags: ["product", "reveal"], shotType: "Product reveal", trendFit: "Product proof", matchReason: "Shows the product answer after the hook", duration: 2800 },
+  { id: "final-3", label: "Final 3 - Generated missing shot", thumbnail: `${trendingTimelineAssetBase}/final_3.jpg`, tags: ["generated", "movement"], shotType: "Missing-shot fill", trendFit: "Movement proof", matchReason: "Fills the missing proof moment for the demo", duration: 2000 },
+  { id: "final-4", label: "Final 4 - Trail movement", thumbnail: `${trendingTimelineAssetBase}/final_4.jpg`, tags: ["trail", "movement"], shotType: "Movement proof", trendFit: "Trail proof", matchReason: "Carries the middle proof beat", duration: 4100 },
+  { id: "final-5", label: "Final 5 - Fit detail", thumbnail: `${trendingTimelineAssetBase}/final_5.jpg`, tags: ["fit", "detail"], shotType: "Detail proof", trendFit: "Product detail", matchReason: "Adds a concrete fit detail before the CTA", duration: 3500 },
+  { id: "final-6", label: "Final 6 - Closing CTA", thumbnail: `${trendingTimelineAssetBase}/final_6.jpg`, tags: ["cta", "closing"], shotType: "Closing frame", trendFit: "Conversion CTA", matchReason: "Closes with the preorder handoff", duration: 2400 },
 ];
 
 export const trendRecipes: TrendRecipe[] = [
@@ -308,20 +303,19 @@ export const trendRecipes: TrendRecipe[] = [
 ];
 
 const alternateClips: MediaAsset[] = [
-  { id: "alt-1", label: "Alternate trail angle", thumbnail: makeThumbnail("#3B6B4A", "Alt Trail"), tags: ["outdoors"], shotType: "Wide", trendFit: "Hook visual", matchReason: "Different angle, same energy" },
-  { id: "alt-2", label: "Kid smiling with pack", thumbnail: makeThumbnail("#F4A261", "Alt Smile"), tags: ["kid", "product"], shotType: "Close-up", trendFit: "Social proof", matchReason: "Warmer expression" },
-  { id: "alt-3", label: "Overhead campsite", thumbnail: makeThumbnail("#264653", "Alt Overhead"), tags: ["camping"], shotType: "Drone overhead", trendFit: "Lifestyle context", matchReason: "Cinematic perspective" },
+  { id: "final-4-alt-1", label: "Final 4 alternative 1", thumbnail: `${trendingTimelineAssetBase}/final_4_alternative_1.jpg`, tags: ["trail", "movement"], shotType: "Movement proof", trendFit: "Trail proof", matchReason: "A tighter movement variation for the fourth beat" },
+  { id: "final-4-alt-2", label: "Final 4 alternative 2", thumbnail: `${trendingTimelineAssetBase}/final_4_alternative_2.jpg`, tags: ["trail", "movement"], shotType: "Movement proof", trendFit: "Trail proof", matchReason: "A more product-forward variation for the fourth beat" },
 ];
 
 export const timelineSegments: TimelineSegment[] = [
-  { id: "ts-1", kind: "clip", label: "Hook – Trail energy", startMs: 0, endMs: 3200, mediaAssetId: "ma-1", thumbnail: mediaAssets[0].thumbnail, alternates: [alternateClips[0], mediaAssets[6]] },
+  { id: "ts-1", kind: "clip", label: "Hook - Fit problem", startMs: 0, endMs: 3200, mediaAssetId: "final-1", thumbnail: mediaAssets[0].thumbnail },
   { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "\"We made the one thing that didn't exist for kids who actually go outside.\"" },
-  { id: "ts-3", kind: "clip", label: "Product reveal", startMs: 3200, endMs: 6000, mediaAssetId: "ma-2", thumbnail: mediaAssets[1].thumbnail, alternates: [alternateClips[1], mediaAssets[5]] },
-  { id: "ts-4", kind: "missing", label: "⚠ Close-up needed: zipper detail", startMs: 6000, endMs: 8000 },
-  { id: "ts-5", kind: "clip", label: "Family context", startMs: 8000, endMs: 12100, mediaAssetId: "ma-3", thumbnail: mediaAssets[2].thumbnail, alternates: [alternateClips[2], mediaAssets[7]] },
-  { id: "ts-6", kind: "clip", label: "Kid reaction", startMs: 12100, endMs: 15600, mediaAssetId: "ma-4", thumbnail: mediaAssets[3].thumbnail, alternates: [mediaAssets[6], mediaAssets[7]] },
+  { id: "ts-3", kind: "clip", label: "Product reveal", startMs: 3200, endMs: 6000, mediaAssetId: "final-2", thumbnail: mediaAssets[1].thumbnail },
+  { id: "ts-4", kind: "missing", label: "Missing shot - Movement proof", startMs: 6000, endMs: 8000, alternates: [mediaAssets[2]] },
+  { id: "ts-5", kind: "clip", label: "Final 4 - Trail movement", startMs: 8000, endMs: 12100, mediaAssetId: "final-4", thumbnail: mediaAssets[3].thumbnail, alternates: alternateClips },
+  { id: "ts-6", kind: "clip", label: "Fit detail", startMs: 12100, endMs: 15600, mediaAssetId: "final-5", thumbnail: mediaAssets[4].thumbnail },
   { id: "ts-7", kind: "text-overlay", label: "CTA overlay", startMs: 15600, endMs: 18000, overlayText: "Preorder now → petiteoutdoors.com" },
-  { id: "ts-8", kind: "clip", label: "Closing beauty", startMs: 15600, endMs: 18000, mediaAssetId: "ma-5", thumbnail: mediaAssets[4].thumbnail, alternates: [alternateClips[0]] },
+  { id: "ts-8", kind: "clip", label: "Closing CTA", startMs: 15600, endMs: 18000, mediaAssetId: "final-6", thumbnail: mediaAssets[5].thumbnail },
   { id: "ts-9", kind: "audio", label: "Beat sync", startMs: 0, endMs: 18000, audioNote: "Upbeat acoustic – drop at 3.2s, build at 8s, resolve at 15.6s" },
 ];
 
