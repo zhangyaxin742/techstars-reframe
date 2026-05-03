@@ -89,7 +89,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
   const [sources, setSources] = useState<SourceBadge[]>([]);
   const [queuedImports, setQueuedImports] = useState<SourceBadge[]>([]);
   const [selectedMediaSources, setSelectedMediaSources] = useState<Set<string>>(new Set());
-  const [phase, setPhase] = useState<"input" | "sources" | "media">("input");
+  const [phase, setPhase] = useState<"input" | "sources">("input");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
@@ -151,19 +151,6 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
 
     setPhase("sources");
   }, [inputValue, queuedImports.length, sources.length]);
-
-  const handleSourcesContinue = useCallback(() => {
-    setPhase("media");
-  }, []);
-
-  const toggleMediaSource = useCallback((id: string) => {
-    setSelectedMediaSources((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
 
   const handleFinalSubmit = useCallback(() => {
     setIsSubmitting(true);
@@ -310,47 +297,6 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                 I see product listings, lifestyle photos, and social content.
                 {selectedMediaSources.size > 0 ? ` I will also pull from ${selectedMediaSources.size} selected import sources.` : ""}
               </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleSourcesContinue}
-              className="inline-flex w-full items-center justify-center rounded-xl bg-cream px-4 py-3 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream"
-            >
-              Connect media sources -&gt;
-            </button>
-          </div>
-        )}
-
-        {phase === "media" && (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-white/15 bg-[rgba(26,22,14,0.8)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-              <p className="mb-3 text-xs uppercase tracking-wide text-gold">
-                Connect your media
-              </p>
-              <div className="grid grid-cols-2 gap-2" data-testid="media-options">
-                {landingMediaImportOptions.map((option) => {
-                  const Icon = platformIcons[option.platform];
-                  const isSelected = selectedMediaSources.has(option.id);
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => toggleMediaSource(option.id)}
-                      className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left text-xs transition ${
-                        isSelected
-                          ? "border-gold/50 bg-gold/10 text-cream"
-                          : "border-white/10 bg-white/5 text-cream/70 hover:border-white/20 hover:text-cream"
-                      }`}
-                    >
-                      <Icon className="size-4 shrink-0" weight={isSelected ? "fill" : "regular"} />
-                      <div className="min-w-0">
-                        <div className="truncate font-medium">{option.label}</div>
-                        <div className="truncate text-[10px] text-cream/40">{option.description}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
             <button
               type="button"

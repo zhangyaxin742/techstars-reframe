@@ -41,18 +41,15 @@ describe("LandingIntakeChat", () => {
     expect(screen.getByText("petiteoutdoors.com")).toBeInTheDocument();
   });
 
-  it("shows media options after continuing past sources", async () => {
+  it("shows the final start-building action after submitting brand context", async () => {
     const user = userEvent.setup();
     render(<LandingIntakeChat />);
 
     await user.type(screen.getByTestId("intake-input"), "petiteoutdoors.com");
     await user.click(screen.getByRole("button", { name: "Submit" }));
-    await user.click(screen.getByRole("button", { name: /Connect media sources/i }));
 
-    expect(screen.getByTestId("media-options")).toBeInTheDocument();
-    expect(screen.getByText("Upload Files")).toBeInTheDocument();
-    expect(screen.getByText("Google Drive")).toBeInTheDocument();
-    expect(screen.getByText("iCloud Drive")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Start building/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Connect media sources/i })).not.toBeInTheDocument();
   });
 
   it("navigates to /app on final submit", async () => {
@@ -61,7 +58,6 @@ describe("LandingIntakeChat", () => {
 
     await user.type(screen.getByTestId("intake-input"), "petiteoutdoors.com");
     await user.click(screen.getByRole("button", { name: "Submit" }));
-    await user.click(screen.getByRole("button", { name: /Connect media sources/i }));
     await user.click(screen.getByRole("button", { name: /Start building/i }));
 
     await vi.waitFor(() => {
