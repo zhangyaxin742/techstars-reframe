@@ -91,7 +91,7 @@ describe("CanvasNodeView", () => {
     expect(screen.getByTestId("timeline-audio-preview-timeline-1").firstElementChild).toHaveClass("object-cover");
     expect(screen.getByTestId("timeline-audio-preview-timeline-1").firstElementChild).toHaveAttribute(
       "src",
-      "/assets/trending%20demo%20timeline/image%2012.png"
+      "/assets/trending%20demo%20timeline/Rectangle.png"
     );
 
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("rounded-full");

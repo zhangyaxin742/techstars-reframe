@@ -471,7 +471,7 @@ function TimelineRevealCard({
             aria-label="Audio beat preview"
           >
             <img
-              src="/assets/trending%20demo%20timeline/image%2012.png"
+              src="/assets/trending%20demo%20timeline/Rectangle.png"
               alt=""
               className="h-full w-full object-cover"
               draggable={false}

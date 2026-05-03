@@ -165,7 +165,7 @@ describe("TimelineAssembly", () => {
     expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");
     expect(screen.getByTestId("timeline-audio-waveform-ts-9")).toHaveAttribute(
       "src",
-      "/assets/trending%20demo%20timeline/image%2012.png"
+      "/assets/trending%20demo%20timeline/Rectangle.png"
     );
   });
 
