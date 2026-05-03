@@ -88,6 +88,9 @@ export function App() {
     progress: 0,
     views: 0,
     likes: 0,
+    saves: 0,
+    shares: 0,
+    reach: 0,
   });
   const [timelineDraftSegments, setTimelineDraftSegments] = useState<TimelineSegment[]>(
     () => seededTimelineSegments
@@ -455,6 +458,9 @@ export function App() {
       progress: 18,
       views: 0,
       likes: 0,
+      saves: 0,
+      shares: 0,
+      reach: 0,
     });
     toast.success("Preview publish queued");
 
@@ -483,6 +489,9 @@ export function App() {
         progress: 100,
         views: 48,
         likes: 9,
+        saves: 4,
+        shares: 2,
+        reach: 46,
       });
     }, 2800);
 
@@ -492,6 +501,9 @@ export function App() {
         ...currentState,
         views: 312,
         likes: 58,
+        saves: 17,
+        shares: 9,
+        reach: 305,
       }));
     }, 5300);
 

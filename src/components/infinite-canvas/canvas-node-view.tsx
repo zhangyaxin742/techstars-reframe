@@ -1,7 +1,22 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, FilmSlate, ImageSquare, Info, InstagramLogo, Play, Target, TrendUp, Warning, X } from "@phosphor-icons/react";
+import {
+  BookmarkSimple,
+  CheckCircle,
+  Eye,
+  FilmSlate,
+  Heart,
+  ImageSquare,
+  Info,
+  InstagramLogo,
+  PaperPlaneTilt,
+  Play,
+  Target,
+  TrendUp,
+  Warning,
+  X,
+} from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { isTrendSourceNode, type CanvasNode, type CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
@@ -26,6 +41,9 @@ export interface PreviewPublishState {
   progress: number;
   views: number;
   likes: number;
+  saves: number;
+  shares: number;
+  reach: number;
 }
 
 interface CanvasNodeViewProps {
@@ -167,6 +185,13 @@ function formatMetricCount(value: number) {
   }).format(value);
 }
 
+function formatMetricPercent(value: number) {
+  return new Intl.NumberFormat("en", {
+    minimumFractionDigits: value >= 10 ? 0 : 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 function AnimatedMetricNumber({ value, testId }: { value: number; testId: string }) {
   return (
     <span
@@ -193,6 +218,8 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
 
   const isPublished = state.status === "published";
   const progress = Math.min(Math.max(state.progress, 0), 100);
+  const engagementRate =
+    state.reach > 0 ? ((state.likes + state.saves + state.shares) / state.reach) * 100 : 0;
 
   return (
     <motion.div
@@ -232,14 +259,66 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
       ) : null}
 
       {isPublished ? (
-        <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] font-medium text-muted-foreground">
-          <div className="rounded-md border border-border bg-secondary/40 px-2 py-1">
-            <AnimatedMetricNumber value={state.views} testId="preview-publish-views-count" />{" "}
-            views
+        <div className="mt-2 space-y-2">
+          <div className="rounded-md border border-border bg-secondary/50 p-2">
+            <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <Eye className="size-3.5 text-sky-500" weight="fill" />
+              Views
+            </div>
+            <div className="mt-1 flex items-end justify-between gap-3">
+              <div className="text-lg font-semibold leading-none text-foreground">
+                <AnimatedMetricNumber value={state.views} testId="preview-publish-views-count" />
+              </div>
+              <span className="text-[10px] font-medium text-muted-foreground">Top-line performance</span>
+            </div>
           </div>
-          <div className="rounded-md border border-border bg-secondary/40 px-2 py-1">
-            <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />{" "}
-            likes
+
+          <div className="grid grid-cols-3 gap-2 text-[10px]">
+            <div className="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1.5 text-rose-100">
+              <div className="flex items-center gap-1 font-medium text-rose-200">
+                <Heart className="size-3" weight="fill" />
+                Likes
+              </div>
+              <div className="mt-1 text-sm font-semibold text-foreground">
+                <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />
+              </div>
+            </div>
+            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1.5 text-emerald-100">
+              <div className="flex items-center gap-1 font-medium text-emerald-200">
+                <BookmarkSimple className="size-3" weight="fill" />
+                Saves
+              </div>
+              <div className="mt-1 text-sm font-semibold text-foreground">
+                <AnimatedMetricNumber value={state.saves} testId="preview-publish-saves-count" />
+              </div>
+            </div>
+            <div className="rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-amber-100">
+              <div className="flex items-center gap-1 font-medium text-amber-200">
+                <PaperPlaneTilt className="size-3" weight="fill" />
+                Shares
+              </div>
+              <div className="mt-1 text-sm font-semibold text-foreground">
+                <AnimatedMetricNumber value={state.shares} testId="preview-publish-shares-count" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-[10px] font-medium text-muted-foreground">
+            <div className="rounded-md border border-border bg-secondary/40 px-2 py-1.5">
+              <span className="block uppercase tracking-[0.08em]">Reach</span>
+              <span className="mt-1 block text-sm font-semibold text-foreground tabular-nums tracking-tight">
+                {formatMetricCount(state.reach)}
+              </span>
+            </div>
+            <div className="rounded-md border border-border bg-secondary/40 px-2 py-1.5">
+              <span className="block uppercase tracking-[0.08em]">Engagement</span>
+              <span
+                className="mt-1 block text-sm font-semibold text-foreground tabular-nums tracking-tight"
+                data-testid="preview-publish-engagement-rate"
+              >
+                {formatMetricPercent(engagementRate)}%
+              </span>
+            </div>
           </div>
         </div>
       ) : null}

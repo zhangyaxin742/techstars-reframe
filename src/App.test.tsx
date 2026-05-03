@@ -389,8 +389,18 @@ describe("App", () => {
       vi.advanceTimersByTime(2100);
     });
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Published");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48 views");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9 likes");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Views");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Likes");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Saves");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Shares");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Reach");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Engagement");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("4");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("2");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("46");
+    expect(screen.getByTestId("preview-publish-engagement-rate")).toHaveTextContent("32.6%");
     expect(screen.queryByTestId("preview-publish-progress")).not.toBeInTheDocument();
     expect(screen.getByTestId("preview-publish-views-count")).toHaveClass("t-digit-group");
     expect(screen.getByTestId("preview-publish-views-count")).toHaveClass("is-animating");
@@ -403,14 +413,21 @@ describe("App", () => {
     act(() => {
       vi.advanceTimersByTime(1500);
     });
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48 views");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9 likes");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("4");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("2");
+    expect(screen.getByTestId("preview-publish-engagement-rate")).toHaveTextContent("32.6%");
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("312 views");
-    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("58 likes");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("312");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("58");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("17");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("305");
+    expect(screen.getByTestId("preview-publish-engagement-rate")).toHaveTextContent("27.5%");
 
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-nodes",
