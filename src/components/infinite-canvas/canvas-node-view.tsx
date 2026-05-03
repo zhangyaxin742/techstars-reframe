@@ -292,35 +292,35 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
 
           <div className="grid grid-cols-3 gap-2 text-[10px]">
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-              <div className={`flex items-center gap-1 ${metricEyebrowClassName}`}>
+              <div className="flex flex-col items-start gap-1">
                 <span className="flex size-4 items-center justify-center rounded-full bg-rose-500/14 text-rose-600">
                   <Heart className="size-2.5" weight="fill" />
                 </span>
-                Likes
+                <span className={metricEyebrowClassName}>Likes</span>
               </div>
-              <div className="mt-1 text-sm font-semibold text-foreground">
+              <div className="mt-1.5 text-sm font-semibold text-foreground">
                 <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />
               </div>
             </div>
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-              <div className={`flex items-center gap-1 ${metricEyebrowClassName}`}>
+              <div className="flex flex-col items-start gap-1">
                 <span className="flex size-4 items-center justify-center rounded-full bg-emerald-500/14 text-emerald-700">
                   <BookmarkSimple className="size-2.5" weight="fill" />
                 </span>
-                Saves
+                <span className={metricEyebrowClassName}>Saves</span>
               </div>
-              <div className="mt-1 text-sm font-semibold text-foreground">
+              <div className="mt-1.5 text-sm font-semibold text-foreground">
                 <AnimatedMetricNumber value={state.saves} testId="preview-publish-saves-count" />
               </div>
             </div>
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-              <div className={`flex items-center gap-1 ${metricEyebrowClassName}`}>
+              <div className="flex flex-col items-start gap-1">
                 <span className="flex size-4 items-center justify-center rounded-full bg-amber-500/16 text-amber-700">
                   <PaperPlaneTilt className="size-2.5" weight="fill" />
                 </span>
-                Shares
+                <span className={metricEyebrowClassName}>Shares</span>
               </div>
-              <div className="mt-1 text-sm font-semibold text-foreground">
+              <div className="mt-1.5 text-sm font-semibold text-foreground">
                 <AnimatedMetricNumber value={state.shares} testId="preview-publish-shares-count" />
               </div>
             </div>
