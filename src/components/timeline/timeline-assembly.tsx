@@ -366,6 +366,9 @@ export function TimelineAssembly({
                               </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-80">
+                              <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase text-muted-foreground">
+                                Suggested captions
+                              </div>
                               {captionOptions.map((caption, index) => (
                                 <DropdownMenuItem
                                   key={caption}

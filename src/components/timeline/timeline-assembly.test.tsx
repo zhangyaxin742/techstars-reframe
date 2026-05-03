@@ -238,6 +238,7 @@ describe("TimelineAssembly", () => {
     );
 
     await user.click(screen.getByLabelText("Choose caption for Hook text"));
+    expect(await screen.findByText("Suggested captions")).toBeInTheDocument();
     await user.click(await screen.findByTestId("caption-option-ts-2-1"));
 
     expect(onSelectCaption).toHaveBeenCalledWith(
