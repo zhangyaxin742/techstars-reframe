@@ -128,9 +128,54 @@ a {
   mix-blend-mode: soft-light;
 }
 
+.animate-landing-start-frame {
+  animation: landing-start-frame 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: 52% 34%;
+  will-change: transform, opacity;
+}
+
+.animate-landing-end-frame {
+  animation: landing-end-frame 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+}
+
 .animate-kenburns {
   animation: kenburns 28s ease-in-out infinite alternate;
   transform-origin: center center;
+}
+
+@keyframes landing-start-frame {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  72% {
+    opacity: 1;
+    transform: scale(1.42) translate3d(-1.5%, -8%, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.48) translate3d(-2%, -10%, 0);
+  }
+}
+
+@keyframes landing-end-frame {
+  0% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+
+  58% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes t-digit-pop-in {
@@ -186,6 +231,18 @@ a {
   .animate-kenburns {
     animation: none;
     transform: scale(1.04);
+  }
+
+  .animate-landing-start-frame {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+
+  .animate-landing-end-frame {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 
   * {
