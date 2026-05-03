@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
 import type { CanvasNode } from "../../lib/infinite-canvas/types";
+import { exportTargets } from "../../data/reframe-demo";
 
 const nodes: CanvasNode[] = [
   {
@@ -181,7 +182,7 @@ describe("InfiniteCanvas", () => {
             nodes={nodes}
             selectedNodeIds={selectedNodeIds}
             onSelectionChange={setSelectedNodeIds}
-            onExportSelected={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </div>
       );
@@ -207,7 +208,90 @@ describe("InfiniteCanvas", () => {
     fireEvent.pointerUp(canvas, { clientX: 220, clientY: 170, pointerId: 1 });
     fireEvent.click(canvas);
 
-    expect(screen.getByLabelText("Export selected nodes")).toBeEnabled();
+    expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
+  });
+
+  it("places the selection toolbar higher above the selected node", () => {
+    renderCanvas({
+      nodes: [
+        {
+          ...nodes[0],
+          position: { x: 100, y: 160 },
+        },
+      ],
+      selectedNodeIds: new Set(["a"]),
+    });
+
+    expect(screen.getByTestId("selection-toolbar")).toHaveStyle({ top: "128px" });
+  });
+
+  it("shows only delete for ordinary selected nodes", () => {
+    renderCanvas({ selectedNodeIds: new Set(["a"]), onDeleteSelected: vi.fn() });
+
+    expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Download preview")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Publish preview")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
+  });
+
+  it("shows download and publish actions for a selected preview node", () => {
+    const onDownloadPreview = vi.fn();
+    const onPublishPreview = vi.fn();
+    renderCanvas({
+      nodes: [
+        {
+          id: "preview-1",
+          kind: "preview",
+          title: "Preview",
+          position: { x: 100, y: 160 },
+          size: { width: 210, height: 380 },
+        },
+      ],
+      selectedNodeIds: new Set(["preview-1"]),
+      onDeleteSelected: vi.fn(),
+      onDownloadPreview,
+      onPublishPreview,
+    });
+
+    fireEvent.click(screen.getByLabelText("Download preview"));
+    fireEvent.click(screen.getByLabelText("Publish preview"));
+
+    expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
+    expect(onDownloadPreview).toHaveBeenCalledWith(new Set(["preview-1"]));
+    expect(onPublishPreview).toHaveBeenCalledWith(new Set(["preview-1"]));
+    expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
+  });
+
+  it("shows editor export options for a selected timeline node", async () => {
+    const user = userEvent.setup();
+    const onExportTimeline = vi.fn();
+    renderCanvas({
+      nodes: [
+        {
+          id: "timeline-1",
+          kind: "timeline",
+          title: "Timeline",
+          position: { x: 100, y: 160 },
+          size: { width: 480, height: 280 },
+        },
+      ],
+      selectedNodeIds: new Set(["timeline-1"]),
+      exportTargets,
+      onExportTimeline,
+      onDeleteSelected: vi.fn(),
+    });
+
+    await user.click(screen.getByLabelText("Export timeline"));
+
+    expect(screen.getByText("CapCut")).toBeInTheDocument();
+    expect(screen.getByText("Adobe Premiere Pro")).toBeInTheDocument();
+    expect(screen.getByText("DaVinci Resolve")).toBeInTheDocument();
+
+    await user.click(screen.getByText("CapCut"));
+
+    expect(onExportTimeline).toHaveBeenCalledWith("capcut", new Set(["timeline-1"]));
+    expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
   });
 
   it("reports node drag updates", () => {

@@ -2,6 +2,7 @@ import { ArrowSquareOut, CheckCircle, X } from "@phosphor-icons/react";
 import React, { useCallback, useState } from "react";
 import type { ExportTarget } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
+import { EditorLogo } from "./editor-logo";
 
 interface ExportHandoffPanelProps {
   targets: ExportTarget[];
@@ -66,7 +67,7 @@ export function ExportHandoffPanel({
                     : "hover:border-primary hover:shadow-sm"
                 )}
               >
-                <span className="text-xl">{target.icon}</span>
+                <EditorLogo targetId={target.id} className="size-6 rounded-md object-contain" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{target.editor}</p>
                   <p className="text-xs text-muted-foreground">{target.description}</p>

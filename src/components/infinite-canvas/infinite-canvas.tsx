@@ -18,7 +18,7 @@ import type {
   CanvasViewportFocus,
   NodeMoveUpdate,
 } from "../../lib/infinite-canvas/types";
-import type { TimelineSegment } from "../../data/reframe-demo";
+import type { ExportTarget, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNavigationRail } from "./canvas-navigation-rail";
@@ -39,7 +39,10 @@ interface InfiniteCanvasProps {
   onSelectionChange?: (nodeIds: Set<string>) => void;
   onNodeMove?: (updates: NodeMoveUpdate[]) => void;
   onDeleteSelected?: (nodeIds: Set<string>) => void;
-  onExportSelected?: (nodeIds: Set<string>) => void;
+  exportTargets?: ExportTarget[];
+  onExportTimeline?: (targetId: ExportTarget["id"], nodeIds: Set<string>) => void;
+  onDownloadPreview?: (nodeIds: Set<string>) => void;
+  onPublishPreview?: (nodeIds: Set<string>) => void;
   bottomPromptBox?: CanvasPromptBoxData;
   onBottomPromptChange?: (value: string) => void;
   onBottomPromptSubmit?: (value: string) => void;
@@ -58,6 +61,8 @@ interface InfiniteCanvasProps {
   chromeHidden?: boolean;
   className?: string;
 }
+
+const EMPTY_EXPORT_TARGETS: ExportTarget[] = [];
 
 interface DragState {
   pointerId: number;
@@ -80,7 +85,10 @@ export function InfiniteCanvas({
   onSelectionChange,
   onNodeMove,
   onDeleteSelected,
-  onExportSelected,
+  exportTargets = EMPTY_EXPORT_TARGETS,
+  onExportTimeline,
+  onDownloadPreview,
+  onPublishPreview,
   bottomPromptBox,
   onBottomPromptChange,
   onBottomPromptSubmit,
@@ -134,6 +142,11 @@ export function InfiniteCanvas({
       onSelectionChange?.(nextSelection);
     },
     [onSelectionChange, selectedNodeIds]
+  );
+
+  const selectedNodes = useMemo(
+    () => nodes.filter((node) => selection.has(node.id)),
+    [nodes, selection]
   );
 
   useEffect(() => {
@@ -414,8 +427,13 @@ export function InfiniteCanvas({
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "e") {
         event.preventDefault();
-        if (selection.size > 0) {
-          onExportSelected?.(new Set(selection));
+        const selectedTimelineNode =
+          selectedNodes.length === 1 && selectedNodes[0].kind === "timeline"
+            ? selectedNodes[0]
+            : null;
+        const defaultTarget = exportTargets[0];
+        if (selectedTimelineNode && defaultTarget) {
+          onExportTimeline?.(defaultTarget.id, new Set([selectedTimelineNode.id]));
         }
       }
     };
@@ -441,7 +459,7 @@ export function InfiniteCanvas({
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [onDeleteSelected, onExportSelected, selection]);
+  }, [exportTargets, onDeleteSelected, onExportTimeline, selectedNodes, selection]);
 
   const positions = useMemo(() => {
     const next = new Map<string, CanvasPoint>();
@@ -582,8 +600,24 @@ export function InfiniteCanvas({
           bounds={selectionBounds}
           viewport={viewport}
           size={containerSize}
+          selectedNodes={selectedNodes}
+          exportTargets={exportTargets}
           onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
-          onExport={selection.size > 0 && onExportSelected ? () => onExportSelected(new Set(selection)) : undefined}
+          onExportTimeline={
+            selectedNodes.length === 1 && selectedNodes[0].kind === "timeline" && onExportTimeline
+              ? (targetId) => onExportTimeline(targetId, new Set(selection))
+              : undefined
+          }
+          onDownloadPreview={
+            selectedNodes.length === 1 && selectedNodes[0].kind === "preview" && onDownloadPreview
+              ? () => onDownloadPreview(new Set(selection))
+              : undefined
+          }
+          onPublishPreview={
+            selectedNodes.length === 1 && selectedNodes[0].kind === "preview" && onPublishPreview
+              ? () => onPublishPreview(new Set(selection))
+              : undefined
+          }
         />
       ) : null}
       {!chromeHidden ? <CanvasNavigationRail /> : null}

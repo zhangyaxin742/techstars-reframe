@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
-import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
 import { TimelineBottomDrawer } from "./components/timeline/timeline-bottom-drawer";
 import { Toaster } from "./components/ui/sonner";
@@ -10,6 +10,7 @@ import type { CanvasConnection, CanvasNode, CanvasViewportFocus } from "./lib/in
 import {
   type AiFlowStep,
   type ChatMessage,
+  type ExportTarget,
   type MediaAsset,
   type SimulatedToolCall,
   type TimelineSegment,
@@ -71,7 +72,6 @@ export function App() {
   const [timelineDraftSegments, setTimelineDraftSegments] = useState<TimelineSegment[]>(
     () => seededTimelineSegments
   );
-  const [exportOpen, setExportOpen] = useState(false);
   const timeoutIdsRef = useRef<number[]>([]);
   const initialSequenceStartedRef = useRef(false);
 
@@ -345,8 +345,17 @@ export function App() {
     setSelectedNodeIds(new Set());
   }, []);
 
-  const handleExportSelected = useCallback((_nodeIds: Set<string>) => {
-    setExportOpen(true);
+  const handleExportTimeline = useCallback((targetId: ExportTarget["id"]) => {
+    const target = exportTargets.find((candidate) => candidate.id === targetId);
+    toast.success(`Prepared ${target?.editor ?? "timeline"} export`);
+  }, []);
+
+  const handleDownloadPreview = useCallback(() => {
+    toast.success("Preview download ready");
+  }, []);
+
+  const handlePublishPreview = useCallback(() => {
+    toast.success("Preview publish queued");
   }, []);
 
   const handleSelectionChange = useCallback((nodeIds: Set<string>) => {
@@ -527,7 +536,10 @@ export function App() {
           onSelectionChange={handleSelectionChange}
           onNodeMove={handleNodeMove}
           onDeleteSelected={handleDeleteSelected}
-          onExportSelected={handleExportSelected}
+          exportTargets={exportTargets}
+          onExportTimeline={handleExportTimeline}
+          onDownloadPreview={handleDownloadPreview}
+          onPublishPreview={handlePublishPreview}
           timelineSourceNodeId={timelineSourceNodeId ?? undefined}
           viewportFocus={viewportFocus}
           onCreateTimelineFromTrend={startTimelineFromRecipe}
@@ -564,11 +576,6 @@ export function App() {
         onOpenChange={setTimelineDrawerOpen}
         onSelectSegment={setSelectedTimelineSegmentId}
         onSwapClip={handleSwapTimelineClip}
-      />
-      <ExportHandoffPanel
-        targets={exportTargets}
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
       />
       <Toaster />
     </div>

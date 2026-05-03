@@ -307,7 +307,7 @@ describe("App", () => {
     expect(screen.queryByRole("navigation", { name: "Canvas navigation" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("workspace-top-label")).not.toBeInTheDocument();
     expect(screen.queryByTestId("workspace-top-fade")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Export selected nodes")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
   });
 
   it("restores workspace chrome after closing the timeline drawer", () => {

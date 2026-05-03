@@ -121,9 +121,8 @@ export interface TrendRecipe {
 // ---------------------------------------------------------------------------
 
 export interface ExportTarget {
-  id: string;
+  id: "capcut" | "premiere-pro" | "davinci-resolve";
   editor: string;
-  icon: string;
   description: string;
 }
 
@@ -465,10 +464,9 @@ export const promptAiToolCalls: SimulatedToolCall[] = [
 ];
 
 export const exportTargets: ExportTarget[] = [
-  { id: "exp-capcut", editor: "CapCut", icon: "✂️", description: "Export timeline for CapCut editing" },
-  { id: "exp-premiere", editor: "Adobe Premiere", icon: "🎬", description: "Export as Premiere project" },
-  { id: "exp-davinci", editor: "DaVinci Resolve", icon: "🎨", description: "Export for DaVinci Resolve" },
-  { id: "exp-generic", editor: "Generic Timeline", icon: "📋", description: "Export as standard timeline XML" },
+  { id: "capcut", editor: "CapCut", description: "Export timeline for CapCut editing" },
+  { id: "premiere-pro", editor: "Adobe Premiere Pro", description: "Export as a Premiere project" },
+  { id: "davinci-resolve", editor: "DaVinci Resolve", description: "Export for DaVinci Resolve" },
 ];
 
 // ---------------------------------------------------------------------------
