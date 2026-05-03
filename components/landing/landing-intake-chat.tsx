@@ -58,10 +58,10 @@ const platformColors: Record<SourcePlatform, string> = {
 
 const rotatingPlaceholders = [
   "I built a budgeting app but nobody outside tech knows it exists...",
-  "Help me find customers for my flower shop in Boston",
+  "Help me find customers for my flower shop in Boston!",
   "Who actually buys handmade ceramics and where do they hang out?",
   "I launched a Notion template and got 3 sales. What am I doing wrong?",
-  "My SaaS has 200 users but zero organic growth",
+  "My SaaS has 200 users but zero organic growth :(",
 ];
 
 interface LandingIntakeChatProps {
