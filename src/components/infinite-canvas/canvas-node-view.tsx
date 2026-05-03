@@ -124,7 +124,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           data-testid={`canvas-node-create-timeline-${node.id}`}
           aria-label={`Generate timeline from ${node.title}`}
           className={cn(
-            "absolute right-0 top-1/2 z-10 size-8 -translate-y-1/2 translate-x-1/2 rounded-full border",
+            "peer absolute right-0 top-1/2 z-10 size-8 -translate-y-1/2 translate-x-1/2 rounded-full border",
             "border-accent bg-card text-accent shadow-[rgba(0,0,0,0.1)_0px_4px_10px_0px]",
             "transition-colors hover:bg-accent hover:text-accent-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -158,7 +158,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               "transition-[opacity,transform] duration-200",
               isTimelineSource
                 ? "scale-100 opacity-100"
-                : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100"
+                : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
             )}
           >
             <div className="h-36 w-60 rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-3 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]">
