@@ -216,6 +216,8 @@ describe("App", () => {
     fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-background-overlay")).toHaveClass("bg-foreground/20");
+    expect(screen.getByTestId("timeline-background-overlay")).toHaveClass("backdrop-blur-sm");
     expect(screen.getByTestId("timeline-floating-preview")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-floating-preview").getAttribute("style")).toContain(
       "aspect-ratio: 9 / 16"

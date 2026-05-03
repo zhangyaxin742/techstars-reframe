@@ -77,7 +77,8 @@ export function TimelineBottomDrawer({
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay asChild>
             <motion.div
-              className="fixed inset-0 z-40 bg-foreground/35"
+              data-testid="timeline-background-overlay"
+              className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: exiting ? 0 : 1 }}
               transition={transition}
