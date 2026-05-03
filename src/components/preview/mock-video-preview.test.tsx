@@ -63,4 +63,43 @@ describe("MockVideoPreview", () => {
     await waitFor(() => expect(video.currentTime).toBe(9));
     expect(screen.getByText("9.0s / 18.0s")).toBeInTheDocument();
   });
+
+  it("shows a black missing-shot frame while scrubbing over a missing segment", async () => {
+    render(
+      <MockVideoPreview
+        segments={timelineSegments}
+        open
+        variant="floating"
+        previewTimeMs={7000}
+      />
+    );
+
+    const video = screen.getByLabelText("Timeline preview video") as HTMLVideoElement;
+
+    await waitFor(() => expect(video.currentTime).toBe(7));
+    expect(screen.getByTestId("preview-missing-shot-frame")).toHaveClass("bg-black");
+    expect(screen.getByText("shot missing")).toBeInTheDocument();
+  });
+
+  it("removes the missing-shot frame after the missing segment is filled", () => {
+    render(
+      <MockVideoPreview
+        segments={timelineSegments.map((segment) =>
+          segment.id === "ts-4"
+            ? {
+                ...segment,
+                kind: "clip" as const,
+                mediaAssetId: "final-3",
+                thumbnail: "/assets/trending%20demo%20timeline/final_3.jpg",
+              }
+            : segment
+        )}
+        open
+        variant="floating"
+        previewTimeMs={7000}
+      />
+    );
+
+    expect(screen.queryByTestId("preview-missing-shot-frame")).not.toBeInTheDocument();
+  });
 });

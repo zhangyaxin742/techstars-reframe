@@ -1,4 +1,4 @@
-import { Pause, Play, X } from "@phosphor-icons/react";
+import { FilmSlate, Pause, Play, X } from "@phosphor-icons/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
@@ -11,6 +11,17 @@ interface MockVideoPreviewProps {
   videoSrc?: string;
   previewTimeMs?: number | null;
   className?: string;
+}
+
+function findMissingScrubSegment(segments: TimelineSegment[], previewTimeMs: number | null) {
+  if (previewTimeMs === null) return undefined;
+
+  return segments.find(
+    (segment) =>
+      segment.kind === "missing" &&
+      previewTimeMs >= segment.startMs &&
+      previewTimeMs < segment.endMs
+  );
 }
 
 export function MockVideoPreview({
@@ -87,6 +98,7 @@ export function MockVideoPreview({
   const isFloating = variant === "floating";
   const isNode = variant === "node";
   const isInline = isFloating || isNode;
+  const missingScrubSegment = findMissingScrubSegment(segments, previewTimeMs);
 
   const player = (
     <div
@@ -132,6 +144,15 @@ export function MockVideoPreview({
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
         />
+        {missingScrubSegment ? (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white"
+            data-testid="preview-missing-shot-frame"
+          >
+            <FilmSlate className="mb-3 size-10 text-white/70" weight="thin" />
+            <span className="text-sm font-medium text-white/85">shot missing</span>
+          </div>
+        ) : null}
       </div>
 
       {/* Controls */}
