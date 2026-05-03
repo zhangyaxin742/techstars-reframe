@@ -651,9 +651,14 @@ export function InfiniteCanvas({
             return null;
           }
           const animateIn = animatedConnectionIds?.has(connectionPath.id) ?? false;
+          const drawDuration = animateIn
+            ? 0.55
+            : connectionPath.isTimelineConnection
+              ? 0.35
+              : 0.45;
           return (
             <motion.path
-              key={`${connectionPath.id}-${animateIn ? "animated" : "static"}`}
+              key={connectionPath.id}
               data-testid={`canvas-connection-${connectionPath.id}`}
               d={connectionPath.d}
               fill="none"
@@ -673,9 +678,9 @@ export function InfiniteCanvas({
               }
               strokeLinecap="round"
               strokeLinejoin="round"
-              initial={animateIn ? { pathLength: 0, opacity: 0.4 } : false}
+              initial={{ pathLength: 0, opacity: animateIn ? 0.4 : 0.32 }}
               animate={{ pathLength: 1, opacity: 1 }}
-              transition={animateIn ? { duration: 0.45, ease: "easeOut" } : { duration: 0 }}
+              transition={{ duration: drawDuration, ease: "easeOut" }}
             />
           );
         })}
