@@ -403,8 +403,8 @@ function TrendDetailsDialog({
           <DialogPrimitive.Content asChild>
             <motion.section
               className={cn(
-                "paper fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl overflow-hidden rounded-xl border bg-card p-3 text-card-foreground shadow-2xl sm:p-4",
-                "max-h-[calc(100dvh-2rem)] focus-visible:outline-none"
+                "paper fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl overflow-visible rounded-xl border bg-card p-3 text-card-foreground shadow-2xl sm:p-4",
+                "max-h-[calc(100dvh-5rem)] focus-visible:outline-none"
               )}
               initial={{ opacity: 0, x: "-50%", y: "calc(-50% + 10px)", scale: 0.985 }}
               animate={
@@ -421,7 +421,7 @@ function TrendDetailsDialog({
               <button
                 type="button"
                 onClick={requestClose}
-                className="absolute right-5 top-5 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="absolute -top-12 right-0 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 aria-label="Close trend breakdown"
               >
                 <X className="size-4" />
@@ -429,7 +429,7 @@ function TrendDetailsDialog({
               <motion.img
                 src={detailsImage.src}
                 alt={detailsImage.alt}
-                className="h-auto max-h-[calc(100dvh-4rem)] w-full rounded-lg border border-border object-contain"
+                className="h-auto max-h-[calc(100dvh-7rem)] w-full rounded-lg border border-border object-contain"
                 draggable={false}
                 initial={{ opacity: 0, y: 8, scale: 1.01 }}
                 animate={exiting ? { opacity: 0, y: 8, scale: 1.01 } : { opacity: 1, y: 0, scale: 1 }}

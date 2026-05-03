@@ -139,6 +139,8 @@ describe("CanvasNodeView", () => {
     fireEvent.click(moreInfoButton);
 
     expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /close trend breakdown/i })).toHaveClass("-top-12");
+    expect(screen.getByRole("button", { name: /close trend breakdown/i })).toHaveClass("right-0");
     expect(screen.getByAltText("Detailed breakdown of the Founder Confessional video trend")).toHaveAttribute(
       "src",
       "/assets/trending%20demo%20timeline/founder_confessional.png"
