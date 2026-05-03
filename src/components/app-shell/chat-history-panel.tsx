@@ -7,10 +7,8 @@ import {
   DeviceMobileCamera,
   Globe,
   InstagramLogo,
-  Robot,
   ShoppingBag,
   TiktokLogo,
-  User,
   YoutubeLogo,
 } from "@phosphor-icons/react";
 import React, { useState } from "react";
@@ -21,6 +19,7 @@ import {
   ChatContainerRoot,
   ChatContainerScrollAnchor,
 } from "../prompt-kit/chat-container";
+import { ResponseStream } from "../prompt-kit/response-stream";
 import { SimulatedToolCall } from "../prompt-kit/simulated-tool-call";
 import { ThinkingBar } from "../prompt-kit/thinking-bar";
 
@@ -92,7 +91,7 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
             {messages.map((message) => (
               <div key={message.id} className="space-y-1.5">
                 {message.step ? (
-                  <div className="ml-7 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
                     {message.toolCalls?.some((toolCall) => toolCall.state === "running") ? (
                       <CircleDashed className="size-3 animate-spin text-accent" />
                     ) : (
@@ -101,41 +100,45 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
                     <span>{stepLabel[message.step]}</span>
                   </div>
                 ) : null}
-                <div className="flex items-start gap-2">
-                  <div
-                    className={cn(
-                      "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px]",
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : message.role === "system"
-                          ? "bg-muted text-muted-foreground"
-                          : "bg-accent text-accent-foreground"
-                    )}
-                  >
-                    {message.role === "user" ? (
-                      <User className="size-3" weight="bold" />
-                    ) : (
-                      <Robot className="size-3" />
-                    )}
-                  </div>
-                  <p className="min-w-0 text-xs leading-relaxed text-foreground/80">
-                    {message.content}
-                  </p>
+                <div
+                  className={cn(
+                    "flex",
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  )}
+                >
+                  {message.role === "assistant" ? (
+                    <ResponseStream
+                      key={`${message.id}-${message.content}`}
+                      textStream={message.content}
+                      className="max-w-[92%] text-pretty text-xs leading-relaxed text-foreground/80"
+                    />
+                  ) : (
+                    <p
+                      className={cn(
+                        "max-w-[92%] rounded-lg px-3 py-2 text-pretty text-xs leading-relaxed",
+                        message.role === "user"
+                          ? "bg-foreground text-background shadow-sm"
+                          : "bg-secondary text-muted-foreground"
+                      )}
+                    >
+                      {message.content}
+                    </p>
+                  )}
                 </div>
                 {message.thinkingText ? (
-                  <div className="ml-7 rounded-md border bg-secondary/40 px-2.5 py-2">
+                  <div className="rounded-md border bg-secondary/40 px-2.5 py-2">
                     <ThinkingBar text={message.thinkingText} />
                   </div>
                 ) : null}
                 {message.toolCalls && message.toolCalls.length > 0 ? (
-                  <div className="ml-7 space-y-1.5">
+                  <div className="space-y-1.5">
                     {message.toolCalls.map((toolCall) => (
                       <SimulatedToolCall key={toolCall.id} toolCall={toolCall} />
                     ))}
                   </div>
                 ) : null}
                 {message.badges && message.badges.length > 0 && (
-                  <div className="ml-7 flex flex-wrap gap-1">
+                  <div className="flex flex-wrap justify-end gap-1">
                     {message.badges.map((badge) => {
                       const Icon = platformIcon[badge.platform];
                       return (

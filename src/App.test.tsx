@@ -15,7 +15,7 @@ describe("App", () => {
     expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
     expect(screen.getByText("Preparing your creative canvas")).toBeInTheDocument();
     act(() => {
-      vi.advanceTimersByTime(650);
+      vi.advanceTimersByTime(1850);
     });
     expect(screen.getByTestId("simulated-tool-tool-read-sources")).toHaveAttribute(
       "data-tool-state",
@@ -31,7 +31,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(6000);
+      vi.advanceTimersByTime(7500);
     });
 
     expect(screen.getByTestId("simulated-tool-tool-build-recipes")).toHaveAttribute(
@@ -47,7 +47,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(6000);
+      vi.advanceTimersByTime(7500);
     });
     fireEvent.click(screen.getByTestId("canvas-node-recipe-1"));
 
@@ -70,7 +70,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(6000);
+      vi.advanceTimersByTime(7500);
     });
 
     fireEvent.change(screen.getByPlaceholderText("Ask Reframe to build, edit, or remix..."), {
@@ -83,5 +83,15 @@ describe("App", () => {
       "data-tool-state",
       "running"
     );
+  });
+
+  it("renders user messages as dark chat cards without avatar icons", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    const userMessage = screen.getByText("Here are our brand sources.");
+    expect(userMessage).toHaveClass("bg-foreground");
+    expect(userMessage).toHaveClass("text-background");
+    expect(screen.queryByTestId("chat-message-avatar")).not.toBeInTheDocument();
   });
 });

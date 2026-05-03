@@ -60,7 +60,7 @@ export function App() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [bottomPrompt, setBottomPrompt] = useState("");
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
-  const [messages, setMessages] = useState<ChatMessage[]>(() => chatHistory.slice(0, 4));
+  const [messages, setMessages] = useState<ChatMessage[]>(() => chatHistory.slice(0, 2));
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [timeline, setTimeline] = useState(timelineSegments);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
@@ -138,6 +138,18 @@ export function App() {
     if (initialSequenceStartedRef.current) return;
     initialSequenceStartedRef.current = true;
     queueTimeout(() => {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        { ...chatHistory[2], timestamp: Date.now() },
+      ]);
+    }, 450);
+    queueTimeout(() => {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        { ...chatHistory[3], timestamp: Date.now() },
+      ]);
+    }, 1150);
+    queueTimeout(() => {
       startToolSequence({
         messageId: "auto-analysis",
         content: "Analyzing your brand sources and connected media.",
@@ -158,7 +170,7 @@ export function App() {
           }, 650);
         },
       });
-    }, 600);
+    }, 1800);
   }, [queueTimeout, startToolSequence]);
 
   const visibleNodes = useMemo(() => {
