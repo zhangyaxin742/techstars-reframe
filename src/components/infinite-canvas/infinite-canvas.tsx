@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   calculateSelectionBounds,
   fitBoundsToViewport,
-  getNodeCenter,
   getNodesInRect,
   normalizeRect,
   screenToWorld,
@@ -425,20 +424,28 @@ export function InfiniteCanvas({
             return null;
           }
 
-          const sourceCenter = getNodeCenter(sourceNode, positions.get(sourceNode.id));
-          const targetCenter = getNodeCenter(targetNode, positions.get(targetNode.id));
-          const sourceX = (sourceCenter.x - viewport.offset.x) * viewport.zoom;
-          const sourceY = (sourceCenter.y - viewport.offset.y) * viewport.zoom;
-          const targetX = (targetCenter.x - viewport.offset.x) * viewport.zoom;
-          const targetY = (targetCenter.y - viewport.offset.y) * viewport.zoom;
+          const sourcePosition = positions.get(sourceNode.id) ?? sourceNode.position;
+          const targetPosition = positions.get(targetNode.id) ?? targetNode.position;
+          const sourceX =
+            (sourcePosition.x + sourceNode.size.width - viewport.offset.x) * viewport.zoom;
+          const sourceY =
+            (sourcePosition.y + sourceNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+          const targetX = (targetPosition.x - viewport.offset.x) * viewport.zoom;
+          const targetY =
+            (targetPosition.y + targetNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
           const midpointX = (sourceX + targetX) / 2;
 
           return {
             id: connection.id,
             d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
+            isTimelineConnection:
+              sourceNode.kind === "trend-recipe" && targetNode.kind === "timeline",
           };
         })
-        .filter((path): path is { id: string; d: string } => path !== null),
+        .filter(
+          (path): path is { id: string; d: string; isTimelineConnection: boolean } =>
+            path !== null
+        ),
     [connections, nodeMap, positions, viewport.offset.x, viewport.offset.y, viewport.zoom]
   );
 
@@ -485,10 +492,15 @@ export function InfiniteCanvas({
           return (
             <motion.path
               key={`${connectionPath.id}-${animateIn ? "animated" : "static"}`}
+              data-testid={`canvas-connection-${connectionPath.id}`}
               d={connectionPath.d}
               fill="none"
-              stroke="rgba(180, 184, 180, 0.78)"
-              strokeWidth={1.5}
+              stroke={
+                connectionPath.isTimelineConnection
+                  ? "rgb(0, 129, 192)"
+                  : "rgba(180, 184, 180, 0.78)"
+              }
+              strokeWidth={connectionPath.isTimelineConnection ? 2 : 1.5}
               strokeLinecap="round"
               initial={animateIn ? { pathLength: 0, opacity: 0.4 } : false}
               animate={{ pathLength: 1, opacity: 1 }}

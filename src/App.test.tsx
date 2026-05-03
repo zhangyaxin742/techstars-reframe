@@ -87,6 +87,7 @@ describe("App", () => {
 
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();
     expect(screen.queryByTestId("canvas-node-create-timeline-recipe-1")).not.toBeInTheDocument();
+    expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-node-skeleton-timeline-1")).toBeInTheDocument();
     expect(screen.getByTestId("simulated-tool-tool-match-clips")).toHaveAttribute(
       "data-tool-state",
