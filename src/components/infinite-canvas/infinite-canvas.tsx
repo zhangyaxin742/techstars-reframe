@@ -129,10 +129,9 @@ function buildConnectionPath({
 
   if (connectsBrandToTrend) {
     const gap = Math.max(targetX - sourceX, 0);
-    const lead = Math.min(Math.max(gap * 0.34, 18), 36);
-    const nearTargetX = Math.max(targetX - lead, sourceX + lead);
+    const controlOffset = Math.min(Math.max(gap * 0.36, 26), 44);
     return {
-      d: `M ${sourceX} ${sourceY} L ${sourceX + lead} ${sourceY} L ${nearTargetX} ${targetY} L ${targetX} ${targetY}`,
+      d: `M ${sourceX} ${sourceY} C ${sourceX + controlOffset} ${sourceY}, ${targetX - controlOffset} ${targetY}, ${targetX} ${targetY}`,
       isTimelineConnection: false,
       isBrandFeedConnection: true,
     };
