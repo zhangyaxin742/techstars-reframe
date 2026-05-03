@@ -17,8 +17,8 @@ describe("MediaLibraryPanel", () => {
       <MediaLibraryPanel assets={mediaAssets} open={true} onClose={vi.fn()} />
     );
     expect(screen.getByTestId("media-library-panel")).toBeInTheDocument();
-    expect(screen.getByText("Uphill trail movement")).toBeInTheDocument();
-    expect(screen.getByText("Hem fit close-up")).toBeInTheDocument();
+    expect(screen.getByText("Final 4 - Trail movement")).toBeInTheDocument();
+    expect(screen.getByText("Final 5 - Fit detail")).toBeInTheDocument();
   });
 
   it("closes when the close button is clicked", async () => {
@@ -36,8 +36,8 @@ describe("MediaLibraryPanel", () => {
     render(
       <MediaLibraryPanel assets={mediaAssets} open={true} onClose={vi.fn()} />
     );
-    await user.type(screen.getByPlaceholderText("Search media..."), "hem");
-    expect(screen.getByText("Hem fit close-up")).toBeInTheDocument();
-    expect(screen.queryByText("Uphill trail movement")).not.toBeInTheDocument();
+    await user.type(screen.getByPlaceholderText("Search media..."), "detail");
+    expect(screen.getByText("Final 5 - Fit detail")).toBeInTheDocument();
+    expect(screen.queryByText("Final 4 - Trail movement")).not.toBeInTheDocument();
   });
 });
