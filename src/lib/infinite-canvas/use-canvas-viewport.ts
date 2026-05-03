@@ -111,7 +111,7 @@ export function useCanvasViewport(
     stopViewportAnimation();
     setViewportState((current) => {
       const nextZoom = clamp(
-        current.zoom * Math.exp(-deltaY * 0.001),
+        current.zoom * Math.exp(-deltaY * 0.0025),
         MIN_ZOOM,
         MAX_ZOOM
       );
