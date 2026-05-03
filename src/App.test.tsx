@@ -207,6 +207,11 @@ describe("App", () => {
 
     expect(screen.getByText(/Timeline is filled/)).toBeInTheDocument();
     expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-connection-tl-prev")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-connection-tl-prev")).toHaveAttribute(
+      "stroke",
+      "rgb(0, 129, 192)"
+    );
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByText("Side-by-Side Fit Failure Demo — Timeline")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(

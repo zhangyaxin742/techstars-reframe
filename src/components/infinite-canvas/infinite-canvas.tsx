@@ -476,7 +476,8 @@ export function InfiniteCanvas({
             id: connection.id,
             d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
             isTimelineConnection:
-              sourceNode.kind === "trend-recipe" && targetNode.kind === "timeline",
+              (sourceNode.kind === "trend-recipe" && targetNode.kind === "timeline") ||
+              (sourceNode.kind === "timeline" && targetNode.kind === "preview"),
           };
         })
         .filter(
