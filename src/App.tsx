@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
+import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
 import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
 import { Toaster } from "./components/ui/sonner";
 import {
+  chatHistory,
   exportTargets,
   reframeDemoConnections,
   reframeDemoNodes,
@@ -53,28 +55,31 @@ export function App() {
   }, []);
 
   return (
-    <div className="h-dvh min-h-0 overflow-hidden bg-background text-foreground">
-      <InfiniteCanvas
-        nodes={nodes}
-        connections={connections}
-        selectedNodeIds={selectedNodeIds}
-        onSelectionChange={setSelectedNodeIds}
-        onNodeMove={handleNodeMove}
-        onDeleteSelected={handleDeleteSelected}
-        onExportSelected={handleExportSelected}
-        bottomPromptBox={{
-          value: bottomPrompt,
-          placeholder: "Ask Reframe to build, edit, or remix...",
-          actionLabel: "Generate",
-          busyLabel: "Building",
-          sourceImageUrl: reframePromptSourceImage,
-          sourceAlt: "",
-          badges: ["Petite Outdoors", "Preorder Hype"],
-          count: 1,
-        }}
-        onBottomPromptChange={handleBottomPromptChange}
-        onBottomPromptSubmit={handleBottomPromptSubmit}
-      />
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-background text-foreground">
+      <ChatHistoryPanel messages={chatHistory} />
+      <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
+        <InfiniteCanvas
+          nodes={nodes}
+          connections={connections}
+          selectedNodeIds={selectedNodeIds}
+          onSelectionChange={setSelectedNodeIds}
+          onNodeMove={handleNodeMove}
+          onDeleteSelected={handleDeleteSelected}
+          onExportSelected={handleExportSelected}
+          bottomPromptBox={{
+            value: bottomPrompt,
+            placeholder: "Ask Reframe to build, edit, or remix...",
+            actionLabel: "Generate",
+            busyLabel: "Building",
+            sourceImageUrl: reframePromptSourceImage,
+            sourceAlt: "",
+            badges: ["Petite Outdoors", "Preorder Hype"],
+            count: 1,
+          }}
+          onBottomPromptChange={handleBottomPromptChange}
+          onBottomPromptSubmit={handleBottomPromptSubmit}
+        />
+      </main>
       <ExportHandoffPanel
         targets={exportTargets}
         open={exportOpen}
