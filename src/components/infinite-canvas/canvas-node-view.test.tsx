@@ -81,7 +81,7 @@ describe("CanvasNodeView", () => {
     );
     expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toHaveClass("h-10");
-    expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toHaveClass("bg-black");
+    expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toHaveClass("bg-transparent");
     expect(screen.getByTestId("timeline-audio-preview-timeline-1").firstElementChild).toHaveAttribute(
       "src",
       "/assets/trending%20demo%20timeline/image%2012.png"

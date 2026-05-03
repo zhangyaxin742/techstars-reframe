@@ -376,7 +376,7 @@ function TimelineRevealCard({
 
         {audioSegments.length > 0 ? (
           <div
-            className="flex h-10 items-center overflow-hidden rounded-md border border-border bg-black px-2"
+            className="flex h-10 items-center overflow-hidden rounded-md border border-border bg-transparent px-2"
             data-testid={`timeline-audio-preview-${node.id}`}
             aria-label="Audio beat preview"
           >
