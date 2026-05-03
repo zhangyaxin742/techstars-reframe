@@ -197,6 +197,11 @@ describe("App", () => {
     fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
     fireEvent.click(screen.getByLabelText("Close timeline drawer"));
 
+    expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
     expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();
