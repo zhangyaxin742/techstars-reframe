@@ -268,14 +268,14 @@ function makeThumbnail(color: string, label: string): string {
 }
 
 export const mediaAssets: MediaAsset[] = [
-  { id: "ma-1", label: "Uphill trail movement", thumbnail: makeThumbnail("#3B6B4A", "Trail Movement"), tags: ["outdoors", "hiking", "fit"], shotType: "Trail movement", trendFit: "Opening frame", matchReason: "Shows petite fit in motion immediately", duration: 3200 },
-  { id: "ma-2", label: "Hem fit close-up", thumbnail: makeThumbnail("#264653", "Hem Detail"), tags: ["product", "fit", "detail"], shotType: "Close-up", trendFit: "Fit proof", matchReason: "Makes the sizing problem visible in under two seconds", duration: 2800 },
-  { id: "ma-3", label: "Mirror fit check", thumbnail: makeThumbnail("#E9C46A", "Mirror Fit"), tags: ["comparison", "founder", "fit"], shotType: "Medium wide", trendFit: "Before vs after", matchReason: "Clear side-by-side proof for the recipe", duration: 4100 },
-  { id: "ma-4", label: "Backpack stride test", thumbnail: makeThumbnail("#F4A261", "Stride Test"), tags: ["movement", "backpack", "trail"], shotType: "Medium close", trendFit: "Movement proof", matchReason: "Confirms the product works on the trail, not just in a mirror", duration: 3500 },
+  { id: "ma-1", label: "Kids hiking trail", thumbnail: makeThumbnail("#3B6B4A", "Trail Hike"), tags: ["outdoors", "hiking", "kids"], shotType: "Wide establishing", trendFit: "Hook visual", matchReason: "High-energy opening shot", duration: 3200 },
+  { id: "ma-2", label: "Backpack product close-up", thumbnail: makeThumbnail("#264653", "Backpack"), tags: ["product", "backpack", "detail"], shotType: "Close-up", trendFit: "Product reveal", matchReason: "Hero product detail at 0:03", duration: 2800 },
+  { id: "ma-3", label: "Family campsite setup", thumbnail: makeThumbnail("#E9C46A", "Campsite"), tags: ["camping", "family", "lifestyle"], shotType: "Medium wide", trendFit: "Lifestyle context", matchReason: "Relatable family moment", duration: 4100 },
+  { id: "ma-4", label: "Kid opening backpack", thumbnail: makeThumbnail("#F4A261", "Unboxing"), tags: ["unboxing", "product", "reaction"], shotType: "Medium close", trendFit: "Social proof", matchReason: "Authentic kid reaction", duration: 3500 },
   { id: "ma-5", label: "Sunset mountain view", thumbnail: makeThumbnail("#264653", "Sunset"), tags: ["nature", "scenic", "sunset"], shotType: "Wide", trendFit: "Closing beauty", matchReason: "Aspirational closer", duration: 2200 },
-  { id: "ma-6", label: "Zipper product detail", thumbnail: makeThumbnail("#3B6B4A", "Zipper Detail"), tags: ["product", "construction", "detail"], shotType: "Close-up", trendFit: "B-roll filler", matchReason: "Supports engineering credibility", duration: 2000 },
-  { id: "ma-7", label: "Open trail pace", thumbnail: makeThumbnail("#E9C46A", "Open Trail"), tags: ["trail", "movement", "energy"], shotType: "Tracking", trendFit: "Energy burst", matchReason: "Good alternate movement beat", duration: 2600 },
-  { id: "ma-8", label: "Pack adjustment detail", thumbnail: makeThumbnail("#F4A261", "Pack Fit"), tags: ["gear", "fit", "prep"], shotType: "Medium", trendFit: "Trust builder", matchReason: "Shows fit and usability before CTA", duration: 3000 },
+  { id: "ma-6", label: "Water bottle in stream", thumbnail: makeThumbnail("#3B6B4A", "Water Bottle"), tags: ["product", "nature", "detail"], shotType: "Close-up", trendFit: "B-roll filler", matchReason: "Product in context", duration: 2000 },
+  { id: "ma-7", label: "Kids running through meadow", thumbnail: makeThumbnail("#E9C46A", "Meadow Run"), tags: ["kids", "play", "energy"], shotType: "Tracking", trendFit: "Energy burst", matchReason: "High-energy transition", duration: 2600 },
+  { id: "ma-8", label: "Parent helping with gear", thumbnail: makeThumbnail("#F4A261", "Gear Prep"), tags: ["family", "gear", "prep"], shotType: "Medium", trendFit: "Trust builder", matchReason: "Parental endorsement", duration: 3000 },
 ];
 
 export const trendRecipes: TrendRecipe[] = [
@@ -309,19 +309,19 @@ export const trendRecipes: TrendRecipe[] = [
 ];
 
 const alternateClips: MediaAsset[] = [
-  { id: "alt-1", label: "Alternate trail angle", thumbnail: makeThumbnail("#3B6B4A", "Alt Trail"), tags: ["outdoors"], shotType: "Wide", trendFit: "Hook visual", matchReason: "Uphill movement, same trail, similar energy" },
-  { id: "alt-2", label: "Product macro detail", thumbnail: makeThumbnail("#F4A261", "Alt Macro"), tags: ["product", "detail"], shotType: "Close-up", trendFit: "Product proof", matchReason: "Sharper detail for fit and construction" },
-  { id: "alt-3", label: "Wooded trail stride", thumbnail: makeThumbnail("#264653", "Alt Stride"), tags: ["trail", "movement"], shotType: "Tracking", trendFit: "Movement proof", matchReason: "Good match: similar pace, different trail" },
+  { id: "alt-1", label: "Alternate trail angle", thumbnail: makeThumbnail("#3B6B4A", "Alt Trail"), tags: ["outdoors"], shotType: "Wide", trendFit: "Hook visual", matchReason: "Different angle, same energy" },
+  { id: "alt-2", label: "Kid smiling with pack", thumbnail: makeThumbnail("#F4A261", "Alt Smile"), tags: ["kid", "product"], shotType: "Close-up", trendFit: "Social proof", matchReason: "Warmer expression" },
+  { id: "alt-3", label: "Overhead campsite", thumbnail: makeThumbnail("#264653", "Alt Overhead"), tags: ["camping"], shotType: "Drone overhead", trendFit: "Lifestyle context", matchReason: "Cinematic perspective" },
 ];
 
 export const timelineSegments: TimelineSegment[] = [
-  { id: "ts-1", kind: "clip", label: "Opening frame: hem problem", startMs: 0, endMs: 3200, mediaAssetId: "ma-2", thumbnail: mediaAssets[1].thumbnail, alternates: [alternateClips[1], mediaAssets[5]] },
-  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "POV: You vs. most outdoor brands" },
-  { id: "ts-3", kind: "clip", label: "Mirror fit check", startMs: 3200, endMs: 6000, mediaAssetId: "ma-3", thumbnail: mediaAssets[2].thumbnail, alternates: [alternateClips[2], mediaAssets[7]] },
-  { id: "ts-4", kind: "missing", label: "Missing shot: uphill movement", startMs: 6000, endMs: 8000 },
-  { id: "ts-5", kind: "clip", label: "Trail movement proof", startMs: 8000, endMs: 12100, mediaAssetId: "ma-1", thumbnail: mediaAssets[0].thumbnail, alternates: [alternateClips[0], mediaAssets[6]] },
-  { id: "ts-6", kind: "clip", label: "Pack adjustment proof", startMs: 12100, endMs: 15600, mediaAssetId: "ma-4", thumbnail: mediaAssets[3].thumbnail, alternates: [mediaAssets[6], mediaAssets[7]] },
-  { id: "ts-7", kind: "text-overlay", label: "CTA overlay", startMs: 15600, endMs: 18000, overlayText: "Petite gear. Big adventures." },
+  { id: "ts-1", kind: "clip", label: "Hook – Trail energy", startMs: 0, endMs: 3200, mediaAssetId: "ma-1", thumbnail: mediaAssets[0].thumbnail, alternates: [alternateClips[0], mediaAssets[6]] },
+  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "\"We made the one thing that didn't exist for kids who actually go outside.\"" },
+  { id: "ts-3", kind: "clip", label: "Product reveal", startMs: 3200, endMs: 6000, mediaAssetId: "ma-2", thumbnail: mediaAssets[1].thumbnail, alternates: [alternateClips[1], mediaAssets[5]] },
+  { id: "ts-4", kind: "missing", label: "⚠ Close-up needed: zipper detail", startMs: 6000, endMs: 8000 },
+  { id: "ts-5", kind: "clip", label: "Family context", startMs: 8000, endMs: 12100, mediaAssetId: "ma-3", thumbnail: mediaAssets[2].thumbnail, alternates: [alternateClips[2], mediaAssets[7]] },
+  { id: "ts-6", kind: "clip", label: "Kid reaction", startMs: 12100, endMs: 15600, mediaAssetId: "ma-4", thumbnail: mediaAssets[3].thumbnail, alternates: [mediaAssets[6], mediaAssets[7]] },
+  { id: "ts-7", kind: "text-overlay", label: "CTA overlay", startMs: 15600, endMs: 18000, overlayText: "Preorder now → petiteoutdoors.com" },
   { id: "ts-8", kind: "clip", label: "Closing beauty", startMs: 15600, endMs: 18000, mediaAssetId: "ma-5", thumbnail: mediaAssets[4].thumbnail, alternates: [alternateClips[0]] },
   { id: "ts-9", kind: "audio", label: "Beat sync", startMs: 0, endMs: 18000, audioNote: "Upbeat acoustic – drop at 3.2s, build at 8s, resolve at 15.6s" },
 ];
