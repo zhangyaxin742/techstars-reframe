@@ -39,6 +39,7 @@ interface InfiniteCanvasProps {
   onBottomPromptSubmit?: (value: string) => void;
   onPromptChange?: (nodeId: string, value: string) => void;
   onPromptSubmit?: (nodeId: string, value: string) => void;
+  timelineSourceNodeId?: string;
   onCreateTimelineFromTrend?: (node: CanvasNode) => void;
   animatedConnectionIds?: Set<string>;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
@@ -74,6 +75,7 @@ export function InfiniteCanvas({
   onBottomPromptSubmit,
   onPromptChange,
   onPromptSubmit,
+  timelineSourceNodeId,
   onCreateTimelineFromTrend,
   animatedConnectionIds,
   resolveImageUrl,
@@ -506,6 +508,7 @@ export function InfiniteCanvas({
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
+            timelineSourceNodeId={timelineSourceNodeId}
             onCreateTimelineFromTrend={onCreateTimelineFromTrend}
             onPromptChange={(node, value) => onPromptChange?.(node.id, value)}
             onPromptSubmit={(node, value) => onPromptSubmit?.(node.id, value)}

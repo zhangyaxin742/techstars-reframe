@@ -68,6 +68,7 @@ export function App() {
   const [trendRecipePhase, setTrendRecipePhase] = useState<"hidden" | "skeleton" | "revealing">("hidden");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
+  const [timelineSourceNodeId, setTimelineSourceNodeId] = useState<string | null>(null);
   const [animatedConnectionIds, setAnimatedConnectionIds] = useState<Set<string>>(new Set());
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -373,6 +374,7 @@ export function App() {
       const recipeNodeId = recipeNode.id;
       const connectionId = recipeNodeId === "recipe-1" ? "r1-tl" : `${recipeNodeId}-tl`;
       setSelectedNodeIds(new Set([recipeNodeId]));
+      setTimelineSourceNodeId(recipeNodeId);
       setRecipeSequenceStarted(true);
       setFlowStep("recipe-selected");
       setConnections((currentConnections) => upsertTimelineConnection(currentConnections, recipeNodeId));
@@ -457,6 +459,7 @@ export function App() {
           onNodeMove={handleNodeMove}
           onDeleteSelected={handleDeleteSelected}
           onExportSelected={handleExportSelected}
+          timelineSourceNodeId={timelineSourceNodeId ?? undefined}
           onCreateTimelineFromTrend={startTimelineFromRecipe}
           animatedConnectionIds={animatedConnectionIds}
           brandCtxPhase={brandCtxPhase}

@@ -21,6 +21,7 @@ interface CanvasNodeViewProps {
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   onPointerDown: (event: React.PointerEvent, node: CanvasNode) => void;
   onClick: (event: React.MouseEvent, node: CanvasNode) => void;
+  timelineSourceNodeId?: string;
   onCreateTimelineFromTrend?: (node: CanvasNode) => void;
   onPromptChange?: (node: CanvasNode, value: string) => void;
   onPromptSubmit?: (node: CanvasNode, value: string) => void;
@@ -67,6 +68,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   resolveImageUrl,
   onPointerDown,
   onClick,
+  timelineSourceNodeId,
   onCreateTimelineFromTrend,
   onPromptChange,
   onPromptSubmit,
@@ -100,6 +102,8 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   }
 
   const meta = kindMeta[node.kind];
+  const isTrendRecipe = node.kind === "trend-recipe" && trendRecipePhase === "revealing";
+  const isTimelineSource = isTrendRecipe && timelineSourceNodeId === node.id;
 
   return (
     <motion.article
@@ -114,7 +118,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
       onPointerDown={(event) => onPointerDown(event, node)}
       onClick={(event) => onClick(event, node)}
     >
-      {node.kind === "trend-recipe" && trendRecipePhase === "revealing" ? (
+      {isTrendRecipe && !isTimelineSource ? (
         <button
           type="button"
           data-testid={`canvas-node-create-timeline-${node.id}`}
@@ -135,6 +139,41 @@ export const CanvasNodeView = memo(function CanvasNodeView({
         >
           <span aria-hidden="true" className="text-base leading-none">+</span>
         </button>
+      ) : null}
+      {isTrendRecipe ? (
+        <>
+          {isTimelineSource ? (
+            <motion.div
+              data-testid={`canvas-node-connector-${node.id}`}
+              className="pointer-events-none absolute right-0 top-1/2 z-10 h-px -translate-y-1/2 translate-x-full bg-accent"
+              initial={{ width: 0, opacity: 0.7 }}
+              animate={{ width: 56, opacity: 1 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+            />
+          ) : null}
+          <div
+            data-testid={`canvas-node-timeline-ghost-${node.id}`}
+            className={cn(
+              "pointer-events-none absolute left-full top-1/2 z-10 ml-14 -translate-y-1/2 origin-left",
+              "transition-[opacity,transform] duration-200",
+              isTimelineSource
+                ? "scale-100 opacity-100"
+                : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100"
+            )}
+          >
+            <div className="h-36 w-60 rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-3 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="h-2 w-20 rounded bg-muted/80" />
+                <div className="h-2 w-10 rounded bg-muted/70" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-6 rounded bg-muted/70" />
+                <div className="h-6 rounded bg-muted/60" />
+                <div className="h-6 rounded bg-muted/50" />
+              </div>
+            </div>
+          </div>
+        </>
       ) : null}
 
       {/* ── Floating kind label (Figma section-header style) ────────────────
