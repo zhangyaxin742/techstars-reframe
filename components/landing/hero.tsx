@@ -78,9 +78,6 @@ export function Hero() {
 
         <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pb-10 pt-28 text-center sm:px-8 sm:pt-32 lg:px-10">
           <div className="mx-auto flex w-full max-w-5xl flex-col items-center">
-            <p className="text-[11px] uppercase tracking-eyebrow text-gold">
-              Your AI CMO
-            </p>
 
             <div className="mt-5 space-y-1 sm:space-y-2">
               <h1 className="font-display text-[2.65rem] font-light leading-[0.95] tracking-[-0.045em] text-cream sm:text-[4.4rem] md:text-[5rem] lg:text-[5.2rem]">
@@ -107,14 +104,6 @@ export function Hero() {
             >
               <LandingIntakeChat className="w-full" />
             </motion.div>
-
-            <button
-              type="button"
-              onClick={() => setWaitlistOpen(true)}
-              className="mt-6 text-xs text-cream/50 transition hover:text-cream/80"
-            >
-              {"or join the waitlist ->"}
-            </button>
           </div>
         </main>
       </div>
