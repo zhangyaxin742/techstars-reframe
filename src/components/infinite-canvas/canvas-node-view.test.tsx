@@ -127,6 +127,8 @@ describe("CanvasNodeView", () => {
           detailsImage: {
             src: "/assets/trending%20demo%20timeline/founder_confessional.png",
             alt: "Detailed breakdown of the Founder Confessional video trend",
+            width: 1405,
+            height: 951,
           },
         },
         position: { x: 0, y: 0 },
@@ -144,10 +146,10 @@ describe("CanvasNodeView", () => {
     const closeButton = screen.getByRole("button", { name: /close trend breakdown/i });
     expect(closeButton).toHaveClass("top-0");
     expect(screen.getByRole("button", { name: /close trend breakdown/i })).toHaveClass("right-0");
-    expect(screen.getByAltText("Detailed breakdown of the Founder Confessional video trend")).toHaveAttribute(
-      "src",
-      "/assets/trending%20demo%20timeline/founder_confessional.png"
-    );
+    const breakdownImage = screen.getByAltText("Detailed breakdown of the Founder Confessional video trend");
+    expect(breakdownImage).toHaveAttribute("src", "/assets/trending%20demo%20timeline/founder_confessional.png");
+    expect(breakdownImage).toHaveAttribute("width", "1405");
+    expect(breakdownImage).toHaveAttribute("height", "951");
     expect(onCreateTimelineFromTrend).not.toHaveBeenCalled();
 
     fireEvent.pointerDown(closeButton);

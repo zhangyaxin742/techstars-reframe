@@ -503,6 +503,8 @@ export const reframeDemoNodes: CanvasNode[] = [
       detailsImage: {
         src: `${trendingTimelineAssetBase}/founder_confessional.png`,
         alt: "Detailed breakdown of the Founder Confessional video trend",
+        width: 1405,
+        height: 951,
       },
     },
     position: { x: 1096, y: 0 },

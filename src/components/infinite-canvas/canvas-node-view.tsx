@@ -434,6 +434,8 @@ function TrendDetailsDialog({
                 <motion.img
                   src={detailsImage.src}
                   alt={detailsImage.alt}
+                  width={detailsImage.width}
+                  height={detailsImage.height}
                   className="h-auto max-h-[calc(100dvh-7rem)] w-full rounded-lg border border-border object-contain"
                   draggable={false}
                   initial={{ opacity: 0, y: 8, scale: 1.01 }}

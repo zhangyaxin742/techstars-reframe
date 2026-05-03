@@ -36,6 +36,8 @@ export interface CanvasVideoData {
   detailsImage?: {
     src: string;
     alt: string;
+    width: number;
+    height: number;
   };
 }
 
