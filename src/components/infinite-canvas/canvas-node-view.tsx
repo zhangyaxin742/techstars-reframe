@@ -372,9 +372,6 @@ function TimelineRevealCard({
           {node.title}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className="rounded-md border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-foreground/75">
-            Timeline ready
-          </span>
           <span
             className="inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground"
             data-testid={`timeline-gap-pill-${node.id}`}

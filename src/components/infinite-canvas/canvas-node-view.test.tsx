@@ -65,7 +65,7 @@ describe("CanvasNodeView", () => {
     expect(screen.getByTestId("timeline-section-timeline-1-title")).toHaveTextContent(
       "Founder Confessional"
     );
-    expect(screen.getByText("Timeline ready")).toBeInTheDocument();
+    expect(screen.queryByText("Timeline ready")).not.toBeInTheDocument();
     expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("1 gap");
     expect(
       within(screen.getByTestId("timeline-gap-pill-timeline-1")).getByTestId(
