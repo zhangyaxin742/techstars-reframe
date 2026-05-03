@@ -24,10 +24,29 @@ describe("LandingIntakeChat", () => {
     render(<LandingIntakeChat />);
 
     await user.click(screen.getByRole("button", { name: "Add import source" }));
+    expect(screen.getByText("Link")).toBeInTheDocument();
+    expect(screen.getByText("Upload")).toBeInTheDocument();
+    expect(screen.queryByText("Google Drive")).not.toBeInTheDocument();
+
+    await user.click(screen.getByText("Upload"));
     await user.click(screen.getByText("Google Drive"));
 
     expect(screen.getByTestId("queued-imports")).toBeInTheDocument();
     expect(screen.getAllByText("Google Drive")[0]).toBeInTheDocument();
+  });
+
+  it("shows social link sources under the link submenu", async () => {
+    const user = userEvent.setup();
+    render(<LandingIntakeChat />);
+
+    await user.click(screen.getByRole("button", { name: "Add import source" }));
+    await user.click(screen.getByText("Link"));
+
+    expect(screen.getByText("Instagram")).toBeInTheDocument();
+    expect(screen.getByText("TikTok")).toBeInTheDocument();
+    expect(screen.getByText("YouTube")).toBeInTheDocument();
+    expect(screen.getByText("Shopify / Website")).toBeInTheDocument();
+    expect(screen.queryByText("iCloud Drive")).not.toBeInTheDocument();
   });
 
   it("shows source badges after submitting brand context", async () => {

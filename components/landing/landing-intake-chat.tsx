@@ -4,6 +4,8 @@ import {
   ArrowUp,
   Cloud,
   CloudArrowUp,
+  CaretLeft,
+  CaretRight,
   DeviceMobileCamera,
   Globe,
   GoogleDriveLogo,
@@ -71,6 +73,14 @@ const landingMediaImportOptions: MediaImportOption[] = [
   { id: "imp-yt", platform: "youtube", label: "YouTube", description: "Import shorts & clips", icon: "youtube" },
 ];
 
+const landingLinkOptions = landingMediaImportOptions.filter((option) =>
+  ["shopify", "instagram", "tiktok", "youtube"].includes(option.platform)
+);
+
+const landingUploadOptions = landingMediaImportOptions.filter((option) =>
+  ["upload", "image-library", "video-library", "google-drive", "icloud"].includes(option.platform)
+);
+
 const rotatingPlaceholders = [
   "I built a budgeting app but nobody outside tech knows it exists...",
   "Help me find customers for my flower shop in Boston!",
@@ -92,6 +102,8 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
   const [phase, setPhase] = useState<"input" | "sources">("input");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isImportMenuOpen, setIsImportMenuOpen] = useState(false);
+  const [importMenuView, setImportMenuView] = useState<"root" | "link" | "upload">("root");
 
   useEffect(() => {
     if (inputValue.trim()) return;
@@ -159,6 +171,19 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
     }, 600);
   }, [router]);
 
+  const handleImportMenuOpenChange = useCallback((open: boolean) => {
+    setIsImportMenuOpen(open);
+    if (!open) {
+      setImportMenuView("root");
+    }
+  }, []);
+
+  const handleQueueImport = useCallback((option: MediaImportOption) => {
+    queueImport(option);
+    setIsImportMenuOpen(false);
+    setImportMenuView("root");
+  }, [queueImport]);
+
   const canSubmit = inputValue.trim().length > 0 || queuedImports.length > 0 || sources.length > 0;
 
   return (
@@ -218,7 +243,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
               />
 
               <div className="mt-4 flex items-center gap-3">
-                <DropdownMenu>
+                <DropdownMenu open={isImportMenuOpen} onOpenChange={handleImportMenuOpenChange}>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
@@ -230,44 +255,74 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="w-[18rem] rounded-2xl border border-white/10 bg-[rgba(18,14,9,0.96)] p-2 text-cream shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
+                    className="w-[16rem] rounded-2xl border border-white/10 bg-[rgba(18,14,9,0.96)] p-2 text-cream shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
                   >
                     <div className="px-3 pb-2 pt-1 text-[10px] uppercase tracking-[0.22em] text-gold/80">
-                      Import Sources
+                      {importMenuView === "root" ? "Import Sources" : importMenuView === "link" ? "Link Sources" : "Media Sources"}
                     </div>
-                    {landingMediaImportOptions.slice(0, 5).map((option) => {
-                      const Icon = platformIcons[option.platform];
-                      return (
+
+                    {importMenuView === "root" ? (
+                      <div className="space-y-1">
                         <DropdownMenuItem
-                          key={option.id}
-                          onSelect={() => queueImport(option)}
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            setImportMenuView("link");
+                          }}
                           className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
                         >
-                          <Icon className="size-4 shrink-0" weight="fill" />
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-medium">{option.label}</div>
-                            <div className="truncate text-[11px] text-cream/45">{option.description}</div>
+                          <Globe className="size-4 shrink-0" weight="fill" />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-medium">Link</div>
+                            <div className="truncate text-[11px] text-cream/45">Website and social profiles</div>
                           </div>
+                          <CaretRight className="size-3.5 shrink-0 text-cream/45" weight="bold" />
                         </DropdownMenuItem>
-                      );
-                    })}
-                    <DropdownMenuSeparator className="my-2 h-px bg-white/10" />
-                    {landingMediaImportOptions.slice(5).map((option) => {
-                      const Icon = platformIcons[option.platform];
-                      return (
                         <DropdownMenuItem
-                          key={option.id}
-                          onSelect={() => queueImport(option)}
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            setImportMenuView("upload");
+                          }}
                           className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
                         >
-                          <Icon className="size-4 shrink-0" weight="fill" />
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-medium">{option.label}</div>
-                            <div className="truncate text-[11px] text-cream/45">{option.description}</div>
+                          <CloudArrowUp className="size-4 shrink-0" weight="fill" />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-medium">Upload</div>
+                            <div className="truncate text-[11px] text-cream/45">Files, libraries, and cloud drives</div>
                           </div>
+                          <CaretRight className="size-3.5 shrink-0 text-cream/45" weight="bold" />
                         </DropdownMenuItem>
-                      );
-                    })}
+                      </div>
+                    ) : (
+                      <>
+                        <DropdownMenuItem
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            setImportMenuView("root");
+                          }}
+                          className="mb-1 cursor-pointer rounded-xl px-3 py-2 text-cream/70 focus:bg-white/10 focus:text-cream"
+                        >
+                          <CaretLeft className="size-3.5 shrink-0" weight="bold" />
+                          <span className="text-sm font-medium">Back</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="my-2 h-px bg-white/10" />
+                        {(importMenuView === "link" ? landingLinkOptions : landingUploadOptions).map((option) => {
+                          const Icon = platformIcons[option.platform];
+                          return (
+                            <DropdownMenuItem
+                              key={option.id}
+                              onSelect={() => handleQueueImport(option)}
+                              className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
+                            >
+                              <Icon className="size-4 shrink-0" weight="fill" />
+                              <div className="min-w-0">
+                                <div className="truncate text-sm font-medium">{option.label}</div>
+                                <div className="truncate text-[11px] text-cream/45">{option.description}</div>
+                              </div>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
