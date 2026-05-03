@@ -276,43 +276,38 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
 
       {isPublished ? (
         <div className="mt-2 space-y-2">
-          <div className="rounded-md border border-accent/15 bg-accent/[0.06] p-2">
-            <div className={`flex items-center gap-1.5 ${metricEyebrowClassName}`}>
-              <span className="flex size-5 items-center justify-center rounded-full bg-accent/12 text-accent">
-                <Eye className="size-3.5" weight="fill" />
-              </span>
-              Views
-            </div>
-            <div className="mt-1">
-              <div className="text-lg font-semibold leading-none text-foreground">
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="rounded-md border border-accent/15 bg-accent/[0.06] px-3 py-2 text-foreground">
+              <div className="flex items-center gap-1.5">
+                <span className="flex size-4 items-center justify-center rounded-full bg-accent/12 text-accent">
+                  <Eye className="size-2.5" weight="fill" />
+                </span>
+                <span className={metricEyebrowClassName}>Views</span>
+              </div>
+              <div className="mt-1.5 text-sm font-semibold leading-none text-foreground">
                 <AnimatedMetricNumber value={state.views} testId="preview-publish-views-count" />
               </div>
             </div>
-          </div>
-
-          <div className="space-y-2 text-[10px]">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-                <div className="flex items-center gap-1.5">
-                  <span className="flex size-4 items-center justify-center rounded-full bg-rose-500/14 text-rose-600">
-                    <Heart className="size-2.5" weight="fill" />
-                  </span>
-                  <span className={metricEyebrowClassName}>Likes</span>
-                </div>
-                <div className="mt-1.5 text-sm font-semibold text-foreground">
-                  <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />
-                </div>
+            <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
+              <div className="flex items-center gap-1.5">
+                <span className="flex size-4 items-center justify-center rounded-full bg-rose-500/14 text-rose-600">
+                  <Heart className="size-2.5" weight="fill" />
+                </span>
+                <span className={metricEyebrowClassName}>Likes</span>
               </div>
-              <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
-                <div className="flex items-center gap-1.5">
-                  <span className="flex size-4 items-center justify-center rounded-full bg-emerald-500/14 text-emerald-700">
-                    <BookmarkSimple className="size-2.5" weight="fill" />
-                  </span>
-                  <span className={metricEyebrowClassName}>Saves</span>
-                </div>
-                <div className="mt-1.5 text-sm font-semibold text-foreground">
-                  <AnimatedMetricNumber value={state.saves} testId="preview-publish-saves-count" />
-                </div>
+              <div className="mt-1.5 text-sm font-semibold text-foreground">
+                <AnimatedMetricNumber value={state.likes} testId="preview-publish-likes-count" />
+              </div>
+            </div>
+            <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
+              <div className="flex items-center gap-1.5">
+                <span className="flex size-4 items-center justify-center rounded-full bg-emerald-500/14 text-emerald-700">
+                  <BookmarkSimple className="size-2.5" weight="fill" />
+                </span>
+                <span className={metricEyebrowClassName}>Saves</span>
+              </div>
+              <div className="mt-1.5 text-sm font-semibold text-foreground">
+                <AnimatedMetricNumber value={state.saves} testId="preview-publish-saves-count" />
               </div>
             </div>
             <div className="rounded-md border border-border bg-secondary/75 px-3 py-2 text-foreground">
