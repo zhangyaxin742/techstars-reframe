@@ -389,6 +389,7 @@ describe("App", () => {
       vi.advanceTimersByTime(2100);
     });
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Published");
+    expect(screen.getByTestId("preview-publish-live-label")).toHaveTextContent("Live");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Views");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Likes");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Saves");

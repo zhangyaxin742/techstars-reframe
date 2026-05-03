@@ -243,7 +243,21 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
           </span>
         </div>
         <span className="shrink-0 text-[10px] font-medium tabular-nums tracking-tight text-muted-foreground">
-          {isPublished ? "Live" : `${progress}%`}
+          {isPublished ? (
+            <span className="flex items-center gap-1" data-testid="preview-publish-live-label">
+              <span className="relative flex size-2 items-center justify-center" aria-hidden="true">
+                <motion.span
+                  className="absolute inline-flex size-2 rounded-full bg-emerald-500/35"
+                  animate={{ scale: [1, 1.9], opacity: [0.7, 0] }}
+                  transition={{ duration: 1.6, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
+                />
+                <span className="relative inline-flex size-1.5 rounded-full bg-emerald-600" />
+              </span>
+              Live
+            </span>
+          ) : (
+            `${progress}%`
+          )}
         </span>
       </div>
 
