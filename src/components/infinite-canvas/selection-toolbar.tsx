@@ -1,5 +1,5 @@
 import React from "react";
-import { CaretDown, DownloadSimple, Export, Trash, UploadSimple } from "@phosphor-icons/react";
+import { CaretDown, DownloadSimple, Export, Play, Trash } from "@phosphor-icons/react";
 import type { ExportTarget } from "../../data/reframe-demo";
 import { Button } from "../ui/button";
 import {
@@ -109,7 +109,7 @@ export function SelectionToolbar({
             onClick={onPublishPreview}
             disabled={!onPublishPreview}
           >
-            <UploadSimple />
+            <Play />
           </Button>
         </>
       ) : null}
