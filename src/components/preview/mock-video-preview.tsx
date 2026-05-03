@@ -9,6 +9,7 @@ interface MockVideoPreviewProps {
   onClose?: () => void;
   variant?: "modal" | "floating" | "node";
   videoSrc?: string;
+  previewTimeMs?: number | null;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export function MockVideoPreview({
   onClose,
   variant = "modal",
   videoSrc = "/videos/final.mp4",
+  previewTimeMs = null,
   className,
 }: MockVideoPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -37,6 +39,19 @@ export function MockVideoPreview({
 
     void video.play().catch(() => setPlaying(false));
   }, [open, playing]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || previewTimeMs === null) return;
+
+    const nextTimeMs = Math.min(Math.max(previewTimeMs, 0), totalMs);
+    const nextTimeSeconds = nextTimeMs / 1000;
+
+    if (Math.abs(video.currentTime - nextTimeSeconds) > 0.02) {
+      video.currentTime = nextTimeSeconds;
+    }
+    setCurrentMs(nextTimeMs);
+  }, [previewTimeMs, totalMs]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;

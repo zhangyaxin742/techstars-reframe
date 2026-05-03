@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { timelineSegments } from "../../data/reframe-demo";
 import { MockVideoPreview } from "./mock-video-preview";
@@ -44,5 +44,21 @@ describe("MockVideoPreview", () => {
       "src",
       "/videos/final.mp4"
     );
+  });
+
+  it("seeks the preview video when a timeline scrub time is provided", async () => {
+    render(
+      <MockVideoPreview
+        segments={timelineSegments}
+        open
+        variant="floating"
+        previewTimeMs={9000}
+      />
+    );
+
+    const video = screen.getByLabelText("Timeline preview video") as HTMLVideoElement;
+
+    await waitFor(() => expect(video.currentTime).toBe(9));
+    expect(screen.getByText("9.0s / 18.0s")).toBeInTheDocument();
   });
 });

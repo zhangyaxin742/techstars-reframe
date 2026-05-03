@@ -32,6 +32,7 @@ export function TimelineBottomDrawer({
   className,
 }: TimelineBottomDrawerProps) {
   const [exiting, setExiting] = useState(false);
+  const [scrubPreviewTimeMs, setScrubPreviewTimeMs] = useState<number | null>(null);
   const closeTimeoutRef = useRef<number | null>(null);
 
   const clearCloseTimeout = useCallback(() => {
@@ -88,7 +89,8 @@ export function TimelineBottomDrawer({
             <motion.section
               data-testid="timeline-bottom-drawer"
               className={cn(
-                "fixed inset-x-0 bottom-0 z-50 max-h-dvh overflow-visible rounded-t-lg border bg-card text-card-foreground shadow-2xl",
+                "paper fixed inset-x-0 bottom-0 z-50 max-h-dvh overflow-visible rounded-t-2xl border border-border bg-card text-card-foreground",
+                "shadow-[rgba(0,0,0,0.12)_0px_-4px_24px_0px]",
                 className
               )}
               initial={{ y: 24, opacity: 0 }}
@@ -114,11 +116,12 @@ export function TimelineBottomDrawer({
                     segments={segments}
                     open
                     variant="floating"
+                    previewTimeMs={scrubPreviewTimeMs}
                     className="h-full"
                   />
                 </motion.div>
               </div>
-              <div className="flex h-full max-h-dvh flex-col overflow-hidden rounded-t-lg">
+              <div className="flex h-full max-h-dvh flex-col overflow-hidden rounded-t-2xl">
                 <div className="flex items-center justify-between border-b px-5 py-3">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-secondary text-muted-foreground">
@@ -148,6 +151,7 @@ export function TimelineBottomDrawer({
                     selectedSegmentId={selectedSegmentId}
                     onSelectSegment={onSelectSegment}
                     onSwapClip={onSwapClip}
+                    onScrubPreviewTimeChange={setScrubPreviewTimeMs}
                     variant="drawer"
                   />
                 </div>

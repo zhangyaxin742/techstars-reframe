@@ -118,11 +118,13 @@ describe("TimelineAssembly", () => {
   });
 
   it("shows a red hover scrubber with the current drawer timecode", () => {
+    const onScrubPreviewTimeChange = vi.fn();
     render(
       <TimelineAssembly
         segments={timelineSegments}
         selectedSegmentId={null}
         onSelectSegment={vi.fn()}
+        onScrubPreviewTimeChange={onScrubPreviewTimeChange}
         variant="drawer"
       />
     );
@@ -136,14 +138,17 @@ describe("TimelineAssembly", () => {
     expect(screen.getByTestId("timeline-hover-scrubber-line")).toHaveClass("bg-destructive");
     expect(screen.getByTestId("timeline-hover-scrubber-line")).toHaveStyle({ left: "50%" });
     expect(screen.getByTestId("timeline-hover-scrubber-time")).toHaveTextContent("0:09");
+    expect(onScrubPreviewTimeChange).toHaveBeenCalledWith(9000);
   });
 
   it("hides the drawer scrubber when the pointer leaves the timeline", () => {
+    const onScrubPreviewTimeChange = vi.fn();
     render(
       <TimelineAssembly
         segments={timelineSegments}
         selectedSegmentId={null}
         onSelectSegment={vi.fn()}
+        onScrubPreviewTimeChange={onScrubPreviewTimeChange}
         variant="drawer"
       />
     );
@@ -156,6 +161,7 @@ describe("TimelineAssembly", () => {
 
     fireEvent.pointerLeave(trackSurface);
     expect(screen.queryByTestId("timeline-hover-scrubber")).not.toBeInTheDocument();
+    expect(onScrubPreviewTimeChange).toHaveBeenLastCalledWith(null);
   });
 
   it("keeps drawer segment selection working while the scrubber is visible", async () => {

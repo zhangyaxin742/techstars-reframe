@@ -8,6 +8,7 @@ interface TimelineAssemblyProps {
   selectedSegmentId: string | null;
   onSelectSegment: (segmentId: string | null) => void;
   onSwapClip?: (segmentId: string, newAsset: MediaAsset) => void;
+  onScrubPreviewTimeChange?: (timeMs: number | null) => void;
   variant?: "compact" | "drawer";
   className?: string;
 }
@@ -41,6 +42,7 @@ export function TimelineAssembly({
   selectedSegmentId,
   onSelectSegment,
   onSwapClip,
+  onScrubPreviewTimeChange,
   variant = "compact",
   className,
 }: TimelineAssemblyProps) {
@@ -71,13 +73,15 @@ export function TimelineAssembly({
         leftPct: progress * 100,
         timeMs: progress * totalMs,
       });
+      onScrubPreviewTimeChange?.(progress * totalMs);
     },
-    [totalMs]
+    [onScrubPreviewTimeChange, totalMs]
   );
 
   const handleScrubPointerLeave = useCallback(() => {
     setScrubPosition(null);
-  }, []);
+    onScrubPreviewTimeChange?.(null);
+  }, [onScrubPreviewTimeChange]);
 
   const clipSegments = segments.filter((s) => s.kind === "clip" || s.kind === "missing");
   const overlaySegments = segments.filter((s) => s.kind === "text-overlay");
