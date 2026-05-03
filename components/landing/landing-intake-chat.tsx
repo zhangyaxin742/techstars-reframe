@@ -144,7 +144,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
           <div className="space-y-4">
             <div className="rounded-2xl border border-white/15 bg-[rgba(26,22,14,0.8)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
               <p className="text-sm text-cream/80">
-                Found <strong className="text-cream">{brandContext.name}</strong> — {brandContext.category}.
+                Found <strong className="text-cream">{brandContext.name}</strong> - {brandContext.category}.
                 I see product listings, lifestyle photos, and social content.
               </p>
             </div>
@@ -153,7 +153,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
               onClick={handleSourcesContinue}
               className="inline-flex w-full items-center justify-center rounded-xl bg-cream px-4 py-3 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream"
             >
-              Connect media sources →
+              Connect media sources -&gt;
             </button>
           </div>
         )}
@@ -202,7 +202,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                   Analyzing your brand...
                 </>
               ) : (
-                "Start building →"
+                "Start building ->"
               )}
             </button>
           </div>
