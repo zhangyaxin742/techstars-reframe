@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { LandingIntakeChat } from "./landing-intake-chat";
 import { LandingNav } from "./nav";
-import { PhoneMockup } from "./phone-mockup";
 import { WaitlistModal } from "./waitlist-modal";
 
 export function Hero() {
@@ -49,16 +49,14 @@ export function Hero() {
               posted.
             </p>
 
-            <div className="mt-8 sm:mt-10">
-              <PhoneMockup />
-            </div>
+            <LandingIntakeChat className="mt-8 w-full sm:mt-10" />
 
             <button
               type="button"
               onClick={() => setWaitlistOpen(true)}
-              className="mt-8 inline-flex items-center rounded-md bg-cream px-6 py-3 text-sm text-ink transition hover:bg-gold hover:text-cream sm:mt-10"
+              className="mt-6 text-xs text-cream/50 transition hover:text-cream/80"
             >
-              Get early access →
+              or join the waitlist →
             </button>
           </div>
         </main>

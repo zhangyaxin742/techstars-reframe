@@ -10,7 +10,16 @@ export interface CanvasSize {
 
 export interface CanvasRect extends CanvasPoint, CanvasSize {}
 
-export type CanvasNodeKind = "image" | "note" | "frame" | "prompt";
+export type CanvasNodeKind =
+  | "image"
+  | "note"
+  | "frame"
+  | "prompt"
+  | "brand-context"
+  | "trend-recipe"
+  | "timeline"
+  | "media"
+  | "preview";
 
 export interface CanvasPromptBoxData {
   value?: string;

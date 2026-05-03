@@ -1,26 +1,48 @@
 "use client";
 
-import { ArrowSquareOut, Gear, Graph, House, SquaresFour, Trash } from "@phosphor-icons/react";
+import {
+  ArrowSquareOut,
+  Eye,
+  Gear,
+  Graph,
+  House,
+  SquaresFour,
+  Trash,
+} from "@phosphor-icons/react";
 import React, { useCallback, useMemo, useState } from "react";
-import { AppShell, type ShellNavItem } from "./components/app-shell";
+import { AppShell, ChatHistoryPanel, type ShellNavItem } from "./components/app-shell";
+import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
+import { MediaLibraryPanel } from "./components/media/media-library-panel";
+import { MockVideoPreview } from "./components/preview/mock-video-preview";
+import { TimelineAssembly } from "./components/timeline/timeline-assembly";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
+import type { MediaAsset, TimelineSegment } from "./data/reframe-demo";
 import {
-  demoPromptSourceImageUrl,
-  initialDemoConnections,
-  initialDemoNodes,
-} from "./data/canvas-demo";
+  chatHistory,
+  exportTargets,
+  mediaAssets,
+  reframeDemoConnections,
+  reframeDemoNodes,
+  reframePromptSourceImage,
+  timelineSegments as initialTimelineSegments,
+} from "./data/reframe-demo";
 
 export function App() {
-  const [nodes, setNodes] = useState(initialDemoNodes);
-  const [connections, setConnections] = useState(initialDemoConnections);
+  const [nodes, setNodes] = useState(reframeDemoNodes);
+  const [connections, setConnections] = useState(reframeDemoConnections);
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
-  const [bottomPrompt, setBottomPrompt] = useState("Make this workflow easier to inspect and hand off.");
+  const [bottomPrompt, setBottomPrompt] = useState("");
   const [status, setStatus] = useState("Ready");
+  const [mediaPanelOpen, setMediaPanelOpen] = useState(false);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
+  const [segments, setSegments] = useState<TimelineSegment[]>(initialTimelineSegments);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const navItems: ShellNavItem[] = [
-    { id: "home", label: "Home", icon: House, href: "#home" },
+    { id: "home", label: "Home", icon: House, href: "/" },
     { id: "canvas", label: "Canvas", icon: Graph, href: "#canvas", active: true },
     { id: "library", label: "Library", icon: SquaresFour, href: "#library" },
   ];
@@ -56,8 +78,8 @@ export function App() {
     setStatus(`Deleted ${nodeIds.size} ${nodeIds.size === 1 ? "node" : "nodes"}`);
   }, []);
 
-  const handleExportSelected = useCallback((nodeIds: Set<string>) => {
-    setStatus(`Exported ${nodeIds.size} ${nodeIds.size === 1 ? "node" : "nodes"}`);
+  const handleExportSelected = useCallback((_nodeIds: Set<string>) => {
+    setExportOpen(true);
   }, []);
 
   const handleBottomPromptChange = useCallback((value: string) => {
@@ -70,10 +92,23 @@ export function App() {
     setStatus(`Submitted prompt: ${promptText}`);
   }, []);
 
+  const handleSwapClip = useCallback((segmentId: string, newAsset: MediaAsset) => {
+    setSegments((prev) =>
+      prev.map((seg) =>
+        seg.id === segmentId
+          ? { ...seg, mediaAssetId: newAsset.id, thumbnail: newAsset.thumbnail, label: newAsset.label }
+          : seg
+      )
+    );
+    setStatus(`Swapped clip: ${newAsset.label}`);
+  }, []);
+
   const headerSummary = useMemo(
     () => `${nodeCount} nodes - ${connectionCount} links`,
     [connectionCount, nodeCount]
   );
+
+  const showTimeline = selectedNodeIds.has("timeline-1") || selectedNodeIds.has("recipe-1");
 
   return (
     <AppShell
@@ -81,62 +116,113 @@ export function App() {
       navItems={navItems}
       footerItems={footerItems}
     >
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-4">
-          <div className="min-w-0">
-            <h1 className="truncate text-sm font-semibold">Canvas workspace</h1>
-            <p className="text-xs text-muted-foreground">{headerSummary}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden rounded-md border px-2 py-1 text-xs text-muted-foreground md:block">
-              <span className="tabular-nums tracking-tight">{selectedCount}</span> selected - {status}
+      <section className="flex min-h-0 flex-1 overflow-hidden">
+        <ChatHistoryPanel messages={chatHistory} />
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <header className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-4">
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-semibold">Canvas workspace</h1>
+              <p className="text-xs text-muted-foreground">{headerSummary}</p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleExportSelected(new Set(selectedNodeIds))}
-              disabled={selectedCount === 0}
-            >
-              <ArrowSquareOut />
-              Export
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleDeleteSelected(new Set(selectedNodeIds))}
-              disabled={selectedCount === 0}
-            >
-              <Trash />
-              Delete
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="hidden rounded-md border px-2 py-1 text-xs text-muted-foreground md:block">
+                <span className="tabular-nums tracking-tight">{selectedCount}</span> selected - {status}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewOpen((v) => !v)}
+              >
+                <Eye />
+                Preview
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setMediaPanelOpen((v) => !v)}
+              >
+                <SquaresFour />
+                Media
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setExportOpen((v) => !v)}
+              >
+                <ArrowSquareOut />
+                Export
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleDeleteSelected(new Set(selectedNodeIds))}
+                disabled={selectedCount === 0}
+              >
+                <Trash />
+                Delete
+              </Button>
+            </div>
+          </header>
+
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div id="canvas" className="min-h-0 min-w-0 flex-1 overflow-hidden">
+              <InfiniteCanvas
+                nodes={nodes}
+                connections={connections}
+                selectedNodeIds={selectedNodeIds}
+                onSelectionChange={setSelectedNodeIds}
+                onNodeMove={handleNodeMove}
+                onDeleteSelected={handleDeleteSelected}
+                onExportSelected={handleExportSelected}
+                bottomPromptBox={{
+                  value: bottomPrompt,
+                  placeholder: "Ask Reframe to build, edit, or remix...",
+                  actionLabel: "Generate",
+                  busyLabel: "Building",
+                  sourceImageUrl: reframePromptSourceImage,
+                  sourceAlt: "",
+                  badges: ["Petite Outdoors", "Preorder Hype"],
+                  count: 1,
+                }}
+                onBottomPromptChange={handleBottomPromptChange}
+                onBottomPromptSubmit={handleBottomPromptSubmit}
+              />
+            </div>
+
+            <MediaLibraryPanel
+              assets={mediaAssets}
+              open={mediaPanelOpen}
+              onClose={() => setMediaPanelOpen(false)}
+            />
           </div>
-        </header>
-        <div id="canvas" className="min-h-0 flex-1 overflow-hidden">
-          <InfiniteCanvas
-            nodes={nodes}
-            connections={connections}
-            selectedNodeIds={selectedNodeIds}
-            onSelectionChange={setSelectedNodeIds}
-            onNodeMove={handleNodeMove}
-            onDeleteSelected={handleDeleteSelected}
-            onExportSelected={handleExportSelected}
-            bottomPromptBox={{
-              value: bottomPrompt,
-              placeholder: "Describe your edit...",
-              actionLabel: "Generate",
-              busyLabel: "Starting",
-              sourceImageUrl: demoPromptSourceImageUrl,
-              sourceAlt: "",
-              badges: ["Model", "Seed"],
-              count: 4,
-            }}
-            onBottomPromptChange={handleBottomPromptChange}
-            onBottomPromptSubmit={handleBottomPromptSubmit}
-          />
+
+          {/* Timeline tray — shown when timeline/recipe node is selected */}
+          {showTimeline && (
+            <div className="shrink-0 border-t bg-card px-4 py-3" data-testid="timeline-tray">
+              <TimelineAssembly
+                segments={segments}
+                selectedSegmentId={selectedSegmentId}
+                onSelectSegment={setSelectedSegmentId}
+                onSwapClip={handleSwapClip}
+              />
+            </div>
+          )}
         </div>
       </section>
+      <MockVideoPreview
+        segments={segments}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+      />
+      <ExportHandoffPanel
+        targets={exportTargets}
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+      />
       <Toaster />
     </AppShell>
   );
