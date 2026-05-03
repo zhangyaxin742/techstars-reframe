@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, FilmSlate, InstagramLogo, Play, Target, TrendUp } from "@phosphor-icons/react";
+import { CheckCircle, FilmSlate, InstagramLogo, Play, Target, TrendUp, Warning } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import type { CanvasNode, CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
@@ -376,9 +376,17 @@ function TimelineRevealCard({
             Timeline ready
           </span>
           <span
-            className="rounded-md border border-dashed border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground"
+            className="inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground"
             data-testid={`timeline-gap-pill-${node.id}`}
           >
+            {gapCount > 0 ? (
+              <Warning
+                aria-hidden="true"
+                className="size-3 shrink-0 text-yellow-600"
+                data-testid={`timeline-gap-pill-${node.id}-warning`}
+                weight="fill"
+              />
+            ) : null}
             {gapCount} {gapCount === 1 ? "gap" : "gaps"}
           </span>
         </div>

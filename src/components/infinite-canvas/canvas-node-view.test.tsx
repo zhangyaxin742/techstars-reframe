@@ -67,6 +67,11 @@ describe("CanvasNodeView", () => {
     );
     expect(screen.getByText("Timeline ready")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("1 gap");
+    expect(
+      within(screen.getByTestId("timeline-gap-pill-timeline-1")).getByTestId(
+        "timeline-gap-pill-timeline-1-warning"
+      )
+    ).toBeInTheDocument();
 
     expect(screen.getByTestId("timeline-node-clip-ts-1")).toContainElement(
       screen.getByAltText(timelineSegments[0].label)
