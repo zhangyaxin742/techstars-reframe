@@ -45,11 +45,13 @@ interface InfiniteCanvasProps {
   onPromptSubmit?: (nodeId: string, value: string) => void;
   timelineSourceNodeId?: string;
   onCreateTimelineFromTrend?: (node: CanvasNode) => void;
+  onOpenTimelineNode?: (node: CanvasNode) => void;
   animatedConnectionIds?: Set<string>;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
   timelinePhase?: TimelinePhase;
+  chromeHidden?: boolean;
   className?: string;
 }
 
@@ -82,11 +84,13 @@ export function InfiniteCanvas({
   onPromptSubmit,
   timelineSourceNodeId,
   onCreateTimelineFromTrend,
+  onOpenTimelineNode,
   animatedConnectionIds,
   resolveImageUrl,
   brandCtxPhase,
   trendRecipePhase,
   timelinePhase,
+  chromeHidden = false,
   className,
 }: InfiniteCanvasProps) {
   const { containerRef, viewport, setViewport, panByScreenDelta, wheelPan, zoomAtPoint } =
@@ -213,8 +217,11 @@ export function InfiniteCanvas({
       }
 
       setSelection(new Set([node.id]));
+      if (node.kind === "timeline") {
+        onOpenTimelineNode?.(node);
+      }
     },
-    [dragState, panStart, selection, setSelection, spacePanMode]
+    [dragState, onOpenTimelineNode, panStart, selection, setSelection, spacePanMode]
   );
 
   const handleNodePointerDown = useCallback(
@@ -536,15 +543,17 @@ export function InfiniteCanvas({
         ))}
       </div>
       <MarqueeOverlay rect={marqueeRect} />
-      <SelectionToolbar
-        bounds={selectionBounds}
-        viewport={viewport}
-        size={containerSize}
-        onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
-        onExport={selection.size > 0 && onExportSelected ? () => onExportSelected(new Set(selection)) : undefined}
-      />
-      <CanvasNavigationRail />
-      {bottomPromptBox ? (
+      {!chromeHidden ? (
+        <SelectionToolbar
+          bounds={selectionBounds}
+          viewport={viewport}
+          size={containerSize}
+          onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
+          onExport={selection.size > 0 && onExportSelected ? () => onExportSelected(new Set(selection)) : undefined}
+        />
+      ) : null}
+      {!chromeHidden ? <CanvasNavigationRail /> : null}
+      {bottomPromptBox && !chromeHidden ? (
         <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 w-full max-w-[672px] -translate-x-1/2 px-4">
           <div className="pointer-events-auto">
             <CanvasPromptBox

@@ -8,6 +8,16 @@ describe("App", () => {
     vi.useRealTimers();
   });
 
+  function revealTimeline() {
+    act(() => {
+      vi.advanceTimersByTime(22000);
+    });
+    fireEvent.click(screen.getByTestId("canvas-node-create-timeline-recipe-1"));
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+  }
+
   it("renders the AI chat sidebar and canvas without the navigation menu", () => {
     vi.useFakeTimers();
     render(<App />);
@@ -159,6 +169,52 @@ describe("App", () => {
 
     expect(screen.queryByText("Auto-filling the timeline")).not.toBeInTheDocument();
     expect(screen.queryByTestId("simulated-tool-tool-match-clips")).not.toBeInTheDocument();
+  });
+
+  it("opens the timeline drawer from the revealed timeline node and hides workspace chrome", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    revealTimeline();
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+
+    expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
+    expect(screen.getByText("Opening frame: hem problem")).toBeInTheDocument();
+    expect(screen.getByText(/Upbeat acoustic/)).toBeInTheDocument();
+    expect(screen.queryByTestId("chat-history-panel")).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Canvas navigation" })).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Ask Reframe anything...")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("workspace-top-label")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("workspace-top-fade")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Export selected nodes")).not.toBeInTheDocument();
+  });
+
+  it("restores workspace chrome after closing the timeline drawer", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    revealTimeline();
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+
+    expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
+    expect(screen.getByTestId("chat-history-panel")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Ask Reframe anything...")).toBeInTheDocument();
+    expect(screen.getByTestId("workspace-top-label")).toBeInTheDocument();
+    expect(screen.getByTestId("workspace-top-fade")).toBeInTheDocument();
+  });
+
+  it("updates the drawer timeline when swapping a selected clip", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    revealTimeline();
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-1"));
+    fireEvent.click(screen.getByTestId("alternate-alt-2"));
+
+    expect(screen.getByTestId("timeline-segment-ts-1")).toHaveTextContent("Product macro detail");
   });
 
   it("bottom prompt submit appends user prompt and simulated tool activity", async () => {

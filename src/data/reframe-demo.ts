@@ -92,6 +92,7 @@ export interface TimelineSegment {
   id: string;
   kind: TimelineSegmentKind;
   label: string;
+  selectedAssetLabel?: string;
   startMs: number;
   endMs: number;
   mediaAssetId?: string;

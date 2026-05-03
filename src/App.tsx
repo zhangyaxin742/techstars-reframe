@@ -5,12 +5,15 @@ import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
 import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
 import { MockVideoPreview } from "./components/preview/mock-video-preview";
+import { TimelineBottomDrawer } from "./components/timeline/timeline-bottom-drawer";
 import { Toaster } from "./components/ui/sonner";
 import type { CanvasConnection, CanvasNode } from "./lib/infinite-canvas/types";
 import {
   type AiFlowStep,
   type ChatMessage,
+  type MediaAsset,
   type SimulatedToolCall,
+  type TimelineSegment,
   chatHistory,
   exportTargets,
   initialAiToolCalls,
@@ -18,7 +21,7 @@ import {
   recipeAiToolCalls,
   reframeDemoConnections,
   reframeDemoNodes,
-  timelineSegments,
+  timelineSegments as seededTimelineSegments,
   trendSearchAiToolCalls,
 } from "./data/reframe-demo";
 
@@ -64,6 +67,11 @@ export function App() {
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [timelineSourceNodeId, setTimelineSourceNodeId] = useState<string | null>(null);
   const [animatedConnectionIds, setAnimatedConnectionIds] = useState<Set<string>>(new Set());
+  const [timelineDrawerOpen, setTimelineDrawerOpen] = useState(false);
+  const [selectedTimelineSegmentId, setSelectedTimelineSegmentId] = useState<string | null>(null);
+  const [timelineDraftSegments, setTimelineDraftSegments] = useState<TimelineSegment[]>(
+    () => seededTimelineSegments
+  );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const timeoutIdsRef = useRef<number[]>([]);
@@ -300,6 +308,32 @@ export function App() {
     setSelectedNodeIds(nodeIds);
   }, []);
 
+  const handleOpenTimelineNode = useCallback(
+    (node: CanvasNode) => {
+      if (node.kind !== "timeline" || timelinePhase !== "revealing") {
+        return;
+      }
+      setTimelineDrawerOpen(true);
+    },
+    [timelinePhase]
+  );
+
+  const handleSwapTimelineClip = useCallback((segmentId: string, newAsset: MediaAsset) => {
+    setTimelineDraftSegments((currentSegments) =>
+      currentSegments.map((segment) =>
+        segment.id === segmentId
+          ? {
+              ...segment,
+              mediaAssetId: newAsset.id,
+              selectedAssetLabel: newAsset.label,
+              thumbnail: newAsset.thumbnail,
+            }
+          : segment
+      )
+    );
+    setSelectedTimelineSegmentId(segmentId);
+  }, []);
+
   const upsertTimelineConnection = useCallback((currentConnections: CanvasConnection[], recipeId: string) => {
     const connectionId = recipeId === "recipe-1" ? "r1-tl" : `${recipeId}-tl`;
     const filteredConnections = currentConnections.filter(
@@ -414,15 +448,17 @@ export function App() {
 
   return (
     <div className="reframe-workspace flex h-dvh min-h-0 overflow-hidden bg-background text-foreground">
-      <ChatHistoryPanel
-        messages={messages}
-        promptValue={bottomPrompt}
-        promptBusy={isAiBusy}
-        promptPlaceholder="Ask Reframe anything..."
-        promptSourceImageUrl={bottomPromptSourceImageUrl}
-        onPromptChange={handleBottomPromptChange}
-        onPromptSubmit={handleBottomPromptSubmit}
-      />
+      {!timelineDrawerOpen ? (
+        <ChatHistoryPanel
+          messages={messages}
+          promptValue={bottomPrompt}
+          promptBusy={isAiBusy}
+          promptPlaceholder="Ask Reframe anything..."
+          promptSourceImageUrl={bottomPromptSourceImageUrl}
+          onPromptChange={handleBottomPromptChange}
+          onPromptSubmit={handleBottomPromptSubmit}
+        />
+      ) : null}
       <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <InfiniteCanvas
           nodes={visibleNodes}
@@ -434,25 +470,43 @@ export function App() {
           onExportSelected={handleExportSelected}
           timelineSourceNodeId={timelineSourceNodeId ?? undefined}
           onCreateTimelineFromTrend={startTimelineFromRecipe}
+          onOpenTimelineNode={handleOpenTimelineNode}
           animatedConnectionIds={animatedConnectionIds}
           brandCtxPhase={brandCtxPhase}
           trendRecipePhase={trendRecipePhase}
           timelinePhase={timelinePhase}
+          chromeHidden={timelineDrawerOpen}
         />
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28"
-          style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--color-background) 92%, transparent) 0%, transparent 100%)" }}
-        />
-        <div className="pointer-events-none absolute left-7 top-4 z-30">
-          <span className="text-sm font-semibold text-foreground/90">
-            Petite Outdoors
-          </span>
-        </div>
+        {!timelineDrawerOpen ? (
+          <>
+            <div
+              data-testid="workspace-top-fade"
+              className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28"
+              style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--color-background) 92%, transparent) 0%, transparent 100%)" }}
+            />
+            <div
+              data-testid="workspace-top-label"
+              className="pointer-events-none absolute left-7 top-4 z-30"
+            >
+              <span className="text-sm font-semibold text-foreground/90">
+                Petite Outdoors
+              </span>
+            </div>
+          </>
+        ) : null}
       </main>
       <MockVideoPreview
-        segments={timelineSegments}
+        segments={timelineDraftSegments}
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
+      />
+      <TimelineBottomDrawer
+        open={timelineDrawerOpen}
+        segments={timelineDraftSegments}
+        selectedSegmentId={selectedTimelineSegmentId}
+        onOpenChange={setTimelineDrawerOpen}
+        onSelectSegment={setSelectedTimelineSegmentId}
+        onSwapClip={handleSwapTimelineClip}
       />
       <ExportHandoffPanel
         targets={exportTargets}

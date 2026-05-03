@@ -60,4 +60,37 @@ describe("TimelineAssembly", () => {
     expect(onSwapClip).toHaveBeenCalledTimes(1);
     expect(onSwapClip).toHaveBeenCalledWith("ts-1", expect.objectContaining({ id: "alt-2" }));
   });
+
+  it("renders the drawer variant with separate timeline tracks", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId={null}
+        onSelectSegment={vi.fn()}
+        variant="drawer"
+      />
+    );
+
+    expect(screen.getByText("Video")).toBeInTheDocument();
+    expect(screen.getByText("Text")).toBeInTheDocument();
+    expect(screen.getByText("Audio")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");
+  });
+
+  it("shows the swapped asset label when provided", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments.map((segment) =>
+          segment.id === "ts-1"
+            ? { ...segment, selectedAssetLabel: "Product macro detail" }
+            : segment
+        )}
+        selectedSegmentId={null}
+        onSelectSegment={vi.fn()}
+        variant="drawer"
+      />
+    );
+
+    expect(screen.getByTestId("timeline-segment-ts-1")).toHaveTextContent("Product macro detail");
+  });
 });
