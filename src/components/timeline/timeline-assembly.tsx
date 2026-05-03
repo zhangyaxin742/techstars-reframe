@@ -18,6 +18,17 @@ function formatMs(ms: number): string {
   return `${secs}.${frac}s`;
 }
 
+function getClipTransitionMarkers(segments: TimelineSegment[], totalMs: number): number[] {
+  const markers = new Set<number>();
+
+  segments.forEach((segment) => {
+    if (segment.startMs > 0 && segment.startMs < totalMs) markers.add(segment.startMs);
+    if (segment.endMs > 0 && segment.endMs < totalMs) markers.add(segment.endMs);
+  });
+
+  return Array.from(markers).sort((a, b) => a - b);
+}
+
 export function TimelineAssembly({
   segments,
   selectedSegmentId,
@@ -38,6 +49,7 @@ export function TimelineAssembly({
   const clipSegments = segments.filter((s) => s.kind === "clip" || s.kind === "missing");
   const overlaySegments = segments.filter((s) => s.kind === "text-overlay");
   const audioSegments = segments.filter((s) => s.kind === "audio");
+  const clipTransitionMarkers = getClipTransitionMarkers(clipSegments, totalMs);
 
   const renderAlternates = () => {
     if (!selectedSegmentId) return null;
@@ -215,6 +227,14 @@ export function TimelineAssembly({
                       <span className="min-w-0 truncate text-xs text-foreground/80">
                         {seg.audioNote}
                       </span>
+                      {clipTransitionMarkers.map((markerMs) => (
+                        <div
+                          key={markerMs}
+                          data-testid={`audio-beat-marker-${markerMs}`}
+                          className="absolute top-1/2 size-1.5 -translate-y-1/2 rotate-45 bg-primary"
+                          style={{ left: `${(markerMs / totalMs) * 100}%` }}
+                        />
+                      ))}
                     </button>
                   ))}
                 </div>

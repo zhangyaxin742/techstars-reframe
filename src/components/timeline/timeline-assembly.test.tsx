@@ -77,6 +77,25 @@ describe("TimelineAssembly", () => {
     expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");
   });
 
+  it("aligns audio beat markers to clip transition boundaries", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId={null}
+        onSelectSegment={vi.fn()}
+        variant="drawer"
+      />
+    );
+
+    expect(screen.getByTestId("audio-beat-marker-3200")).toHaveStyle({
+      left: `${(3200 / 18000) * 100}%`,
+    });
+    expect(screen.getByTestId("audio-beat-marker-6000")).toBeInTheDocument();
+    expect(screen.getByTestId("audio-beat-marker-8000")).toBeInTheDocument();
+    expect(screen.getByTestId("audio-beat-marker-12100")).toBeInTheDocument();
+    expect(screen.getByTestId("audio-beat-marker-15600")).toBeInTheDocument();
+  });
+
   it("shows the swapped asset label when provided", () => {
     render(
       <TimelineAssembly
