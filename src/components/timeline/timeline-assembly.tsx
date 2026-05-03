@@ -1,5 +1,5 @@
 import { ArrowsClockwise, Eye, FilmSlate, SpeakerHigh, TextT } from "@phosphor-icons/react";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import type { MediaAsset, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
 
@@ -21,6 +21,10 @@ function formatMs(ms: number): string {
 
 const WAVE_HEIGHTS = [20, 42, 74, 56, 30, 88, 64, 36, 52, 76, 44, 68, 25, 90, 58, 38];
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
 function getClipTransitionMarkers(segments: TimelineSegment[], totalMs: number): number[] {
   const markers = new Set<number>();
 
@@ -41,6 +45,10 @@ export function TimelineAssembly({
   className,
 }: TimelineAssemblyProps) {
   const totalMs = Math.max(...segments.map((s) => s.endMs), 0);
+  const [scrubPosition, setScrubPosition] = useState<{
+    leftPct: number;
+    timeMs: number;
+  } | null>(null);
 
   const handleSegmentClick = useCallback(
     (segmentId: string) => {
@@ -48,6 +56,28 @@ export function TimelineAssembly({
     },
     [onSelectSegment, selectedSegmentId]
   );
+
+  const handleScrubPointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (totalMs <= 0) return;
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      if (rect.width <= 0) return;
+
+      const x = clamp(event.clientX - rect.left, 0, rect.width);
+      const progress = x / rect.width;
+
+      setScrubPosition({
+        leftPct: progress * 100,
+        timeMs: progress * totalMs,
+      });
+    },
+    [totalMs]
+  );
+
+  const handleScrubPointerLeave = useCallback(() => {
+    setScrubPosition(null);
+  }, []);
 
   const clipSegments = segments.filter((s) => s.kind === "clip" || s.kind === "missing");
   const overlaySegments = segments.filter((s) => s.kind === "text-overlay");
@@ -135,6 +165,8 @@ export function TimelineAssembly({
               <div
                 className="relative"
                 data-testid="timeline-track-surface"
+                onPointerMove={handleScrubPointerMove}
+                onPointerLeave={handleScrubPointerLeave}
                 style={{ width: "100%", minWidth: trackWidth }}
               >
 
@@ -269,6 +301,29 @@ export function TimelineAssembly({
                     </button>
                   ))}
                 </div>
+
+                {scrubPosition ? (
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 left-0 right-0 z-10"
+                    data-testid="timeline-hover-scrubber"
+                  >
+                    <div
+                      className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-destructive"
+                      data-testid="timeline-hover-scrubber-line"
+                      style={{ left: `${scrubPosition.leftPct}%` }}
+                    />
+                    <div
+                      className="absolute top-1 -translate-x-1/2 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-destructive-foreground shadow-sm"
+                      data-testid="timeline-hover-scrubber-time"
+                      style={{
+                        left: `clamp(1.75rem, ${scrubPosition.leftPct}%, calc(100% - 1.75rem))`,
+                      }}
+                    >
+                      {formatMs(scrubPosition.timeMs)}
+                    </div>
+                  </div>
+                ) : null}
 
               </div>
             </div>

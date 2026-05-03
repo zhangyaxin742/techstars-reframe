@@ -1,8 +1,22 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { timelineSegments } from "../../data/reframe-demo";
 import { TimelineAssembly } from "./timeline-assembly";
+
+function mockTimelineTrackRect(element: HTMLElement) {
+  vi.spyOn(element, "getBoundingClientRect").mockReturnValue({
+    bottom: 198,
+    height: 198,
+    left: 0,
+    right: 1120,
+    top: 0,
+    width: 1120,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  } as DOMRect);
+}
 
 describe("TimelineAssembly", () => {
   it("renders timeline segments", () => {
@@ -101,6 +115,69 @@ describe("TimelineAssembly", () => {
     expect(screen.getByTestId("audio-beat-marker-8000")).toBeInTheDocument();
     expect(screen.getByTestId("audio-beat-marker-12100")).toBeInTheDocument();
     expect(screen.getByTestId("audio-beat-marker-15600")).toBeInTheDocument();
+  });
+
+  it("shows a red hover scrubber with the current drawer timecode", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId={null}
+        onSelectSegment={vi.fn()}
+        variant="drawer"
+      />
+    );
+
+    const trackSurface = screen.getByTestId("timeline-track-surface");
+    mockTimelineTrackRect(trackSurface);
+
+    fireEvent.pointerMove(trackSurface, { clientX: 560 });
+
+    expect(screen.getByTestId("timeline-hover-scrubber")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-hover-scrubber-line")).toHaveClass("bg-destructive");
+    expect(screen.getByTestId("timeline-hover-scrubber-line")).toHaveStyle({ left: "50%" });
+    expect(screen.getByTestId("timeline-hover-scrubber-time")).toHaveTextContent("0:09");
+  });
+
+  it("hides the drawer scrubber when the pointer leaves the timeline", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId={null}
+        onSelectSegment={vi.fn()}
+        variant="drawer"
+      />
+    );
+
+    const trackSurface = screen.getByTestId("timeline-track-surface");
+    mockTimelineTrackRect(trackSurface);
+
+    fireEvent.pointerMove(trackSurface, { clientX: 560 });
+    expect(screen.getByTestId("timeline-hover-scrubber")).toBeInTheDocument();
+
+    fireEvent.pointerLeave(trackSurface);
+    expect(screen.queryByTestId("timeline-hover-scrubber")).not.toBeInTheDocument();
+  });
+
+  it("keeps drawer segment selection working while the scrubber is visible", async () => {
+    const onSelectSegment = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId={null}
+        onSelectSegment={onSelectSegment}
+        variant="drawer"
+      />
+    );
+
+    const trackSurface = screen.getByTestId("timeline-track-surface");
+    mockTimelineTrackRect(trackSurface);
+    fireEvent.pointerMove(trackSurface, { clientX: 560 });
+
+    await user.click(screen.getByTestId("timeline-segment-ts-1"));
+
+    expect(screen.getByTestId("timeline-hover-scrubber")).toBeInTheDocument();
+    expect(onSelectSegment).toHaveBeenCalledWith("ts-1");
   });
 
   it("shows the swapped asset label when provided", () => {
