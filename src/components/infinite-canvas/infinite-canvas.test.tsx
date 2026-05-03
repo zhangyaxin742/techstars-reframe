@@ -284,6 +284,8 @@ describe("InfiniteCanvas", () => {
 
     await user.click(screen.getByLabelText("Export timeline"));
 
+    expect(screen.getByLabelText("Export timeline")).toHaveClass("w-auto");
+    expect(screen.getByLabelText("Export timeline")).toHaveClass("px-2.5");
     expect(screen.getByText("CapCut")).toBeInTheDocument();
     expect(screen.getByText("Adobe Premiere Pro")).toBeInTheDocument();
     expect(screen.getByText("DaVinci Resolve")).toBeInTheDocument();

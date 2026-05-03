@@ -67,6 +67,7 @@ export function SelectionToolbar({
               type="button"
               variant="ghost"
               size="icon"
+              className="w-auto gap-1.5 px-2.5"
               aria-label="Export timeline"
               disabled={!onExportTimeline}
             >
