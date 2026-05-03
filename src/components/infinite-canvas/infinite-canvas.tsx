@@ -18,6 +18,7 @@ import type {
 } from "../../lib/infinite-canvas/types";
 import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
+import { CanvasNavigationRail } from "./canvas-navigation-rail";
 import { CanvasNodeView } from "./canvas-node-view";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { MarqueeOverlay } from "./marquee-overlay";
@@ -455,6 +456,7 @@ export function InfiniteCanvas({
         onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
         onExport={selection.size > 0 && onExportSelected ? () => onExportSelected(new Set(selection)) : undefined}
       />
+      <CanvasNavigationRail />
       {bottomPromptBox ? (
         <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 w-full max-w-[672px] -translate-x-1/2 px-4">
           <div className="pointer-events-auto">

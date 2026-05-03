@@ -215,4 +215,21 @@ describe("InfiniteCanvas", () => {
 
     expect(onBottomPromptSubmit).toHaveBeenCalledWith("Refine this path");
   });
+
+  it("renders the floating canvas navigation rail without starting canvas selection", () => {
+    const { canvas } = renderCanvas();
+
+    fireEvent.pointerDown(screen.getByLabelText("Add new canvas item"), {
+      button: 0,
+      clientX: 24,
+      clientY: 240,
+      pointerId: 1,
+    });
+    fireEvent.click(screen.getByLabelText("Add new canvas item"));
+
+    expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Documents")).toHaveAttribute("aria-current", "page");
+    expect(screen.queryByTestId("marquee-overlay")).not.toBeInTheDocument();
+    expect(canvas).toBeInTheDocument();
+  });
 });
