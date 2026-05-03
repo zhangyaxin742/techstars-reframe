@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   calculateSelectionBounds,
   fitBoundsToViewport,
@@ -7,18 +8,28 @@ import {
   screenToWorld,
 } from "../../lib/infinite-canvas/geometry";
 import { useCanvasViewport } from "../../lib/infinite-canvas/use-canvas-viewport";
-import type {
-  CanvasConnection,
-  CanvasNode,
-  CanvasPoint,
-  CanvasPromptBoxData,
-  CanvasRect,
-  CanvasSize,
-  NodeMoveUpdate,
+import {
+  isTrendSourceNode,
+  type CanvasConnection,
+  type CanvasNode,
+  type CanvasPoint,
+  type CanvasPromptBoxData,
+  type CanvasRect,
+  type CanvasSize,
+  type CanvasViewportFocus,
+  type NodeMoveUpdate,
 } from "../../lib/infinite-canvas/types";
+import type { ExportTarget, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
-import { CanvasNodeView } from "./canvas-node-view";
+import { CanvasNavigationRail } from "./canvas-navigation-rail";
+import {
+  CanvasNodeView,
+  type BrandCtxPhase,
+  type PreviewPublishState,
+  type TimelinePhase,
+  type TrendRecipePhase,
+} from "./canvas-node-view";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { MarqueeOverlay } from "./marquee-overlay";
 import { SelectionToolbar } from "./selection-toolbar";
@@ -30,21 +41,44 @@ interface InfiniteCanvasProps {
   onSelectionChange?: (nodeIds: Set<string>) => void;
   onNodeMove?: (updates: NodeMoveUpdate[]) => void;
   onDeleteSelected?: (nodeIds: Set<string>) => void;
-  onExportSelected?: (nodeIds: Set<string>) => void;
+  exportTargets?: ExportTarget[];
+  onExportTimeline?: (targetId: ExportTarget["id"], nodeIds: Set<string>) => void;
+  onDownloadPreview?: (nodeIds: Set<string>) => void;
+  onPublishPreview?: (nodeIds: Set<string>) => void;
   bottomPromptBox?: CanvasPromptBoxData;
   onBottomPromptChange?: (value: string) => void;
   onBottomPromptSubmit?: (value: string) => void;
   onPromptChange?: (nodeId: string, value: string) => void;
   onPromptSubmit?: (nodeId: string, value: string) => void;
+  timelineSourceNodeId?: string;
+  viewportFocus?: CanvasViewportFocus;
+  onCreateTimelineFromTrend?: (node: CanvasNode) => void;
+  onOpenTimelineNode?: (node: CanvasNode) => void;
+  animatedConnectionIds?: Set<string>;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
+  brandCtxPhase?: BrandCtxPhase;
+  trendRecipePhase?: TrendRecipePhase;
+  timelinePhase?: TimelinePhase;
+  previewSegments?: TimelineSegment[];
+  previewPublishState?: PreviewPublishState;
+  chromeHidden?: boolean;
   className?: string;
 }
+
+const EMPTY_EXPORT_TARGETS: ExportTarget[] = [];
 
 interface DragState {
   pointerId: number;
   startScreen: CanvasPoint;
   nodeIds: string[];
   startPositions: Map<string, CanvasPoint>;
+}
+
+function isTextEditingTarget(target: EventTarget | null) {
+  return (
+    target instanceof HTMLElement &&
+    Boolean(target.closest("input, textarea, select, [contenteditable]"))
+  );
 }
 
 export function InfiniteCanvas({
@@ -54,16 +88,38 @@ export function InfiniteCanvas({
   onSelectionChange,
   onNodeMove,
   onDeleteSelected,
-  onExportSelected,
+  exportTargets = EMPTY_EXPORT_TARGETS,
+  onExportTimeline,
+  onDownloadPreview,
+  onPublishPreview,
   bottomPromptBox,
   onBottomPromptChange,
   onBottomPromptSubmit,
   onPromptChange,
   onPromptSubmit,
+  timelineSourceNodeId,
+  viewportFocus,
+  onCreateTimelineFromTrend,
+  onOpenTimelineNode,
+  animatedConnectionIds,
   resolveImageUrl,
+  brandCtxPhase,
+  trendRecipePhase,
+  timelinePhase,
+  previewSegments,
+  previewPublishState,
+  chromeHidden = false,
   className,
 }: InfiniteCanvasProps) {
-  const { containerRef, viewport, setViewport, panByScreenDelta, wheelPan, zoomAtPoint } =
+  const {
+    containerRef,
+    viewport,
+    animateViewportTo,
+    stopViewportAnimation,
+    panByScreenDelta,
+    wheelPan,
+    zoomAtPoint,
+  } =
     useCanvasViewport();
   const [containerSize, setContainerSize] = useState<CanvasSize>({
     width: 0,
@@ -73,10 +129,12 @@ export function InfiniteCanvas({
   const [localPositions, setLocalPositions] = useState<Map<string, CanvasPoint>>(new Map());
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [panStart, setPanStart] = useState<CanvasPoint | null>(null);
+  const [spacePanMode, setSpacePanMode] = useState(Boolean(0));
   const [marqueeStart, setMarqueeStart] = useState<CanvasPoint | null>(null);
   const [marqueeRect, setMarqueeRect] = useState<CanvasRect | null>(null);
   const lastPointerRef = useRef<CanvasPoint | null>(null);
   const suppressNextCanvasClickRef = useRef(Boolean(0));
+  const lastViewportFocusIdRef = useRef<string | null>(null);
 
   const selection = selectedNodeIds ?? internalSelection;
 
@@ -88,6 +146,11 @@ export function InfiniteCanvas({
       onSelectionChange?.(nextSelection);
     },
     [onSelectionChange, selectedNodeIds]
+  );
+
+  const selectedNodes = useMemo(
+    () => nodes.filter((node) => selection.has(node.id)),
+    [nodes, selection]
   );
 
   useEffect(() => {
@@ -110,14 +173,28 @@ export function InfiniteCanvas({
       return;
     }
 
-    const bounds = calculateSelectionBounds(
-      nodes,
-      new Set(nodes.map((node) => node.id))
-    );
+    if (!viewportFocus || lastViewportFocusIdRef.current === viewportFocus.id) {
+      return;
+    }
+
+    const bounds = calculateSelectionBounds(nodes, new Set(viewportFocus.nodeIds));
     if (!bounds) return;
 
-    setViewport(fitBoundsToViewport(bounds, containerSize, 96, 0.25, 0.95));
-  }, [containerSize, nodes, setViewport]);
+    lastViewportFocusIdRef.current = viewportFocus.id;
+    animateViewportTo(
+      fitBoundsToViewport(
+        bounds,
+        containerSize,
+        viewportFocus.padding ?? 96,
+        viewportFocus.minZoom ?? 0.25,
+        viewportFocus.maxZoom ?? 0.95
+      ),
+      {
+        delayMs: viewportFocus.delayMs,
+        durationMs: viewportFocus.durationMs,
+      }
+    );
+  }, [animateViewportTo, containerSize, nodes, viewportFocus]);
 
   useEffect(() => {
     const element = containerRef.current;
@@ -131,13 +208,19 @@ export function InfiniteCanvas({
         y: event.clientY - rect.top,
       };
 
+      // Normalize across deltaMode: 0=pixel (default), 1=line (~16px), 2=page (~300px)
+      const lineSize = 16;
+      const pageSize = 300;
+      const multiplier = event.deltaMode === 1 ? lineSize : event.deltaMode === 2 ? pageSize : 1;
+
       if (event.metaKey || event.ctrlKey) {
-        zoomAtPoint(event.deltaY, point);
+        zoomAtPoint(event.deltaY * multiplier, point);
         return;
       }
 
       if (event.shiftKey) {
-        wheelPan({ x: event.deltaY, y: 0 });
+        const horizontalDelta = event.deltaX !== 0 ? event.deltaX : event.deltaY;
+        wheelPan({ x: horizontalDelta * multiplier, y: 0 });
         return;
       }
 
@@ -153,10 +236,20 @@ export function InfiniteCanvas({
     [localPositions]
   );
 
+  const startPanning = useCallback((event: React.PointerEvent<Element>) => {
+    const target = event.currentTarget as HTMLElement;
+    target.setPointerCapture(event.pointerId);
+    setPanStart({ x: event.clientX, y: event.clientY });
+    lastPointerRef.current = { x: event.clientX, y: event.clientY };
+  }, []);
+
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode) => {
       event.stopPropagation();
-      if (dragState) return;
+      if (dragState || panStart || spacePanMode || suppressNextCanvasClickRef.current) {
+        suppressNextCanvasClickRef.current = Boolean(0);
+        return;
+      }
 
       if (event.shiftKey || event.metaKey || event.ctrlKey) {
         const next = new Set(selection);
@@ -170,14 +263,24 @@ export function InfiniteCanvas({
       }
 
       setSelection(new Set([node.id]));
+      if (node.kind === "timeline") {
+        onOpenTimelineNode?.(node);
+      }
     },
-    [dragState, selection, setSelection]
+    [dragState, onOpenTimelineNode, panStart, selection, setSelection, spacePanMode]
   );
 
   const handleNodePointerDown = useCallback(
     (event: React.PointerEvent, node: CanvasNode) => {
       if (event.button !== 0) return;
       event.stopPropagation();
+      stopViewportAnimation();
+
+      if (spacePanMode) {
+        startPanning(event);
+        return;
+      }
+
       event.currentTarget.setPointerCapture(event.pointerId);
 
       const nodeIds = selection.has(node.id) ? Array.from(selection) : [node.id];
@@ -196,15 +299,13 @@ export function InfiniteCanvas({
         startPositions,
       });
     },
-    [nodePosition, nodes, selection]
+    [nodePosition, nodes, selection, spacePanMode, startPanning, stopViewportAnimation]
   );
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (event.button === 1 || (event.button === 0 && event.altKey)) {
-        event.currentTarget.setPointerCapture(event.pointerId);
-        setPanStart({ x: event.clientX, y: event.clientY });
-        lastPointerRef.current = { x: event.clientX, y: event.clientY };
+      if (event.button === 1 || (event.button === 0 && (event.altKey || spacePanMode))) {
+        startPanning(event);
         return;
       }
 
@@ -218,7 +319,7 @@ export function InfiniteCanvas({
       setMarqueeStart(start);
       setMarqueeRect({ x: start.x, y: start.y, width: 0, height: 0 });
     },
-    []
+    [spacePanMode, startPanning]
   );
 
   const handlePointerMove = useCallback(
@@ -243,9 +344,16 @@ export function InfiniteCanvas({
 
       if (panStart && lastPointerRef.current) {
         const current = { x: event.clientX, y: event.clientY };
-        panByScreenDelta({
+        const delta = {
           x: current.x - lastPointerRef.current.x,
           y: current.y - lastPointerRef.current.y,
+        };
+        if (Math.abs(delta.x) > 4 || Math.abs(delta.y) > 4) {
+          suppressNextCanvasClickRef.current = true;
+        }
+        panByScreenDelta({
+          x: delta.x,
+          y: delta.y,
         });
         lastPointerRef.current = current;
         return;
@@ -306,11 +414,13 @@ export function InfiniteCanvas({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (
-        target instanceof HTMLElement &&
-        target.closest("input, textarea, select, [contenteditable]")
-      ) {
+      if (isTextEditingTarget(event.target)) {
+        return;
+      }
+
+      if (event.code === "Space" || event.key === " ") {
+        event.preventDefault();
+        setSpacePanMode(true);
         return;
       }
 
@@ -321,15 +431,39 @@ export function InfiniteCanvas({
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "e") {
         event.preventDefault();
-        if (selection.size > 0) {
-          onExportSelected?.(new Set(selection));
+        const selectedTimelineNode =
+          selectedNodes.length === 1 && selectedNodes[0].kind === "timeline"
+            ? selectedNodes[0]
+            : null;
+        const defaultTarget = exportTargets[0];
+        if (selectedTimelineNode && defaultTarget) {
+          onExportTimeline?.(defaultTarget.id, new Set([selectedTimelineNode.id]));
         }
       }
     };
 
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (isTextEditingTarget(event.target)) {
+        return;
+      }
+
+      if (event.code === "Space" || event.key === " ") {
+        event.preventDefault();
+        setSpacePanMode(Boolean(0));
+      }
+    };
+
+    const handleWindowBlur = () => setSpacePanMode(Boolean(0));
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onDeleteSelected, onExportSelected, selection]);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [exportTargets, onDeleteSelected, onExportTimeline, selectedNodes, selection]);
 
   const positions = useMemo(() => {
     const next = new Map<string, CanvasPoint>();
@@ -338,14 +472,63 @@ export function InfiniteCanvas({
   }, [nodePosition, nodes]);
 
   const selectionBounds = calculateSelectionBounds(nodes, selection, positions);
+  const nodeMap = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
+  const connectionPaths = useMemo(
+    () =>
+      connections
+        .map((connection) => {
+          const sourceNode = nodeMap.get(connection.sourceNodeId);
+          const targetNode = nodeMap.get(connection.targetNodeId);
+          if (!sourceNode || !targetNode) {
+            return null;
+          }
+
+          const sourcePosition = positions.get(sourceNode.id) ?? sourceNode.position;
+          const targetPosition = positions.get(targetNode.id) ?? targetNode.position;
+          const connectsTrendToTimeline = isTrendSourceNode(sourceNode) && targetNode.kind === "timeline";
+          const sourceX = connectsTrendToTimeline
+            ? (sourcePosition.x + sourceNode.size.width / 2 - viewport.offset.x) * viewport.zoom
+            : (sourcePosition.x + sourceNode.size.width - viewport.offset.x) * viewport.zoom;
+          const sourceY = connectsTrendToTimeline
+            ? (sourcePosition.y + sourceNode.size.height - viewport.offset.y) * viewport.zoom
+            : (sourcePosition.y + sourceNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+          const targetX = connectsTrendToTimeline
+            ? (targetPosition.x + targetNode.size.width / 2 - viewport.offset.x) * viewport.zoom
+            : (targetPosition.x - viewport.offset.x) * viewport.zoom;
+          const targetY = connectsTrendToTimeline
+            ? (targetPosition.y - viewport.offset.y) * viewport.zoom
+            : (targetPosition.y + targetNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+          const midpointX = (sourceX + targetX) / 2;
+          const midpointY = (sourceY + targetY) / 2;
+          const pathD = connectsTrendToTimeline
+            ? `M ${sourceX} ${sourceY} C ${sourceX} ${midpointY}, ${targetX} ${midpointY}, ${targetX} ${targetY}`
+            : `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`;
+
+          return {
+            id: connection.id,
+            d: pathD,
+            isTimelineConnection:
+              connectsTrendToTimeline ||
+              (sourceNode.kind === "timeline" && targetNode.kind === "preview"),
+          };
+        })
+        .filter(
+          (path): path is { id: string; d: string; isTimelineConnection: boolean } =>
+            path !== null
+        ),
+    [connections, nodeMap, positions, viewport.offset.x, viewport.offset.y, viewport.zoom]
+  );
 
   return (
     <div
       ref={containerRef}
       data-testid="infinite-canvas"
+      data-viewport-focus-id={viewportFocus?.id}
+      data-viewport-focus-nodes={viewportFocus?.nodeIds.join(" ")}
       className={cn(
         "relative h-full min-h-0 w-full overflow-hidden bg-background outline-none",
-        "cursor-grab active:cursor-grabbing",
+        spacePanMode || panStart ? "cursor-grab active:cursor-grabbing" : "cursor-default",
+        panStart && "cursor-grabbing",
         className
       )}
       tabIndex={0}
@@ -375,6 +558,29 @@ export function InfiniteCanvas({
         size={containerSize}
         positions={positions}
       />
+      <svg className="pointer-events-none absolute inset-0" aria-hidden="true">
+        {connectionPaths.map((connectionPath) => {
+          const animateIn = animatedConnectionIds?.has(connectionPath.id) ?? false;
+          return (
+            <motion.path
+              key={`${connectionPath.id}-${animateIn ? "animated" : "static"}`}
+              data-testid={`canvas-connection-${connectionPath.id}`}
+              d={connectionPath.d}
+              fill="none"
+              stroke={
+                connectionPath.isTimelineConnection
+                  ? "rgb(0, 129, 192)"
+                  : "rgba(180, 184, 180, 0.78)"
+              }
+              strokeWidth={connectionPath.isTimelineConnection ? 2 : 1.5}
+              strokeLinecap="round"
+              initial={animateIn ? { pathLength: 0, opacity: 0.4 } : false}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={animateIn ? { duration: 0.45, ease: "easeOut" } : { duration: 0 }}
+            />
+          );
+        })}
+      </svg>
       <div
         className="absolute left-0 top-0 origin-top-left"
         style={{
@@ -388,23 +594,49 @@ export function InfiniteCanvas({
             position={nodePosition(node)}
             zoom={viewport.zoom}
             selected={selection.has(node.id)}
+            brandCtxPhase={brandCtxPhase}
+            trendRecipePhase={trendRecipePhase}
+            timelinePhase={timelinePhase}
+            previewSegments={previewSegments}
+            previewPublishState={previewPublishState}
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
+            timelineSourceNodeId={timelineSourceNodeId}
+            onCreateTimelineFromTrend={onCreateTimelineFromTrend}
             onPromptChange={(node, value) => onPromptChange?.(node.id, value)}
             onPromptSubmit={(node, value) => onPromptSubmit?.(node.id, value)}
           />
         ))}
       </div>
       <MarqueeOverlay rect={marqueeRect} />
-      <SelectionToolbar
-        bounds={selectionBounds}
-        viewport={viewport}
-        size={containerSize}
-        onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
-        onExport={selection.size > 0 && onExportSelected ? () => onExportSelected(new Set(selection)) : undefined}
-      />
-      {bottomPromptBox ? (
+      {!chromeHidden ? (
+        <SelectionToolbar
+          bounds={selectionBounds}
+          viewport={viewport}
+          size={containerSize}
+          selectedNodes={selectedNodes}
+          exportTargets={exportTargets}
+          onDelete={selection.size > 0 && onDeleteSelected ? () => onDeleteSelected(new Set(selection)) : undefined}
+          onExportTimeline={
+            selectedNodes.length === 1 && selectedNodes[0].kind === "timeline" && onExportTimeline
+              ? (targetId) => onExportTimeline(targetId, new Set(selection))
+              : undefined
+          }
+          onDownloadPreview={
+            selectedNodes.length === 1 && selectedNodes[0].kind === "preview" && onDownloadPreview
+              ? () => onDownloadPreview(new Set(selection))
+              : undefined
+          }
+          onPublishPreview={
+            selectedNodes.length === 1 && selectedNodes[0].kind === "preview" && onPublishPreview
+              ? () => onPublishPreview(new Set(selection))
+              : undefined
+          }
+        />
+      ) : null}
+      {!chromeHidden ? <CanvasNavigationRail /> : null}
+      {bottomPromptBox && !chromeHidden ? (
         <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 w-full max-w-[672px] -translate-x-1/2 px-4">
           <div className="pointer-events-auto">
             <CanvasPromptBox

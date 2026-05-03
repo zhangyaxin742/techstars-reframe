@@ -1,79 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-
-type VideoVariant = "trend" | "explore";
-
-type VideoCard = {
-  id: string;
-  src: string;
-  label: VideoVariant;
-  title: string;
-  meta: string;
-};
-
-const trendVideos: VideoCard[] = [
-  {
-    id: "trend-1",
-    src: "/videos/trend1.mp4",
-    label: "trend",
-    title: "Founder confessional",
-    meta: "Hook refresh",
-  },
-  {
-    id: "trend-2",
-    src: "/videos/trend2.mp4",
-    label: "trend",
-    title: "Process cutdown",
-    meta: "High-retention edit",
-  },
-  {
-    id: "trend-3",
-    src: "/videos/trend3.mp4",
-    label: "trend",
-    title: "Customer proof remix",
-    meta: "Comment-led version",
-  },
-  {
-    id: "trend-4",
-    src: "/videos/trend4.mp4",
-    label: "trend",
-    title: "Screen-record story",
-    meta: "Narration layer",
-  },
-  {
-    id: "trend-5",
-    src: "/videos/trend5.mp4",
-    label: "trend",
-    title: "A/B opener pack",
-    meta: "Save-ready templates",
-  },
-];
-
-const exploreVideos: VideoCard[] = [
-  {
-    id: "explore-1",
-    src: "/videos/explore1.mp4",
-    label: "explore",
-    title: "Niche pocket",
-    meta: "For You crossover",
-  },
-  {
-    id: "explore-2",
-    src: "/videos/explore2.mp4",
-    label: "explore",
-    title: "Visual bait",
-    meta: "Texture-first loop",
-  },
-  {
-    id: "explore-3",
-    src: "/videos/explore3.mp4",
-    label: "explore",
-    title: "Creator reference",
-    meta: "Format steal",
-  },
-];
+import { useEffect, useRef, useState } from "react";
+import {
+  exploreVideos,
+  trendVideos,
+  type TrendingVideo,
+} from "@/src/data/trending-videos";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 24 },
@@ -184,7 +117,6 @@ export function TrendingWorkspace({
       <div className="pointer-events-none absolute inset-x-[-10%] top-[-24%] h-[32rem] rounded-full bg-[radial-gradient(circle,rgba(244,184,85,0.24),transparent_62%)] blur-3xl" />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
-
         <main className="mt-6 grid flex-1 gap-6 xl:grid-cols-[minmax(0,1.8fr)_360px]">
           <motion.section
             initial="hidden"
@@ -206,22 +138,48 @@ export function TrendingWorkspace({
                   </span>
                 </h1>
               </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[0.65rem] uppercase tracking-[0.28em] text-white/45">
+                    Feed
+                  </p>
+                  <p className="mt-2 text-base text-white/85">Instagram</p>
+                </div>
+                <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[0.65rem] uppercase tracking-[0.28em] text-white/45">
+                    Focus
+                  </p>
+                  <p className="mt-2 text-base text-white/85">Founders + social proof</p>
+                </div>
+              </div>
             </div>
 
             <div className="mt-6 rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-4 sm:p-5">
               <div className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
+                  <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/45">
+                    Banner
+                  </p>
                   <div className="mt-2 flex items-center gap-3">
                     <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ff8d4d,#ffcb6a)] text-sm font-semibold text-[#1f1105]">
                       IG
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-white">Instagram trends</h2>
+                      <h2 className="text-xl font-medium text-white">Instagram trend lane</h2>
                       <p className="text-sm text-white/55">
                         Labeled trend references for hooks, edits, and remixes
                       </p>
                     </div>
                   </div>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs text-white/55">
+                  <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5">
+                    5 active cuts
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5">
+                    Hover for audio
+                  </span>
                 </div>
               </div>
 
@@ -252,16 +210,16 @@ export function TrendingWorkspace({
           >
             <div className="border-b border-white/10 pb-5">
               <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/45">
-                Explore
+                Explore rail
               </p>
-              <h2 className="mt-2 text-2xl font-medium text-white">Bored? Switch it up!</h2>
+              <h2 className="mt-2 text-2xl font-medium text-white">Adjacent references</h2>
               <p className="mt-2 text-sm leading-6 text-white/58">
                 Supporting clips to pull textures, pacing, and creator energy
                 from while building a remix.
               </p>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3 3xl:grid-cols-3">
+            <div className="mt-5 flex flex-1 flex-col gap-4">
               {exploreVideos.map((video, index) => (
                 <VideoTile
                   key={video.id}
@@ -294,7 +252,7 @@ function VideoTile({
 }: {
   activeVideoId: string | null;
   audibleVideoId: string | null;
-  card: VideoCard;
+  card: TrendingVideo;
   index: number;
   onBlur: () => void;
   onFocus: (id: string) => void;
@@ -342,8 +300,11 @@ function VideoTile({
         <div className="absolute left-3 top-3 flex items-center gap-2">
           <span className="rounded-full border border-white/14 bg-black/30 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.24em] text-white/78 backdrop-blur-md">
             {card.label}
-          </span> 
-           </div>
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-white/56 backdrop-blur-md">
+            {isAudible ? "audio on" : "looping"}
+          </span>
+        </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="flex items-end justify-between gap-4">

@@ -4,6 +4,7 @@ import {
   ArrowUp,
   Cloud,
   CloudArrowUp,
+  DeviceMobileCamera,
   Globe,
   GoogleDriveLogo,
   ImageSquare,
@@ -28,7 +29,7 @@ import type {
   SourceBadge,
   SourcePlatform,
 } from "@/src/data/reframe-demo";
-import { brandContext, mediaImportOptions } from "@/src/data/reframe-demo";
+import { brandContext } from "@/src/data/reframe-demo";
 
 const platformIcons: Record<SourcePlatform, React.ElementType> = {
   website: Globe,
@@ -40,6 +41,7 @@ const platformIcons: Record<SourcePlatform, React.ElementType> = {
   icloud: Cloud,
   "image-library": ImageSquare,
   "video-library": VideoCamera,
+  "phone-camera": DeviceMobileCamera,
   upload: CloudArrowUp,
 };
 
@@ -53,8 +55,21 @@ const platformColors: Record<SourcePlatform, string> = {
   icloud: "border-slate-300/20 bg-slate-300/10 text-slate-100",
   "image-library": "border-orange-500/20 bg-orange-500/10 text-orange-100",
   "video-library": "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
+  "phone-camera": "border-amber-500/20 bg-amber-500/10 text-amber-100",
   upload: "border-white/20 bg-white/10 text-cream",
 };
+
+const landingMediaImportOptions: MediaImportOption[] = [
+  { id: "imp-upload", platform: "upload", label: "Upload Files", description: "Photos, videos, logos", icon: "upload" },
+  { id: "imp-images", platform: "image-library", label: "Image Library", description: "Bring in stills and product shots", icon: "image-library" },
+  { id: "imp-video", platform: "video-library", label: "Video Library", description: "Import clips, reels, and b-roll", icon: "video-library" },
+  { id: "imp-gdrive", platform: "google-drive", label: "Google Drive", description: "Connect your Drive folder", icon: "google-drive" },
+  { id: "imp-icloud", platform: "icloud", label: "iCloud Drive", description: "Pull media from iCloud folders", icon: "icloud" },
+  { id: "imp-shopify", platform: "shopify", label: "Shopify / Website", description: "Pull product images", icon: "shopify" },
+  { id: "imp-ig", platform: "instagram", label: "Instagram", description: "Import posts & reels", icon: "instagram" },
+  { id: "imp-tt", platform: "tiktok", label: "TikTok", description: "Import existing videos", icon: "tiktok" },
+  { id: "imp-yt", platform: "youtube", label: "YouTube", description: "Import shorts & clips", icon: "youtube" },
+];
 
 const rotatingPlaceholders = [
   "I built a budgeting app but nobody outside tech knows it exists...",
@@ -233,7 +248,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                     <div className="px-3 pb-2 pt-1 text-[10px] uppercase tracking-[0.22em] text-gold/80">
                       Import Sources
                     </div>
-                    {mediaImportOptions.slice(0, 5).map((option) => {
+                    {landingMediaImportOptions.slice(0, 5).map((option) => {
                       const Icon = platformIcons[option.platform];
                       return (
                         <DropdownMenuItem
@@ -250,7 +265,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                       );
                     })}
                     <DropdownMenuSeparator className="my-2 h-px bg-white/10" />
-                    {mediaImportOptions.slice(5).map((option) => {
+                    {landingMediaImportOptions.slice(5).map((option) => {
                       const Icon = platformIcons[option.platform];
                       return (
                         <DropdownMenuItem
@@ -313,7 +328,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                 Connect your media
               </p>
               <div className="grid grid-cols-2 gap-2" data-testid="media-options">
-                {mediaImportOptions.map((option) => {
+                {landingMediaImportOptions.map((option) => {
                   const Icon = platformIcons[option.platform];
                   const isSelected = selectedMediaSources.has(option.id);
                   return (

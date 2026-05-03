@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useRef } from "react";
-import { drawBackground, drawConnections, setupCanvas } from "../../lib/infinite-canvas/rendering";
+import { drawBackground, setupCanvas } from "../../lib/infinite-canvas/rendering";
 import type {
   CanvasConnection,
   CanvasNode,
@@ -17,11 +17,11 @@ interface Canvas2DLayerProps {
 }
 
 export const Canvas2DLayer = memo(function Canvas2DLayer({
-  nodes,
-  connections,
+  nodes: _nodes,
+  connections: _connections,
   viewport,
   size,
-  positions,
+  positions: _positions,
 }: Canvas2DLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -33,11 +33,10 @@ export const Canvas2DLayer = memo(function Canvas2DLayer({
       const context = setupCanvas(canvas, size);
       context.clearRect(0, 0, size.width, size.height);
       drawBackground(context, viewport, size);
-      drawConnections({ context, nodes, connections, viewport, positions });
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [connections, nodes, positions, size, viewport]);
+  }, [size.width, size.height, viewport.offset.x, viewport.offset.y, viewport.zoom]);
 
   return (
     <canvas

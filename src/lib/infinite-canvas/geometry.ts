@@ -3,6 +3,7 @@ import type {
   CanvasPoint,
   CanvasRect,
   CanvasSize,
+  CanvasViewportPadding,
   CanvasViewportState,
 } from "./types";
 
@@ -105,23 +106,40 @@ export function calculateSelectionBounds(
 export function fitBoundsToViewport(
   bounds: CanvasRect,
   viewportSize: CanvasSize,
-  padding = 96,
+  padding: number | CanvasViewportPadding = 96,
   minZoom = 0.25,
   maxZoom = 1
 ): CanvasViewportState {
-  const availableWidth = Math.max(1, viewportSize.width - padding * 2);
-  const availableHeight = Math.max(1, viewportSize.height - padding * 2);
+  const normalizedPadding =
+    typeof padding === "number"
+      ? { top: padding, right: padding, bottom: padding, left: padding }
+      : {
+          top: padding.top ?? 0,
+          right: padding.right ?? 0,
+          bottom: padding.bottom ?? 0,
+          left: padding.left ?? 0,
+        };
+  const availableWidth = Math.max(
+    1,
+    viewportSize.width - normalizedPadding.left - normalizedPadding.right
+  );
+  const availableHeight = Math.max(
+    1,
+    viewportSize.height - normalizedPadding.top - normalizedPadding.bottom
+  );
   const zoom = clamp(
     Math.min(availableWidth / bounds.width, availableHeight / bounds.height),
     minZoom,
     maxZoom
   );
+  const targetCenterX = normalizedPadding.left + availableWidth / 2;
+  const targetCenterY = normalizedPadding.top + availableHeight / 2;
 
   return {
     zoom,
     offset: {
-      x: bounds.x + bounds.width / 2 - viewportSize.width / (2 * zoom),
-      y: bounds.y + bounds.height / 2 - viewportSize.height / (2 * zoom),
+      x: bounds.x + bounds.width / 2 - targetCenterX / zoom,
+      y: bounds.y + bounds.height / 2 - targetCenterY / zoom,
     },
   };
 }

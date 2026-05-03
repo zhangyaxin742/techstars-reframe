@@ -10,6 +10,13 @@ export interface CanvasSize {
 
 export interface CanvasRect extends CanvasPoint, CanvasSize {}
 
+export interface CanvasViewportPadding {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
+
 export type CanvasNodeKind =
   | "image"
   | "note"
@@ -19,7 +26,14 @@ export type CanvasNodeKind =
   | "trend-recipe"
   | "timeline"
   | "media"
+  | "video"
   | "preview";
+
+export interface CanvasVideoData {
+  src: string;
+  label?: "trend" | "explore" | "media";
+  meta?: string;
+}
 
 export interface CanvasPromptBoxData {
   value?: string;
@@ -42,9 +56,14 @@ export interface CanvasNode {
   body?: string;
   prompt?: CanvasPromptBoxData;
   imageUrl?: string;
+  video?: CanvasVideoData;
   position: CanvasPoint;
   size: CanvasSize;
   createdAt?: number;
+}
+
+export function isTrendSourceNode(node: CanvasNode) {
+  return node.kind === "trend-recipe" || (node.kind === "video" && node.video?.label === "trend");
 }
 
 export interface CanvasConnection {
@@ -57,6 +76,16 @@ export interface CanvasConnection {
 export interface CanvasViewportState {
   offset: CanvasPoint;
   zoom: number;
+}
+
+export interface CanvasViewportFocus {
+  id: string;
+  nodeIds: string[];
+  padding?: number | CanvasViewportPadding;
+  minZoom?: number;
+  maxZoom?: number;
+  delayMs?: number;
+  durationMs?: number;
 }
 
 export interface NodeMoveUpdate {
