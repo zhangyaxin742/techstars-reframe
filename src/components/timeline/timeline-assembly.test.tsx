@@ -103,29 +103,35 @@ describe("TimelineAssembly", () => {
     expect(screen.getByText("Drag and drop or click to upload video")).toBeInTheDocument();
   });
 
-  it("fills the missing shot from either demo action", async () => {
+  it("starts AI generation without swapping the missing shot directly", async () => {
     const onSwapClip = vi.fn();
+    const onGenerateMissingShotWithAi = vi.fn();
     const user = userEvent.setup();
-    const { rerender } = render(
+    render(
       <TimelineAssembly
         segments={timelineSegments}
         selectedSegmentId="ts-4"
         onSelectSegment={vi.fn()}
         onSwapClip={onSwapClip}
+        onGenerateMissingShotWithAi={onGenerateMissingShotWithAi}
       />
     );
 
     await user.click(screen.getByTestId("missing-shot-generate-ai"));
-    expect(onSwapClip).toHaveBeenCalledWith(
+    expect(onSwapClip).not.toHaveBeenCalled();
+    expect(onGenerateMissingShotWithAi).toHaveBeenCalledWith(
       "ts-4",
       expect.objectContaining({
         id: "final-3",
         thumbnail: "/assets/trending%20demo%20timeline/final_3.jpg",
       })
     );
+  });
 
-    onSwapClip.mockClear();
-    rerender(
+  it("fills the missing shot from the upload demo action", async () => {
+    const onSwapClip = vi.fn();
+    const user = userEvent.setup();
+    render(
       <TimelineAssembly
         segments={timelineSegments}
         selectedSegmentId="ts-4"
@@ -136,6 +142,50 @@ describe("TimelineAssembly", () => {
 
     await user.click(screen.getByTestId("missing-shot-upload"));
     expect(onSwapClip).toHaveBeenCalledWith("ts-4", expect.objectContaining({ id: "final-3" }));
+  });
+
+  it("shows inline AI generation progress for the selected missing shot", () => {
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId="ts-4"
+        onSelectSegment={vi.fn()}
+        onSwapClip={vi.fn()}
+        onGenerateMissingShotWithAi={vi.fn()}
+        aiGeneratingSegmentId="ts-4"
+      />
+    );
+
+    expect(screen.getByTestId("missing-shot-generate-ai")).toBeDisabled();
+    expect(screen.getByTestId("missing-shot-generate-ai")).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("Generating shot...")).toBeInTheDocument();
+  });
+
+  it("marks filled AI-generated segments inline", () => {
+    const generatedSegments = timelineSegments.map((segment) =>
+      segment.id === "ts-4"
+        ? {
+            ...segment,
+            kind: "clip" as const,
+            mediaAssetId: "final-3",
+            selectedAssetLabel: "Final 3 - Generated missing shot",
+            thumbnail: "/assets/trending%20demo%20timeline/final_3.jpg",
+          }
+        : segment
+    );
+
+    render(
+      <TimelineAssembly
+        segments={generatedSegments}
+        selectedSegmentId="ts-4"
+        onSelectSegment={vi.fn()}
+        aiGeneratedSegmentIds={new Set(["ts-4"])}
+      />
+    );
+
+    expect(screen.getByTestId("timeline-segment-ts-4-ai-generated")).toHaveTextContent(
+      "AI generated"
+    );
   });
 
   it("renders the drawer variant with separate timeline tracks", () => {

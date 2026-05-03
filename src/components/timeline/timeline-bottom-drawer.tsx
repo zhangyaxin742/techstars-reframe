@@ -19,6 +19,9 @@ interface TimelineBottomDrawerProps {
   onOpenChange: (open: boolean) => void;
   onSelectSegment: (segmentId: string | null) => void;
   onSwapClip: (segmentId: string, newAsset: MediaAsset) => void;
+  onGenerateMissingShotWithAi?: (segmentId: string, newAsset: MediaAsset) => void;
+  aiGeneratingSegmentId?: string | null;
+  aiGeneratedSegmentIds?: Set<string>;
   className?: string;
 }
 
@@ -29,6 +32,9 @@ export function TimelineBottomDrawer({
   onOpenChange,
   onSelectSegment,
   onSwapClip,
+  onGenerateMissingShotWithAi,
+  aiGeneratingSegmentId,
+  aiGeneratedSegmentIds,
   className,
 }: TimelineBottomDrawerProps) {
   const [exiting, setExiting] = useState(false);
@@ -151,6 +157,9 @@ export function TimelineBottomDrawer({
                     selectedSegmentId={selectedSegmentId}
                     onSelectSegment={onSelectSegment}
                     onSwapClip={onSwapClip}
+                    onGenerateMissingShotWithAi={onGenerateMissingShotWithAi}
+                    aiGeneratingSegmentId={aiGeneratingSegmentId}
+                    aiGeneratedSegmentIds={aiGeneratedSegmentIds}
                     onScrubPreviewTimeChange={setScrubPreviewTimeMs}
                     variant="drawer"
                   />

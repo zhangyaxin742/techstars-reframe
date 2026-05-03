@@ -79,6 +79,8 @@ export function App() {
   const [timelineDraftSegments, setTimelineDraftSegments] = useState<TimelineSegment[]>(
     () => seededTimelineSegments
   );
+  const [aiGeneratingSegmentId, setAiGeneratingSegmentId] = useState<string | null>(null);
+  const [aiGeneratedSegmentIds, setAiGeneratedSegmentIds] = useState<Set<string>>(new Set());
   const timeoutIdsRef = useRef<number[]>([]);
   const initialSequenceStartedRef = useRef(false);
   const previewPublishRunRef = useRef(0);
@@ -426,7 +428,7 @@ export function App() {
     [timelinePhase]
   );
 
-  const handleSwapTimelineClip = useCallback((segmentId: string, newAsset: MediaAsset) => {
+  const applyTimelineClipSwap = useCallback((segmentId: string, newAsset: MediaAsset) => {
     setTimelineDraftSegments((currentSegments) =>
       currentSegments.map((segment) =>
         segment.id === segmentId
@@ -442,6 +444,37 @@ export function App() {
     );
     setSelectedTimelineSegmentId(segmentId);
   }, []);
+
+  const handleSwapTimelineClip = useCallback(
+    (segmentId: string, newAsset: MediaAsset) => {
+      applyTimelineClipSwap(segmentId, newAsset);
+      setAiGeneratedSegmentIds((currentSegmentIds) => {
+        if (!currentSegmentIds.has(segmentId)) return currentSegmentIds;
+        const nextSegmentIds = new Set(currentSegmentIds);
+        nextSegmentIds.delete(segmentId);
+        return nextSegmentIds;
+      });
+    },
+    [applyTimelineClipSwap]
+  );
+
+  const handleGenerateMissingShotWithAi = useCallback(
+    (segmentId: string, newAsset: MediaAsset) => {
+      if (aiGeneratingSegmentId !== null) return;
+
+      setAiGeneratingSegmentId(segmentId);
+      queueTimeout(() => {
+        applyTimelineClipSwap(segmentId, newAsset);
+        setAiGeneratedSegmentIds((currentSegmentIds) => {
+          const nextSegmentIds = new Set(currentSegmentIds);
+          nextSegmentIds.add(segmentId);
+          return nextSegmentIds;
+        });
+        setAiGeneratingSegmentId(null);
+      }, 650);
+    },
+    [aiGeneratingSegmentId, applyTimelineClipSwap, queueTimeout]
+  );
 
   const upsertTimelineConnection = useCallback((currentConnections: CanvasConnection[], recipeId: string) => {
     const connectionId = recipeId === "recipe-1" ? "r1-tl" : `${recipeId}-tl`;
@@ -485,6 +518,8 @@ export function App() {
       };
       setSelectedNodeIds(new Set([recipeNodeId]));
       setTimelineSourceNodeId(recipeNodeId);
+      setAiGeneratingSegmentId(null);
+      setAiGeneratedSegmentIds(new Set());
       setRecipeSequenceStarted(true);
       setFlowStep("recipe-selected");
       setTimelinePhase("skeleton");
@@ -638,6 +673,9 @@ export function App() {
         onOpenChange={setTimelineDrawerOpen}
         onSelectSegment={setSelectedTimelineSegmentId}
         onSwapClip={handleSwapTimelineClip}
+        onGenerateMissingShotWithAi={handleGenerateMissingShotWithAi}
+        aiGeneratingSegmentId={aiGeneratingSegmentId}
+        aiGeneratedSegmentIds={aiGeneratedSegmentIds}
       />
       <Toaster />
     </div>

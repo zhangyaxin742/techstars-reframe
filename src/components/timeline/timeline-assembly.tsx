@@ -16,6 +16,9 @@ interface TimelineAssemblyProps {
   selectedSegmentId: string | null;
   onSelectSegment: (segmentId: string | null) => void;
   onSwapClip?: (segmentId: string, newAsset: MediaAsset) => void;
+  onGenerateMissingShotWithAi?: (segmentId: string, newAsset: MediaAsset) => void;
+  aiGeneratingSegmentId?: string | null;
+  aiGeneratedSegmentIds?: Set<string>;
   onScrubPreviewTimeChange?: (timeMs: number | null) => void;
   variant?: "compact" | "drawer";
   className?: string;
@@ -48,6 +51,9 @@ export function TimelineAssembly({
   selectedSegmentId,
   onSelectSegment,
   onSwapClip,
+  onGenerateMissingShotWithAi,
+  aiGeneratingSegmentId = null,
+  aiGeneratedSegmentIds,
   onScrubPreviewTimeChange,
   variant = "compact",
   className,
@@ -102,6 +108,7 @@ export function TimelineAssembly({
     if (seg.kind === "missing") {
       const fillAsset = seg.alternates?.[0];
       if (!fillAsset) return null;
+      const isGeneratingAi = aiGeneratingSegmentId === seg.id;
 
       return (
         <div
@@ -117,12 +124,14 @@ export function TimelineAssembly({
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => onSwapClip?.(selectedSegmentId, fillAsset)}
-              className="flex h-16 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => onGenerateMissingShotWithAi?.(selectedSegmentId, fillAsset)}
+              disabled={isGeneratingAi}
+              aria-busy={isGeneratingAi}
+              className="flex h-16 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition hover:border-accent disabled:pointer-events-none disabled:opacity-65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               data-testid="missing-shot-generate-ai"
             >
               <MagicWand className="size-4 shrink-0 text-accent" weight="bold" />
-              <span className="text-pretty">Generate with AI</span>
+              <span className="text-pretty">{isGeneratingAi ? "Generating shot..." : "Generate with AI"}</span>
             </button>
             <button
               type="button"
@@ -243,6 +252,7 @@ export function TimelineAssembly({
                     const leftPct = (seg.startMs / totalMs) * 100;
                     const isSelected = seg.id === selectedSegmentId;
                     const segmentLabel = seg.selectedAssetLabel ?? seg.label;
+                    const isAiGenerated = aiGeneratedSegmentIds?.has(seg.id) ?? false;
                     return (
                       <button
                         key={seg.id}
@@ -270,6 +280,14 @@ export function TimelineAssembly({
                               draggable={false}
                             />
                             <span className="sr-only">{segmentLabel}</span>
+                            {isAiGenerated ? (
+                              <span
+                                className="absolute right-1 top-1 rounded border border-accent/40 bg-background/90 px-1.5 py-0.5 text-[9px] font-medium text-accent"
+                                data-testid={`timeline-segment-${seg.id}-ai-generated`}
+                              >
+                                AI generated
+                              </span>
+                            ) : null}
                           </>
                         ) : (
                           <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2">
@@ -395,6 +413,7 @@ export function TimelineAssembly({
           {clipSegments.map((seg) => {
             const widthPct = ((seg.endMs - seg.startMs) / totalMs) * 100;
             const isSelected = seg.id === selectedSegmentId;
+            const isAiGenerated = aiGeneratedSegmentIds?.has(seg.id) ?? false;
             return (
               <button
                 key={seg.id}
@@ -411,12 +430,22 @@ export function TimelineAssembly({
                 style={{ width: `${widthPct}%`, minWidth: 40 }}
               >
                 {seg.kind === "clip" && seg.thumbnail ? (
-                  <img
-                    src={seg.thumbnail}
-                    alt={seg.selectedAssetLabel ?? seg.label}
-                    className="h-12 w-full object-cover"
-                    draggable={false}
-                  />
+                  <>
+                    <img
+                      src={seg.thumbnail}
+                      alt={seg.selectedAssetLabel ?? seg.label}
+                      className="h-12 w-full object-cover"
+                      draggable={false}
+                    />
+                    {isAiGenerated ? (
+                      <span
+                        className="absolute right-1 top-1 rounded border border-accent/40 bg-background/90 px-1 py-0.5 text-[8px] font-medium text-accent"
+                        data-testid={`timeline-segment-${seg.id}-ai-generated`}
+                      >
+                        AI generated
+                      </span>
+                    ) : null}
+                  </>
                 ) : (
                   <div className="flex h-12 items-center justify-center">
                     <FilmSlate className="size-4 text-white/40" weight="thin" />

@@ -411,9 +411,17 @@ describe("App", () => {
     fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
     expect(screen.getByTestId("missing-shot-actions")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+    expect(screen.getByText("Generating shot...")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
 
     expect(screen.getByTestId("timeline-segment-ts-4")).toHaveTextContent(
       "Final 3 - Generated missing shot"
+    );
+    expect(screen.getByTestId("timeline-segment-ts-4-ai-generated")).toHaveTextContent(
+      "AI generated"
     );
     expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("0 gaps");
   });
