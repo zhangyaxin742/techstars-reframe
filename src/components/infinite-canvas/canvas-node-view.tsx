@@ -607,7 +607,7 @@ function TimelineRevealCard({
         {[
           formatTimelineDuration(totalMs),
           `${videoSlotCount} clips`,
-          `${overlaySegments.length} overlays`,
+          `${overlaySegments.length} ${overlaySegments.length === 1 ? "overlay" : "overlays"}`,
         ].map((metric, index) => (
           <div
             key={metric}

@@ -310,12 +310,11 @@ const alternateClips: MediaAsset[] = [
 
 export const timelineSegments: TimelineSegment[] = [
   { id: "ts-1", kind: "clip", label: "Hook - Fit problem", startMs: 0, endMs: 3200, mediaAssetId: "final-1", thumbnail: mediaAssets[0].thumbnail },
-  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "\"We made the one thing that didn't exist for kids who actually go outside.\"" },
+  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "I couldn't find hiking pants that fit so I made my own." },
   { id: "ts-3", kind: "clip", label: "Product reveal", startMs: 3200, endMs: 6000, mediaAssetId: "final-2", thumbnail: mediaAssets[1].thumbnail },
   { id: "ts-4", kind: "missing", label: "Missing shot - Movement proof", startMs: 6000, endMs: 8000, alternates: [mediaAssets[2]] },
   { id: "ts-5", kind: "clip", label: "Final 4 - Trail movement", startMs: 8000, endMs: 12100, mediaAssetId: "final-4", thumbnail: mediaAssets[3].thumbnail, alternates: alternateClips },
   { id: "ts-6", kind: "clip", label: "Fit detail", startMs: 12100, endMs: 15600, mediaAssetId: "final-5", thumbnail: mediaAssets[4].thumbnail },
-  { id: "ts-7", kind: "text-overlay", label: "CTA overlay", startMs: 15600, endMs: 18000, overlayText: "Preorder now → petiteoutdoors.com" },
   { id: "ts-8", kind: "clip", label: "Closing CTA", startMs: 15600, endMs: 18000, mediaAssetId: "final-6", thumbnail: mediaAssets[5].thumbnail },
   { id: "ts-9", kind: "audio", label: "Beat sync", startMs: 0, endMs: 18000, audioNote: "Upbeat acoustic – drop at 3.2s, build at 8s, resolve at 15.6s" },
 ];
@@ -519,7 +518,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     id: "timeline-1",
     kind: "timeline",
     title: "Founder Confessional",
-    body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
+    body: "6 clips · 1 missing shot · 1 text overlay · 1 audio track\n18s total",
     position: { x: 1412, y: 0 },
     size: { width: 480, height: 280 },
   },

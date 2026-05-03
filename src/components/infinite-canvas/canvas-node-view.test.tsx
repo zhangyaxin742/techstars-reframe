@@ -114,7 +114,7 @@ describe("CanvasNodeView", () => {
         id: "timeline-1",
         kind: "timeline",
         title: "Founder Confessional",
-        body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
+        body: "6 clips · 1 missing shot · 1 text overlay · 1 audio track\n18s total",
         position: { x: 0, y: 0 },
         size: { width: 480, height: 280 },
       },
@@ -159,7 +159,7 @@ describe("CanvasNodeView", () => {
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("bg-secondary");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveTextContent("18s");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-1")).toHaveTextContent("6 clips");
-    expect(screen.getByTestId("timeline-node-metric-timeline-1-2")).toHaveTextContent("2 overlays");
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-2")).toHaveTextContent("1 overlay");
     expect(screen.queryByTestId("timeline-node-metric-timeline-1-3")).not.toBeInTheDocument();
     expect(within(timelineNode).queryAllByRole("button")).toHaveLength(0);
   });
