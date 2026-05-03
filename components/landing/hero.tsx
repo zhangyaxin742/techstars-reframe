@@ -7,22 +7,20 @@ import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
 function BackgroundFrame({
-  frame,
   priority = false,
 }: {
-  frame: "start-frame" | "end-frame";
   priority?: boolean;
 }) {
   return (
     <picture className="block h-full w-full">
-      <source srcSet={`/assets/${frame}.avif`} type="image/avif" />
-      <source srcSet={`/assets/${frame}.webp`} type="image/webp" />
+      <source srcSet="/assets/start-frame.avif" type="image/avif" />
+      <source srcSet="/assets/start-frame.webp" type="image/webp" />
       <img
-        src={`/assets/${frame}.png`}
+        src="/assets/start-frame.png"
         alt=""
         aria-hidden="true"
         fetchPriority={priority ? "high" : undefined}
-        className="landing-background-image h-full w-full object-cover object-center sepia-[0.2] saturate-[0.85] brightness-[0.7]"
+        className="landing-background-image h-full w-full object-cover object-[50%_24%] sepia-[0.2] saturate-[0.85] brightness-[0.7]"
       />
     </picture>
   );
@@ -40,20 +38,12 @@ export function Hero() {
         <div className="absolute inset-0">
           <div className="absolute inset-[-4%] overflow-hidden">
             <div
-              data-testid="landing-background-start"
+              data-testid="landing-background"
               className={`absolute inset-0 ${
-                prefersReducedMotion ? "opacity-0" : "animate-landing-start-frame"
+                prefersReducedMotion ? "landing-background-final-frame" : "animate-landing-background"
               }`}
             >
-              <BackgroundFrame frame="start-frame" priority />
-            </div>
-            <div
-              data-testid="landing-background-end"
-              className={`absolute inset-0 ${
-                prefersReducedMotion ? "opacity-100" : "animate-landing-end-frame"
-              }`}
-            >
-              <BackgroundFrame frame="end-frame" priority />
+              <BackgroundFrame priority />
             </div>
           </div>
           <div className="hero-vignette absolute inset-0" />

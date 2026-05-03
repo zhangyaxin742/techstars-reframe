@@ -1,0 +1,23 @@
+- generic [ref=e2]:
+  - img [ref=e7]
+  - navigation [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]: reframe.
+      - button "waitlist" [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - heading "Drop your links." [level=1] [ref=e18]
+        - heading "Get a recipe." [level=1] [ref=e19]
+        - heading "Go viral." [level=1] [ref=e20]:
+          - text: Go
+          - emphasis [ref=e21]: viral.
+      - paragraph [ref=e22]: Your AI CMO that helps you 10x.
+      - generic [ref=e27]:
+        - textbox "I built a budgeting app but nobody outside tech knows it exists..." [ref=e28]
+        - generic [ref=e29]:
+          - button "Add import source" [ref=e30] [cursor=pointer]:
+            - img [ref=e31]
+          - paragraph [ref=e33]: Paste links or describe your brand
+          - button "Submit" [disabled] [ref=e34]:
+            - img [ref=e35]

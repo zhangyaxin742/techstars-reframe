@@ -13,13 +13,12 @@ describe("Hero", () => {
     mockPush.mockClear();
   });
 
-  it("renders the landing background as layered images instead of video", () => {
+  it("renders the landing background as a single image instead of video", () => {
     const { container } = render(<Hero />);
 
     expect(container.querySelector("video")).not.toBeInTheDocument();
-    expect(screen.getByTestId("landing-background-start")).toBeInTheDocument();
-    expect(screen.getByTestId("landing-background-end")).toBeInTheDocument();
+    expect(screen.getByTestId("landing-background")).toBeInTheDocument();
     expect(container.querySelector('img[src="/assets/start-frame.png"]')).toBeInTheDocument();
-    expect(container.querySelector('img[src="/assets/end-frame.png"]')).toBeInTheDocument();
+    expect(container.querySelector('img[src="/assets/end-frame.png"]')).not.toBeInTheDocument();
   });
 });

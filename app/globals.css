@@ -128,16 +128,15 @@ a {
   mix-blend-mode: soft-light;
 }
 
-.animate-landing-start-frame {
-  animation: landing-start-frame 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transform-origin: 50% 41%;
-  will-change: transform, opacity;
+.animate-landing-background {
+  animation: landing-background-zoom 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: 50% 26%;
+  will-change: transform;
 }
 
-.animate-landing-end-frame {
-  animation: landing-end-frame 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transform-origin: 50% 43%;
-  will-change: transform, opacity;
+.landing-background-final-frame {
+  transform: scale(2.2) translate3d(-0.9%, -18%, 0);
+  transform-origin: 50% 26%;
 }
 
 .animate-kenburns {
@@ -145,37 +144,17 @@ a {
   transform-origin: center center;
 }
 
-@keyframes landing-start-frame {
+@keyframes landing-background-zoom {
   0% {
-    opacity: 1;
     transform: scale(1) translate3d(0, 0, 0);
   }
 
-  72% {
-    opacity: 1;
-    transform: scale(1.95) translate3d(-0.7%, -17%, 0);
+  82% {
+    transform: scale(2.2) translate3d(-0.9%, -18%, 0);
   }
 
   100% {
-    opacity: 0;
-    transform: scale(2.2) translate3d(-0.9%, -21%, 0);
-  }
-}
-
-@keyframes landing-end-frame {
-  0% {
-    opacity: 0;
-    transform: scale(1.62) translate3d(0, -8%, 0);
-  }
-
-  58% {
-    opacity: 0;
-    transform: scale(1.58) translate3d(0, -9%, 0);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1.5) translate3d(0, -11.5%, 0);
+    transform: scale(2.2) translate3d(-0.9%, -18%, 0);
   }
 }
 
@@ -234,16 +213,13 @@ a {
     transform: scale(1.04);
   }
 
-  .animate-landing-start-frame {
+  .animate-landing-background {
     animation: none;
-    opacity: 0;
-    transform: none;
   }
 
-  .animate-landing-end-frame {
-    animation: none;
-    opacity: 1;
-    transform: none;
+  .landing-background-final-frame,
+  .animate-landing-background {
+    transform: scale(2.2) translate3d(-0.9%, -18%, 0);
   }
 
   * {

@@ -337,10 +337,6 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <p className="min-w-0 flex-1 text-left text-[11px] text-cream/40">
-                  Paste links or describe your brand
-                </p>
-
                 <button
                   type="button"
                   onClick={handleInputSubmit}
