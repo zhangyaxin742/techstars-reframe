@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { timelineSegments } from "../../data/reframe-demo";
@@ -25,6 +27,10 @@ describe("MockVideoPreview", () => {
       "/videos/final.mp4"
     );
     expect(screen.getByLabelText("Timeline preview video")).not.toHaveAttribute("muted");
+  });
+
+  it("keeps the default final preview video available in public assets", () => {
+    expect(existsSync(join(process.cwd(), "public/videos/final.mp4"))).toBe(true);
   });
 
   it("does not render timeline text over the preview video", () => {
