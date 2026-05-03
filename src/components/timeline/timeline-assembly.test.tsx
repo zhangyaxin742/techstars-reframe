@@ -158,6 +158,7 @@ describe("TimelineAssembly", () => {
 
     expect(screen.getByTestId("missing-shot-generate-ai")).toBeDisabled();
     expect(screen.getByTestId("missing-shot-generate-ai")).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByTestId("missing-shot-generate-ai-spinner")).toHaveClass("animate-spin");
     expect(screen.getByText("Generating shot...")).toBeInTheDocument();
   });
 

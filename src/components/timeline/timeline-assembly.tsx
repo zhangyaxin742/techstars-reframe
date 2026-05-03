@@ -130,7 +130,15 @@ export function TimelineAssembly({
               className="flex h-16 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium transition hover:border-accent disabled:pointer-events-none disabled:opacity-65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               data-testid="missing-shot-generate-ai"
             >
-              <MagicWand className="size-4 shrink-0 text-accent" weight="bold" />
+              {isGeneratingAi ? (
+                <span
+                  aria-hidden="true"
+                  className="size-4 shrink-0 animate-spin rounded-full border-2 border-accent/30 border-t-accent"
+                  data-testid="missing-shot-generate-ai-spinner"
+                />
+              ) : (
+                <MagicWand className="size-4 shrink-0 text-accent" weight="bold" />
+              )}
               <span className="text-pretty">{isGeneratingAi ? "Generating shot..." : "Generate with AI"}</span>
             </button>
             <button
