@@ -1,0 +1,28 @@
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { timelineSegments } from "../../data/reframe-demo";
+import { MockVideoPreview } from "./mock-video-preview";
+
+describe("MockVideoPreview", () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("renders the final video asset in the preview player", () => {
+    render(<MockVideoPreview segments={timelineSegments} open variant="floating" />);
+
+    expect(screen.getByTestId("mock-video-preview")).toHaveAttribute(
+      "data-preview-variant",
+      "floating"
+    );
+    expect(screen.getByLabelText("Timeline preview video")).toHaveAttribute(
+      "src",
+      "/videos/final.mp4"
+    );
+  });
+});

@@ -1,5 +1,5 @@
 import { Pause, Play, X } from "@phosphor-icons/react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
 
@@ -8,6 +8,7 @@ interface MockVideoPreviewProps {
   open: boolean;
   onClose?: () => void;
   variant?: "modal" | "floating";
+  videoSrc?: string;
   className?: string;
 }
 
@@ -16,39 +17,54 @@ export function MockVideoPreview({
   open,
   onClose,
   variant = "modal",
+  videoSrc = "/videos/final.mp4",
   className,
 }: MockVideoPreviewProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [currentMs, setCurrentMs] = useState(0);
-
-  const totalMs = Math.max(...segments.map((s) => s.endMs), 1);
-  const clipSegments = segments.filter((s) => s.kind === "clip" || s.kind === "missing");
-  const overlaySegments = segments.filter((s) => s.kind === "text-overlay");
-
-  const currentClip = clipSegments.find((s) => currentMs >= s.startMs && currentMs < s.endMs);
-  const currentOverlay = overlaySegments.find(
-    (s) => currentMs >= s.startMs && currentMs < s.endMs
-  );
+  const [durationMs, setDurationMs] = useState(() => Math.max(...segments.map((s) => s.endMs), 1));
+  const totalMs = Math.max(durationMs, 1);
 
   useEffect(() => {
-    if (!playing || !open) return;
-    const interval = setInterval(() => {
-      setCurrentMs((prev) => {
-        const next = prev + 100;
-        if (next >= totalMs) {
-          setPlaying(false);
-          return 0;
-        }
-        return next;
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [playing, open, totalMs]);
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (!open || !playing) {
+      video.pause();
+      return;
+    }
+
+    void video.play().catch(() => setPlaying(false));
+  }, [open, playing]);
 
   const togglePlay = useCallback(() => {
-    if (currentMs >= totalMs) setCurrentMs(0);
+    const video = videoRef.current;
+    if (video && currentMs >= totalMs - 100) {
+      video.currentTime = 0;
+      setCurrentMs(0);
+    }
     setPlaying((v) => !v);
   }, [currentMs, totalMs]);
+
+  const handleLoadedMetadata = useCallback(() => {
+    const duration = videoRef.current?.duration;
+    if (duration && Number.isFinite(duration)) {
+      setDurationMs(duration * 1000);
+    }
+  }, []);
+
+  const handleTimeUpdate = useCallback(() => {
+    const currentTime = videoRef.current?.currentTime ?? 0;
+    setCurrentMs(currentTime * 1000);
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    const video = videoRef.current;
+    if (video) video.currentTime = 0;
+    setCurrentMs(0);
+    setPlaying(false);
+  }, []);
 
   if (!open) return null;
 
@@ -79,41 +95,25 @@ export function MockVideoPreview({
         </button>
       ) : null}
 
-      {/* 9:16 aspect ratio preview */}
+      {/* 9:16 actual video preview */}
       <div
         className={cn(
           "relative w-full overflow-hidden bg-neutral-900",
           isFloating ? "min-h-0 flex-1" : "aspect-[9/16]"
         )}
       >
-        {currentClip?.thumbnail ? (
-          <img
-            src={currentClip.thumbnail}
-            alt={currentClip.label}
-            className="absolute inset-0 size-full object-cover"
-            draggable={false}
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center text-neutral-600">
-            <span className="text-sm">No clip</span>
-          </div>
-        )}
-
-        {currentOverlay && (
-          <div className="absolute inset-x-0 bottom-16 flex justify-center px-4">
-            <p className="rounded-lg bg-black/60 px-4 py-2 text-center text-sm font-semibold text-white backdrop-blur-sm">
-              {currentOverlay.overlayText}
-            </p>
-          </div>
-        )}
-
-        {currentClip?.kind === "missing" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-yellow-900/30">
-            <span className="rounded bg-yellow-500/80 px-2 py-1 text-xs font-bold text-black">
-              MISSING SHOT
-            </span>
-          </div>
-        )}
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          className="absolute inset-0 size-full object-cover"
+          playsInline
+          muted
+          preload="metadata"
+          aria-label="Timeline preview video"
+          onLoadedMetadata={handleLoadedMetadata}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={handleEnded}
+        />
       </div>
 
       {/* Controls */}
@@ -145,11 +145,7 @@ export function MockVideoPreview({
           <span className="text-xs tabular-nums text-neutral-400">
             {(currentMs / 1000).toFixed(1)}s / {(totalMs / 1000).toFixed(1)}s
           </span>
-          {!isFloating ? (
-            <span className="text-xs text-neutral-500">
-              {currentClip?.label ?? "—"}
-            </span>
-          ) : null}
+          {!isFloating ? <span className="text-xs text-neutral-500">final.mp4</span> : null}
         </div>
       </div>
     </div>
