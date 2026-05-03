@@ -476,7 +476,7 @@ describe("App", () => {
     vi.useFakeTimers();
     render(<App />);
 
-    const userMessage = screen.getByText(/Here are the brand links and product media/);
+    const userMessage = screen.getByText(/Here are the product links and footage moments/);
     expect(userMessage).toHaveClass("bg-foreground");
     expect(userMessage).toHaveClass("text-background");
     expect(screen.queryByTestId("chat-message-avatar")).not.toBeInTheDocument();
@@ -486,7 +486,7 @@ describe("App", () => {
     vi.useFakeTimers();
     render(<App />);
 
-    expect(screen.getByText(/Create a pre-order launch video/)).toBeInTheDocument();
+    expect(screen.getByText(/Match Petite Outdoors to a trend/)).toBeInTheDocument();
     expect(screen.getByText("Product media")).toBeInTheDocument();
     expect(screen.getByText("Camera roll")).toBeInTheDocument();
     expect(screen.queryByText("Starting Reframe")).not.toBeInTheDocument();

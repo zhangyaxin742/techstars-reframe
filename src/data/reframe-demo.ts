@@ -320,11 +320,11 @@ export const timelineSegments: TimelineSegment[] = [
 ];
 
 export const chatHistory: ChatMessage[] = [
-  { id: "msg-1", role: "assistant", content: "What would you like to create? Paste your brand links, upload media, and let AI do the rest.", timestamp: 1, step: "source-intake" },
+  { id: "msg-1", role: "assistant", content: "What product should we match to a trend? Paste a product page, store, social profile, or short product description.", timestamp: 1, step: "source-intake" },
   {
     id: "msg-2",
     role: "user",
-    content: "Create a pre-order launch video for Petite Outdoors. Here are the brand links and product media.",
+    content: "Match Petite Outdoors to a trend for a pre-order launch. Here are the product links and footage moments.",
     timestamp: 2,
     badges: [
       ...brandContext.sources.slice(0, 3),

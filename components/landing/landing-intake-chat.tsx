@@ -39,12 +39,12 @@ const platformColors: Record<SourcePlatform, string> = {
 };
 
 const landingMediaImportOptions: MediaImportOption[] = [
-  { id: "imp-upload", platform: "upload", label: "Upload Files", description: "Photos, videos, logos", icon: "upload" },
-  { id: "imp-gdrive", platform: "google-drive", label: "Google Drive", description: "Connect your Drive folder", icon: "google-drive" },
-  { id: "imp-shopify", platform: "shopify", label: "Shopify / Website", description: "Pull product images", icon: "shopify" },
-  { id: "imp-ig", platform: "instagram", label: "Instagram", description: "Import posts & reels", icon: "instagram" },
-  { id: "imp-tt", platform: "tiktok", label: "TikTok", description: "Import existing videos", icon: "tiktok" },
-  { id: "imp-yt", platform: "youtube", label: "YouTube", description: "Import shorts & clips", icon: "youtube" },
+  { id: "imp-product", platform: "shopify", label: "Product footage", description: "Reveals, closeups, demos", icon: "shopify" },
+  { id: "imp-founder", platform: "phone-camera", label: "Founder footage", description: "POV, story, talking clips", icon: "phone-camera" },
+  { id: "imp-proof", platform: "instagram", label: "Proof moments", description: "Reviews, reactions, UGC", icon: "instagram" },
+  { id: "imp-detail", platform: "upload", label: "Fit / detail shots", description: "Texture, fit, movement", icon: "upload" },
+  { id: "imp-field", platform: "tiktok", label: "Field test clips", description: "Use cases in context", icon: "tiktok" },
+  { id: "imp-cta", platform: "youtube", label: "CTA shots", description: "Offer, preorder, launch", icon: "youtube" },
 ];
 
 interface LandingIntakeChatProps {
@@ -56,12 +56,12 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
   const [inputValue, setInputValue] = useState("");
   const [sources, setSources] = useState<SourceBadge[]>([]);
   const [selectedMediaSources, setSelectedMediaSources] = useState<Set<string>>(new Set());
-  const [phase, setPhase] = useState<"input" | "sources" | "media">("input");
+  const [phase, setPhase] = useState<"input" | "match" | "media">("input");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePaste = useCallback(() => {
     setSources(brandContext.sources);
-    setPhase("sources");
+    setPhase("match");
   }, []);
 
   const handleInputSubmit = useCallback(() => {
@@ -69,11 +69,11 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
       if (sources.length === 0) {
         setSources(brandContext.sources);
       }
-      setPhase("sources");
+      setPhase("match");
     }
   }, [inputValue, sources]);
 
-  const handleSourcesContinue = useCallback(() => {
+  const handleMatchContinue = useCallback(() => {
     setPhase("media");
   }, []);
 
@@ -96,6 +96,17 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
   return (
     <div className={className} data-testid="landing-intake-chat">
       <div className="mx-auto w-full max-w-lg">
+        {phase === "input" && (
+          <div className="mb-4 text-center">
+            <h2 className="text-balance text-xl font-medium text-cream sm:text-2xl">
+              What product should we match to a trend?
+            </h2>
+            <p className="mt-2 text-pretty text-xs leading-5 text-cream/55 sm:text-sm">
+              No uploads yet. Reframe will ask for clips after it finds the format.
+            </p>
+          </div>
+        )}
+
         {/* Source badges */}
         {sources.length > 0 && (
           <div className="mb-4 flex flex-wrap justify-center gap-2" data-testid="source-badges">
@@ -124,7 +135,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onPaste={handlePaste}
-                placeholder="Paste your website or social links..."
+                placeholder="Paste a product page, store, Instagram, TikTok, or describe what you sell..."
                 className="w-full resize-none bg-transparent text-sm leading-relaxed text-cream outline-none placeholder:text-cream/35"
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -136,7 +147,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
             </div>
             <div className="flex items-center justify-between border-t border-white/8 px-3 py-2">
               <p className="text-[11px] text-cream/40">
-                Paste links or describe your brand
+                Links or plain text both work
               </p>
               <button
                 type="button"
@@ -151,21 +162,32 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
           </div>
         )}
 
-        {/* Sources confirmed view */}
-        {phase === "sources" && (
+        {/* Trend match view */}
+        {phase === "match" && (
           <div className="space-y-4">
             <div className="rounded-2xl border border-white/15 bg-[rgba(26,22,14,0.8)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-              <p className="text-sm text-cream/80">
-                Found <strong className="text-cream">{brandContext.name}</strong> - {brandContext.category}.
-                I see product listings, lifestyle photos, and social content.
+              <p className="text-sm leading-6 text-cream/80">
+                I'm reading the product context so I can match it to a trend format you can actually execute.
+              </p>
+              <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3 text-left">
+                <p className="text-xs font-medium text-gold">Matched trend format</p>
+                <p className="mt-2 text-sm leading-6 text-cream">
+                  I found a format that fits this product: founder problem -&gt; product proof -&gt; field test -&gt; preorder CTA.
+                </p>
+                <p className="mt-2 text-xs leading-5 text-cream/55">
+                  It fits <strong className="font-medium text-cream">{brandContext.name}</strong> because the strongest proof points are fit, founder story, and outdoor testing.
+                </p>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-cream/70">
+                Want me to assemble this from your footage?
               </p>
             </div>
             <button
               type="button"
-              onClick={handleSourcesContinue}
+              onClick={handleMatchContinue}
               className="inline-flex w-full items-center justify-center rounded-xl bg-cream px-4 py-3 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream"
             >
-              Connect media sources -&gt;
+              Choose clips to map -&gt;
             </button>
           </div>
         )}
@@ -175,7 +197,10 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
           <div className="space-y-4">
             <div className="rounded-2xl border border-white/15 bg-[rgba(26,22,14,0.8)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
               <p className="mb-3 text-xs uppercase tracking-wide text-gold">
-                Connect your media
+                Footage for this trend
+              </p>
+              <p className="mb-3 text-sm leading-6 text-cream/70">
+                To build it, I'll need any clips you already have for these moments. I'll map what fits and flag what's missing.
               </p>
               <div className="grid grid-cols-2 gap-2" data-testid="media-options">
                 {landingMediaImportOptions.map((option) => {
@@ -211,10 +236,10 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
               {isSubmitting ? (
                 <>
                   <span className="mr-2 size-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-                  Analyzing your brand...
+                  Opening workspace...
                 </>
               ) : (
-                "Start building ->"
+                "Assemble in workspace ->"
               )}
             </button>
           </div>
