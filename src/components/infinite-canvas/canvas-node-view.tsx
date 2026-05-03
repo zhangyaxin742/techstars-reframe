@@ -350,37 +350,42 @@ function TimelineRevealCard({
 
         {overlaySegments.length > 0 ? (
           <div
-            className="relative h-7 rounded-md border border-border bg-secondary/30"
+            className="relative h-8 rounded-md border border-border bg-secondary/30"
             data-testid={`timeline-overlay-row-${node.id}`}
           >
-            {overlaySegments.map((segment) => (
-              <div
-                key={segment.id}
-                className="absolute inset-y-1 flex min-w-12 items-center rounded border border-border bg-card px-1.5"
-                style={{
-                  left: `${totalMs > 0 ? (segment.startMs / totalMs) * 100 : 0}%`,
-                  width: getSegmentWidth(segment, totalMs),
-                }}
-                data-testid={`timeline-node-overlay-${segment.id}`}
-              >
-                <span className="truncate text-[9px] font-medium text-foreground/75">
-                  {segment.overlayText}
-                </span>
-              </div>
-            ))}
+            <div
+              className="absolute inset-x-2 inset-y-1"
+              data-testid={`timeline-overlay-track-${node.id}`}
+            >
+              {overlaySegments.map((segment) => (
+                <div
+                  key={segment.id}
+                  className="absolute inset-y-0 flex min-w-12 items-center rounded border border-border bg-card px-1.5"
+                  style={{
+                    left: `${totalMs > 0 ? (segment.startMs / totalMs) * 100 : 0}%`,
+                    width: getSegmentWidth(segment, totalMs),
+                  }}
+                  data-testid={`timeline-node-overlay-${segment.id}`}
+                >
+                  <span className="truncate text-[9px] font-medium text-foreground/75">
+                    {segment.overlayText}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
 
         {audioSegments.length > 0 ? (
           <div
-            className="flex h-7 items-center gap-px rounded-md border border-border bg-secondary/30 px-2"
+            className="flex h-10 items-center gap-[1.5px] rounded-md border border-border bg-secondary/40 px-2.5"
             data-testid={`timeline-audio-preview-${node.id}`}
             aria-label="Audio beat preview"
           >
             {Array.from({ length: 36 }, (_, index) => (
               <span
                 key={index}
-                className="flex-1 rounded-full bg-accent/45"
+                className="flex-1 rounded-full bg-accent/65"
                 style={{ height: `${MINI_WAVE_HEIGHTS[index % MINI_WAVE_HEIGHTS.length]}%` }}
               />
             ))}
