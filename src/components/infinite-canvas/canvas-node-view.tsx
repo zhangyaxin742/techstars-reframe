@@ -693,7 +693,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           data-testid={`canvas-node-create-timeline-${node.id}`}
           aria-label={`Generate timeline from ${node.title}`}
           className={cn(
-            "peer absolute left-full top-1/2 z-30 ml-3 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border",
+            "peer absolute left-1/2 top-full z-30 mt-3 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border",
             "border-accent bg-accent text-accent-foreground shadow-[rgba(0,0,0,0.12)_0px_5px_12px_0px]",
             "transition-colors hover:bg-accent/90",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

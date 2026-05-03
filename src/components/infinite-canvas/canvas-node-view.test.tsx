@@ -84,8 +84,8 @@ describe("CanvasNodeView", () => {
     expect(video.loop).toBe(true);
     expect(video.muted).toBe(true);
     expect(video.playsInline).toBe(true);
-    expect(plusButton).toHaveClass("left-full");
-    expect(plusButton).toHaveClass("ml-3");
+    expect(plusButton).toHaveClass("top-full");
+    expect(plusButton).toHaveClass("mt-3");
     expect(
       within(screen.getByTestId("canvas-node-card-recipe-1")).queryByTestId(
         "canvas-node-create-timeline-recipe-1"

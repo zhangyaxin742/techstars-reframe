@@ -473,8 +473,14 @@ export function App() {
       const previewHeight = 380;
       const canvasNodeGap = 96;
       const previewNodeGap = 64;
+      const trendSourceRightEdge = Math.max(
+        recipeNode.position.x + recipeNode.size.width,
+        ...nodes
+          .filter(isTrendSourceNode)
+          .map((node) => node.position.x + node.size.width)
+      );
       const timelinePosition = {
-        x: recipeNode.position.x + recipeNode.size.width + canvasNodeGap,
+        x: trendSourceRightEdge + canvasNodeGap,
         y: recipeNode.position.y,
       };
       setSelectedNodeIds(new Set([recipeNodeId]));
@@ -535,7 +541,7 @@ export function App() {
         },
       });
     },
-    [flowStep, queueTimeout, recipeSequenceStarted, startToolSequence, upsertTimelineConnection]
+    [flowStep, nodes, queueTimeout, recipeSequenceStarted, startToolSequence, upsertTimelineConnection]
   );
 
   const handleBottomPromptChange = useCallback((value: string) => {

@@ -67,28 +67,31 @@ describe("infinite canvas geometry", () => {
     expect(nodeCenter.y).toBeCloseTo(300);
   });
 
-  it("centers a trend recipe group as the viewport focus", () => {
+  it("centers a horizontal trend video group as the viewport focus", () => {
     const recipeNodes: CanvasNode[] = [
       {
         id: "recipe-1",
-        kind: "trend-recipe",
-        title: "Recipe 1",
+        kind: "video",
+        title: "Founder confessional",
+        video: { src: "/videos/trend1.mp4", label: "trend" },
         position: { x: 1096, y: 0 },
-        size: { width: 300, height: 200 },
+        size: { width: 220, height: 391 },
       },
       {
         id: "recipe-2",
-        kind: "trend-recipe",
-        title: "Recipe 2",
-        position: { x: 1096, y: 280 },
-        size: { width: 300, height: 200 },
+        kind: "video",
+        title: "Process cutdown",
+        video: { src: "/videos/trend2.mp4", label: "trend" },
+        position: { x: 1356, y: 0 },
+        size: { width: 220, height: 391 },
       },
       {
         id: "recipe-3",
-        kind: "trend-recipe",
-        title: "Recipe 3",
-        position: { x: 1096, y: 560 },
-        size: { width: 300, height: 200 },
+        kind: "video",
+        title: "Customer proof remix",
+        video: { src: "/videos/trend3.mp4", label: "trend" },
+        position: { x: 1616, y: 0 },
+        size: { width: 220, height: 391 },
       },
     ];
     const bounds = calculateSelectionBounds(
@@ -96,7 +99,7 @@ describe("infinite canvas geometry", () => {
       new Set(["recipe-1", "recipe-2", "recipe-3"])
     );
     const viewport = fitBoundsToViewport(bounds!, { width: 900, height: 600 }, 120, 0.25, 0.95);
-    const recipeGroupCenter = worldToScreen({ x: 1246, y: 380 }, viewport);
+    const recipeGroupCenter = worldToScreen({ x: 1466, y: 195.5 }, viewport);
 
     expect(recipeGroupCenter.x).toBeCloseTo(450);
     expect(recipeGroupCenter.y).toBeCloseTo(300);
