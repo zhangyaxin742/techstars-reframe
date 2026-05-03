@@ -14,10 +14,8 @@ interface CanvasPromptBoxProps {
   onDragHandlePointerDown?: (event: React.PointerEvent) => void;
 }
 
-const countOptions = [1, 2, 3, 4] as const;
-
 export const CanvasPromptBox = memo(function CanvasPromptBox({
-  title,
+  title: _title,
   data,
   selected,
   onChange,
@@ -36,7 +34,6 @@ export const CanvasPromptBox = memo(function CanvasPromptBox({
   const placeholder = data?.placeholder ?? "Describe your edit...";
   const trimmedValue = value.trim();
   const canSubmit = isEditing && !isLocked && trimmedValue.length > 0 && Boolean(onSubmit);
-  const activeCount = data?.count ?? 1;
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -70,30 +67,27 @@ export const CanvasPromptBox = memo(function CanvasPromptBox({
     >
       <div
         className={cn(
-          "relative overflow-hidden rounded-[28px] border border-black/[0.04] bg-neutral-100/60 p-1 shadow-lg backdrop-blur-xl",
+          "paper relative overflow-hidden rounded-2xl border border-border bg-card p-1",
+          "shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]",
           selected && "ring-2 ring-ring"
         )}
       >
-        <div className="overflow-hidden min-h-0">
-          <div className="px-2 pb-3 pt-2">
-            <div className="relative size-12 overflow-hidden rounded-2xl border border-transparent bg-white/80 shadow-md ring-1 ring-border/50 min-[480px]:size-16 sm:size-24">
-              {data?.sourceImageUrl ? (
+        {data?.sourceImageUrl ? (
+          <div className="overflow-hidden min-h-0">
+            <div className="px-2 pb-3 pt-2">
+              <div className="relative size-12 overflow-hidden rounded-xl border border-border bg-secondary shadow-sm min-[480px]:size-16 sm:size-24">
                 <img
                   src={data.sourceImageUrl}
                   alt={data.sourceAlt ?? ""}
                   className="size-full object-cover"
                   draggable={Boolean(0)}
                 />
-              ) : (
-                <div className="flex size-full items-center justify-center bg-secondary text-xs font-medium uppercase text-muted-foreground">
-                  {title?.slice(0, 2) ?? "In"}
-                </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
 
-        <div className="relative overflow-hidden rounded-[24px] border border-black/[0.08] bg-white/80 shadow-sm backdrop-blur-md">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-background shadow-sm">
           <div className="relative px-4 py-3">
             {isEditing ? (
               <textarea
@@ -120,36 +114,6 @@ export const CanvasPromptBox = memo(function CanvasPromptBox({
               </p>
             )}
           </div>
-
-          {isEditing ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-2">
-              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                {(data?.badges ?? []).map((badge) => (
-                  <span
-                    key={badge}
-                    className="h-8 rounded-3xl border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-muted-foreground"
-                  >
-                    {badge}
-                  </span>
-                ))}
-              </div>
-              <div className="flex-1" />
-              <div className="flex h-8 items-center rounded-3xl bg-neutral-100 p-1">
-                {countOptions.map((count) => (
-                  <span
-                    key={count}
-                    className={cn(
-                      "flex size-6 items-center justify-center rounded-full text-xs tabular-nums text-muted-foreground",
-                      activeCount === count && "bg-card text-foreground shadow-sm"
-                    )}
-                  >
-                    {count}
-                  </span>
-                ))}
-              </div>
-              <div className="ml-auto w-8" />
-            </div>
-          ) : null}
         </div>
       </div>
 
