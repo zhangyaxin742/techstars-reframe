@@ -44,7 +44,7 @@ type PreviewCameraIntent = {
 };
 
 const BRAND_CONTEXT_HANDOFF_PAUSE_MS = 4200;
-
+const CONNECTION_DRAW_IN_MS = 550;
 function toolCallsThroughIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
@@ -248,6 +248,8 @@ export function App() {
             onDone: () => {
               setFlowStep("recipes-ready");
               setTrendRecipePhase("revealing");
+              setAnimatedConnectionIds(new Set(["ctx-r1", "ctx-r2", "ctx-r3"]));
+              queueTimeout(() => setAnimatedConnectionIds(new Set()), CONNECTION_DRAW_IN_MS);
             },
           });
         }, BRAND_CONTEXT_HANDOFF_PAUSE_MS);
@@ -629,7 +631,7 @@ export function App() {
       );
       setConnections((currentConnections) => upsertTimelineConnection(currentConnections, recipeNodeId));
       setAnimatedConnectionIds(new Set([connectionId]));
-      queueTimeout(() => setAnimatedConnectionIds(new Set()), 550);
+      queueTimeout(() => setAnimatedConnectionIds(new Set()), CONNECTION_DRAW_IN_MS);
       setMessages((currentMessages) => [
         ...currentMessages,
         {

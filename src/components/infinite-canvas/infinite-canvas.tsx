@@ -79,6 +79,7 @@ interface ConnectionPathSpec {
   d: string;
   isTimelineConnection: boolean;
   isBrandFeedConnection: boolean;
+  renderSvg: boolean;
 }
 
 function isTextEditingTarget(target: EventTarget | null) {
@@ -104,6 +105,8 @@ function buildConnectionPath({
   const connectsTrendToTimeline = isTrendSourceNode(sourceNode) && targetNode.kind === "timeline";
   const connectsBrandToTrend =
     sourceNode.kind === "brand-context" && isTrendSourceNode(targetNode);
+  const connectsLibraryToTimeline =
+    sourceNode.kind === "media" && targetNode.kind === "timeline";
 
   const sourceX = connectsTrendToTimeline
     ? (sourcePosition.x + sourceNode.size.width / 2 - viewport.offset.x) * viewport.zoom
@@ -124,6 +127,7 @@ function buildConnectionPath({
       d: `M ${sourceX} ${sourceY} C ${sourceX} ${midpointY}, ${targetX} ${midpointY}, ${targetX} ${targetY}`,
       isTimelineConnection: true,
       isBrandFeedConnection: false,
+      renderSvg: false,
     };
   }
 
@@ -134,6 +138,18 @@ function buildConnectionPath({
       d: `M ${sourceX} ${sourceY} C ${sourceX + controlOffset} ${sourceY}, ${targetX - controlOffset} ${targetY}, ${targetX} ${targetY}`,
       isTimelineConnection: false,
       isBrandFeedConnection: true,
+      renderSvg: true,
+    };
+  }
+
+  if (connectsLibraryToTimeline) {
+    const gap = Math.max(targetX - sourceX, 0);
+    const controlOffset = Math.min(Math.max(gap * 0.36, 26), 44);
+    return {
+      d: `M ${sourceX} ${sourceY} C ${sourceX + controlOffset} ${sourceY}, ${targetX - controlOffset} ${targetY}, ${targetX} ${targetY}`,
+      isTimelineConnection: true,
+      isBrandFeedConnection: true,
+      renderSvg: true,
     };
   }
 
@@ -142,6 +158,7 @@ function buildConnectionPath({
     d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
     isTimelineConnection: sourceNode.kind === "timeline" && targetNode.kind === "preview",
     isBrandFeedConnection: false,
+    renderSvg: true,
   };
 }
 
@@ -565,6 +582,7 @@ export function InfiniteCanvas({
             d: path.d,
             isTimelineConnection: path.isTimelineConnection,
             isBrandFeedConnection: path.isBrandFeedConnection,
+            renderSvg: path.renderSvg,
           };
         })
         .filter(
@@ -575,6 +593,7 @@ export function InfiniteCanvas({
             d: string;
             isTimelineConnection: boolean;
             isBrandFeedConnection: boolean;
+            renderSvg: boolean;
           } =>
             path !== null
         ),
@@ -628,6 +647,9 @@ export function InfiniteCanvas({
         aria-hidden="true"
       >
         {connectionPaths.map((connectionPath) => {
+          if (!connectionPath.renderSvg) {
+            return null;
+          }
           const animateIn = animatedConnectionIds?.has(connectionPath.id) ?? false;
           return (
             <motion.path

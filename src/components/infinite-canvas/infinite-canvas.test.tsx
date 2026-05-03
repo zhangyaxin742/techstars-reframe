@@ -195,7 +195,7 @@ describe("InfiniteCanvas", () => {
     expect(secondControlY).toBe(targetY);
   });
 
-  it("draws trend-to-timeline connections from the source bottom to timeline top", () => {
+  it("keeps trend-to-timeline handoff out of the svg connection layer", () => {
     vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
     const trendTimelineNodes: CanvasNode[] = [
       {
@@ -220,16 +220,61 @@ describe("InfiniteCanvas", () => {
 
     renderCanvas({ nodes: trendTimelineNodes, connections });
 
-    const path = screen.getByTestId("canvas-connection-r1-tl").getAttribute("d") ?? "";
+    expect(screen.queryByTestId("canvas-connection-r1-tl")).not.toBeInTheDocument();
+  });
+
+  it("draws library-to-timeline connections with the same bezier family as brand-to-trend", () => {
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    const libraryTimelineNodes: CanvasNode[] = [
+      {
+        id: "library",
+        kind: "media",
+        title: "Library",
+        position: { x: 0, y: 732 },
+        size: { width: 1000, height: 420 },
+      },
+      {
+        id: "timeline-1",
+        kind: "timeline",
+        title: "Founder Confessional",
+        position: { x: 1096, y: 583 },
+        size: { width: 480, height: 280 },
+      },
+    ];
+    const connections: CanvasConnection[] = [
+      { id: "library-tl", sourceNodeId: "library", targetNodeId: "timeline-1" },
+    ];
+
+    renderCanvas({ nodes: libraryTimelineNodes, connections });
+
+    const layer = screen.getByTestId("canvas-node-library").parentElement;
+    if (!layer) {
+      throw new Error("Expected a canvas transform layer");
+    }
+
+    const layerTransform = readLayerTransform(layer);
+    const libraryPosition = readTranslate(screen.getByTestId("canvas-node-library"));
+    const timelinePosition = readTranslate(screen.getByTestId("canvas-node-timeline-1"));
+    const path = screen.getByTestId("canvas-connection-library-tl").getAttribute("d") ?? "";
     const numbers = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
-    const [sourceX, sourceY, firstControlX, firstControlY, secondControlX, secondControlY, targetX, targetY] = numbers;
+    const [sourceX, sourceY, firstControlX, firstControlY, secondControlX, secondControlY, targetX, targetY] =
+      numbers;
 
     expect(path).toMatch(/^M /);
-    expect(sourceY).toBeLessThan(targetY);
-    expect(firstControlX).toBe(sourceX);
-    expect(secondControlX).toBe(targetX);
-    expect(firstControlY).toBeCloseTo((sourceY + targetY) / 2);
-    expect(secondControlY).toBeCloseTo((sourceY + targetY) / 2);
+    expect(sourceX).toBeCloseTo(layerTransform.x + (libraryPosition.x + 1000) * layerTransform.zoom);
+    expect(sourceY).toBeCloseTo(layerTransform.y + (libraryPosition.y + 210) * layerTransform.zoom);
+    expect(targetX).toBeCloseTo(layerTransform.x + timelinePosition.x * layerTransform.zoom);
+    expect(targetY).toBeCloseTo(layerTransform.y + (timelinePosition.y + 140) * layerTransform.zoom);
+    expect(firstControlX).toBeGreaterThan(sourceX);
+    expect(firstControlX).toBeLessThan(targetX);
+    expect(firstControlY).toBe(sourceY);
+    expect(secondControlX).toBeGreaterThan(firstControlX);
+    expect(secondControlX).toBeLessThan(targetX);
+    expect(secondControlY).toBe(targetY);
+    expect(screen.getByTestId("canvas-connection-library-tl")).toHaveAttribute(
+      "stroke",
+      "rgb(0, 129, 192)"
+    );
   });
 
   it("pans instead of marquee selecting while space is held", async () => {

@@ -266,7 +266,7 @@ describe("App", () => {
       "timeline-1"
     );
     expect(screen.queryByTestId("canvas-node-create-timeline-recipe-1")).not.toBeInTheDocument();
-    expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
+    expect(screen.queryByTestId("canvas-connection-r1-tl")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toHaveClass("top-full");
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toHaveClass("h-48");
@@ -287,7 +287,7 @@ describe("App", () => {
     });
 
     expect(screen.getByText(/Timeline is filled/)).toBeInTheDocument();
-    expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
+    expect(screen.queryByTestId("canvas-connection-r1-tl")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-connection-tl-prev")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-connection-tl-prev")).toHaveAttribute(
       "stroke",
