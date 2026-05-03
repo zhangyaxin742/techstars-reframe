@@ -111,8 +111,8 @@ export function ChatHistoryPanel({
         aria-label={open ? "Collapse chat history" : "Expand chat history"}
         aria-expanded={open}
         className={cn(
-          "flex items-center gap-2 self-end rounded-full border bg-card px-4 py-2 shadow-lg transition-shadow hover:shadow-xl",
-          isActive && "border-accent/40"
+          "flex items-center gap-2 self-end rounded-full border border-border bg-card px-4 py-2 shadow-[rgba(0,0,0,0.15)_0px_2px_6px_0px] transition-shadow hover:shadow-[rgba(0,0,0,0.2)_0px_4px_12px_0px]",
+          isActive && "border-accent/60"
         )}
         whileTap={{ scale: 0.96 }}
       >
@@ -148,31 +148,11 @@ export function ChatHistoryPanel({
         aria-hidden={!open}
         inert={open ? undefined : true}
         className={cn(
-          "flex flex-col overflow-hidden rounded-2xl border bg-card shadow-xl",
+          "flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]",
           open ? "pointer-events-auto" : "pointer-events-none select-none"
         )}
         style={{ maxHeight: "calc(100dvh - 5rem)" }}
       >
-            {/* Header */}
-            <div className="flex h-10 shrink-0 items-center justify-between border-b px-3">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                {isActive ? (
-                  <CircleDashed className="size-3 animate-spin text-accent" />
-                ) : (
-                  <ChatCircleDots className="size-3.5" />
-                )}
-                Chat History
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="flex size-6 items-center justify-center rounded text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                aria-label="Collapse chat history"
-              >
-                <CaretDown className="size-3.5" />
-              </button>
-            </div>
-
             {/* Messages */}
             <ChatContainerRoot className="scrollbar-hover-visible min-h-0 flex-1 px-3 py-3">
               <ChatContainerContent className="space-y-3">
@@ -224,7 +204,7 @@ export function ChatHistoryPanel({
                             return (
                               <span
                                 key={badge.id}
-                                className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-foreground"
                               >
                                 <Icon className="size-2.5" weight="fill" />
                                 {badge.label}
@@ -243,7 +223,7 @@ export function ChatHistoryPanel({
             {/* Input area */}
             {onPromptSubmit || onPromptChange ? (
               <div className="shrink-0 border-t p-2">
-                <div className="flex flex-col rounded-xl border bg-secondary/40">
+                <div className="flex flex-col rounded-xl border border-border bg-background shadow-[rgba(0,0,0,0.05)_0px_1px_8px_0px]">
                   {promptSourceImageUrl && (
                     <div className="px-3 pt-2.5">
                       <img
@@ -311,7 +291,7 @@ export function ChatHistoryPanel({
                         className={cn(
                           "flex size-7 items-center justify-center rounded-lg transition",
                           canSubmit
-                            ? "bg-neutral-800 text-white hover:bg-neutral-700 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-300"
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
                             : "text-muted-foreground opacity-40"
                         )}
                       >
