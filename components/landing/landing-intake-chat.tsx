@@ -18,7 +18,7 @@ import {
   YoutubeLogo,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,8 +63,6 @@ const platformColors: Record<SourcePlatform, string> = {
 
 const landingMediaImportOptions: MediaImportOption[] = [
   { id: "imp-upload", platform: "upload", label: "Upload Files", description: "Photos, videos, logos", icon: "upload" },
-  { id: "imp-images", platform: "image-library", label: "Image Library", description: "Bring in stills and product shots", icon: "image-library" },
-  { id: "imp-video", platform: "video-library", label: "Video Library", description: "Import clips, reels, and b-roll", icon: "video-library" },
   { id: "imp-gdrive", platform: "google-drive", label: "Google Drive", description: "Connect your Drive folder", icon: "google-drive" },
   { id: "imp-icloud", platform: "icloud", label: "iCloud Drive", description: "Pull media from iCloud folders", icon: "icloud" },
   { id: "imp-shopify", platform: "shopify", label: "Shopify / Website", description: "Pull product images", icon: "shopify" },
@@ -95,6 +93,7 @@ interface LandingIntakeChatProps {
 
 export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [sources, setSources] = useState<SourceBadge[]>([]);
   const [queuedImports, setQueuedImports] = useState<SourceBadge[]>([]);
@@ -115,6 +114,14 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
     return () => {
       window.clearInterval(intervalId);
     };
+  }, [inputValue]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "0px";
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }, [inputValue]);
 
   const queueImport = useCallback((option: MediaImportOption) => {
@@ -208,7 +215,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
 
         {phase === "input" && (
           <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-[rgba(26,22,14,0.8)] shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-            <div className="flex min-h-[172px] flex-col px-4 py-4 sm:min-h-[184px] sm:px-5 sm:py-5">
+            <div className="flex min-h-[128px] flex-col px-4 py-4 sm:min-h-[136px] sm:px-5 sm:py-5">
               {queuedImports.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2" data-testid="queued-imports">
                   {queuedImports.map((source) => {
@@ -228,12 +235,13 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
 
               <textarea
                 data-testid="intake-input"
-                rows={3}
+                ref={textareaRef}
+                rows={1}
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
                 onPaste={handlePaste}
                 placeholder={rotatingPlaceholders[placeholderIndex]}
-                className="min-h-[88px] w-full flex-1 resize-none bg-transparent text-sm leading-relaxed text-cream outline-none placeholder:text-cream/35 sm:text-[0.95rem]"
+                className="min-h-[3.75rem] w-full resize-none overflow-hidden bg-transparent text-sm leading-relaxed text-cream outline-none placeholder:text-cream/35 sm:text-[0.95rem]"
                 onKeyDown={(event) => {
                   if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
                     event.preventDefault();
@@ -248,18 +256,20 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                     <button
                       type="button"
                       aria-label="Add import source"
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/6 text-cream/90 transition hover:border-gold/50 hover:bg-gold/10 hover:text-gold"
+                      aria-pressed={isImportMenuOpen}
+                      className={`flex size-8 shrink-0 items-center justify-center rounded-full text-cream/72 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 ${
+                        isImportMenuOpen
+                          ? "bg-gold/12 text-gold ring-1 ring-gold/35"
+                          : "hover:bg-white/8 hover:text-gold"
+                      }`}
                     >
-                      <Plus className="size-4" weight="bold" />
+                      <Plus className="size-5" weight="bold" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
                     className="w-[16rem] rounded-2xl border border-white/10 bg-[rgba(18,14,9,0.96)] p-2 text-cream shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
                   >
-                    <div className="px-3 pb-2 pt-1 text-[10px] uppercase tracking-[0.22em] text-gold/80">
-                      {importMenuView === "root" ? "Import Sources" : importMenuView === "link" ? "Link Sources" : "Media Sources"}
-                    </div>
                     <div className="space-y-1">
                       {importMenuView === "root" ? (
                         <>

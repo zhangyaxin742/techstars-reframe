@@ -130,12 +130,13 @@ a {
 
 .animate-landing-start-frame {
   animation: landing-start-frame 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transform-origin: 52% 34%;
+  transform-origin: 50% 41%;
   will-change: transform, opacity;
 }
 
 .animate-landing-end-frame {
   animation: landing-end-frame 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: 50% 43%;
   will-change: transform, opacity;
 }
 
@@ -152,29 +153,29 @@ a {
 
   72% {
     opacity: 1;
-    transform: scale(1.42) translate3d(-1.5%, -8%, 0);
+    transform: scale(1.95) translate3d(-0.7%, -17%, 0);
   }
 
   100% {
     opacity: 0;
-    transform: scale(1.48) translate3d(-2%, -10%, 0);
+    transform: scale(2.2) translate3d(-0.9%, -21%, 0);
   }
 }
 
 @keyframes landing-end-frame {
   0% {
     opacity: 0;
-    transform: scale(1.08);
+    transform: scale(1.62) translate3d(0, -8%, 0);
   }
 
   58% {
     opacity: 0;
-    transform: scale(1.06);
+    transform: scale(1.58) translate3d(0, -9%, 0);
   }
 
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1.5) translate3d(0, -11.5%, 0);
   }
 }
 

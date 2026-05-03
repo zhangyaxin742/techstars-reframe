@@ -8,12 +8,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-vi.mock("next/image", () => ({
-  default: ({ alt, src, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img alt={alt} src={typeof src === "string" ? src : ""} {...props} />
-  ),
-}));
-
 describe("Hero", () => {
   beforeEach(() => {
     mockPush.mockClear();

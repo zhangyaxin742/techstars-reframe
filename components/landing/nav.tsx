@@ -14,7 +14,7 @@ export function LandingNav({ onWaitlistClick }: LandingNavProps) {
         <button
           type="button"
           onClick={onWaitlistClick}
-          className="landing-wordmark font-display text-[1.55rem] lowercase tracking-wordmark text-cream underline decoration-cream/70 underline-offset-[0.16em] transition-colors duration-200 hover:text-gold sm:text-[1.8rem]"
+          className="landing-wordmark font-display text-[1.55rem] lowercase tracking-wordmark text-cream decoration-cream/70 transition-colors duration-200 hover:text-gold sm:text-[1.8rem]"
         >
           waitlist
         </button>

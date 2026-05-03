@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { LandingIntakeChat } from "./landing-intake-chat";
@@ -47,6 +47,35 @@ describe("LandingIntakeChat", () => {
     expect(screen.getByText("YouTube")).toBeInTheDocument();
     expect(screen.getByText("Shopify / Website")).toBeInTheDocument();
     expect(screen.queryByText("iCloud Drive")).not.toBeInTheDocument();
+  });
+
+  it("highlights the plus trigger while the import menu is open", async () => {
+    const user = userEvent.setup();
+    render(<LandingIntakeChat />);
+
+    const trigger = screen.getByRole("button", { name: "Add import source" });
+    expect(trigger).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(trigger);
+
+    expect(trigger).toHaveAttribute("aria-pressed", "true");
+    expect(trigger).toHaveClass("bg-gold/12");
+  });
+
+  it("auto-expands the intake textarea as more text is entered", async () => {
+    render(<LandingIntakeChat />);
+
+    const textarea = screen.getByTestId("intake-input") as HTMLTextAreaElement;
+    Object.defineProperty(textarea, "scrollHeight", {
+      configurable: true,
+      value: 144,
+    });
+
+    fireEvent.change(textarea, {
+      target: { value: "line one\nline two\nline three\nline four" },
+    });
+
+    expect(textarea.style.height).toBe("144px");
   });
 
   it("shows source badges after submitting brand context", async () => {
