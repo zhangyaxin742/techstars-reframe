@@ -63,10 +63,6 @@ a {
   text-decoration: none;
 }
 
-[data-sidebar-inset] {
-  scrollbar-gutter: stable;
-}
-
 .font-display {
   font-family: var(--font-display), serif;
 }
@@ -138,4 +134,3 @@ a {
     scroll-behavior: auto;
   }
 }
-
