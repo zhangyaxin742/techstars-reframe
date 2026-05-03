@@ -4,7 +4,7 @@
 The preview node currently shows an Instagram publishing state with a progress bar and then only two published metrics: views and likes. That state proves the publish handoff, but it does not feel close enough to the compact performance summary a founder would expect from Instagram insights.
 
 ## Approved Approach
-Keep the card compact and restrained, but make the published state read more like a mini insights summary. Views becomes the hero metric. Likes, saves, and shares become smaller support metrics with distinct icons and tinted chips. A secondary summary row adds reach plus a derived engagement-rate signal so the card communicates distribution and response, not just vanity counts.
+Keep the card compact and restrained, but make the published state read more like a mini insights summary. Views becomes the hero metric. Likes, saves, and shares remain the supporting metrics, but their cards should align to the workspace design system: stronger neutral contrast, token-led surfaces, darker labels, and color limited to icon chips and restrained border accents instead of full tinted backgrounds. A secondary summary row adds reach plus a derived engagement-rate signal so the card communicates distribution and response, not just vanity counts.
 
 ## Alternatives Considered
 - Keep the current two-metric layout and only add color: cheaper, but it still under-represents the analytics story.
@@ -15,6 +15,7 @@ Keep the card compact and restrained, but make the published state read more lik
 - Published state promotes views as the top metric.
 - Published state includes distinct supporting metrics for likes, saves, and shares.
 - Published state includes secondary summary values for reach and engagement rate.
+- Metric cards align with the workspace palette using `bg-card` / `bg-secondary` style surfaces rather than ad hoc saturated fills.
 - Existing publish animation and viewport focus behavior continue to work.
 
 ## Verification
