@@ -86,6 +86,7 @@ describe("CanvasNodeView", () => {
     expect(video.playsInline).toBe(true);
     expect(plusButton).toHaveClass("top-full");
     expect(plusButton).toHaveClass("mt-3");
+    expect(screen.queryByRole("button", { name: /more info/i })).not.toBeInTheDocument();
     expect(
       within(screen.getByTestId("canvas-node-card-recipe-1")).queryByTestId(
         "canvas-node-create-timeline-recipe-1"
@@ -106,6 +107,43 @@ describe("CanvasNodeView", () => {
 
     fireEvent.click(plusButton);
     expect(onCreateTimelineFromTrend).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens a trend breakdown dialog from the founder confessional video", () => {
+    const onCreateTimelineFromTrend = vi.fn();
+
+    renderNode(
+      {
+        id: "recipe-1",
+        kind: "video",
+        title: "Founder confessional",
+        body: "\"This is why regular hiking pants never worked for me.\"",
+        video: {
+          src: "/videos/trend1.mp4",
+          label: "trend",
+          meta: "Hook refresh",
+          detailsImage: {
+            src: "/assets/trending%20demo%20timeline/founder_confessional.png",
+            alt: "Detailed breakdown of the Founder Confessional video trend",
+          },
+        },
+        position: { x: 0, y: 0 },
+        size: { width: 220, height: 391 },
+      },
+      { onCreateTimelineFromTrend }
+    );
+
+    const moreInfoButton = screen.getByRole("button", { name: /more info/i });
+
+    fireEvent.pointerDown(moreInfoButton);
+    fireEvent.click(moreInfoButton);
+
+    expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
+    expect(screen.getByAltText("Detailed breakdown of the Founder Confessional video trend")).toHaveAttribute(
+      "src",
+      "/assets/trending%20demo%20timeline/founder_confessional.png"
+    );
+    expect(onCreateTimelineFromTrend).not.toHaveBeenCalled();
   });
 
   it("renders the timeline node as a compact non-editable visual preview", () => {

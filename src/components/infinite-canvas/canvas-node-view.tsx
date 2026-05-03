@@ -1,11 +1,12 @@
 import React, { memo, useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, FilmSlate, InstagramLogo, Play, Target, TrendUp, Warning } from "@phosphor-icons/react";
+import { CheckCircle, FilmSlate, Info, InstagramLogo, Play, Target, TrendUp, Warning } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { isTrendSourceNode, type CanvasNode, type CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { MockVideoPreview } from "../preview/mock-video-preview";
 import { brandContext, type TimelineSegment } from "../../data/reframe-demo";
 
@@ -361,6 +362,16 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
     setActive(false);
   }, []);
 
+  const handleCardFocus = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) return;
+    playVideo();
+  }, [playVideo]);
+
+  const handleCardBlur = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) return;
+    pauseVideo();
+  }, [pauseVideo]);
+
   if (!node.video?.src) {
     return (
       <div className="space-y-1 p-3">
@@ -381,8 +392,8 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
       data-testid={`trend-video-reveal-${node.id}`}
       onMouseEnter={playVideo}
       onMouseLeave={pauseVideo}
-      onFocus={playVideo}
-      onBlur={pauseVideo}
+      onFocus={handleCardFocus}
+      onBlur={handleCardBlur}
     >
       <video
         ref={videoRef}
@@ -416,6 +427,48 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
           {active ? "Playing" : "Hover to play"}
         </span>
       </motion.div>
+      {node.video.detailsImage ? (
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              data-testid={`trend-video-more-info-${node.id}`}
+              className={cn(
+                "absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-md border border-white/15 bg-black/55 px-2 py-1",
+                "text-[10px] font-medium text-white/85 shadow-sm transition-colors hover:bg-black/70",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              )}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
+              onFocus={(event) => {
+                event.stopPropagation();
+              }}
+              onBlur={(event) => {
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <Info className="size-3 shrink-0" weight="bold" />
+              <span>More info</span>
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-5xl p-3 sm:p-4">
+            <DialogTitle className="sr-only">{node.title} trend breakdown</DialogTitle>
+            <DialogDescription className="sr-only">
+              Detailed visual breakdown of the {node.title} video trend.
+            </DialogDescription>
+            <img
+              src={node.video.detailsImage.src}
+              alt={node.video.detailsImage.alt}
+              className="h-auto w-full rounded-md border border-border object-contain"
+              draggable={false}
+            />
+          </DialogContent>
+        </Dialog>
+      ) : null}
       <motion.div
         className="absolute inset-x-0 bottom-0 space-y-1 bg-black/65 p-3 text-white backdrop-blur-sm"
         data-testid={`trend-video-bottom-overlay-${node.id}`}

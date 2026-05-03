@@ -500,6 +500,10 @@ export const reframeDemoNodes: CanvasNode[] = [
       src: trendVideos[0].src,
       label: trendVideos[0].label,
       meta: trendVideos[0].meta,
+      detailsImage: {
+        src: `${trendingTimelineAssetBase}/founder_confessional.png`,
+        alt: "Detailed breakdown of the Founder Confessional video trend",
+      },
     },
     position: { x: 1096, y: 0 },
     size: { width: 220, height: 391 },

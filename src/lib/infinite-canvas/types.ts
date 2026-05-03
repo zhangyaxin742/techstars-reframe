@@ -33,6 +33,10 @@ export interface CanvasVideoData {
   src: string;
   label?: "trend" | "explore" | "media";
   meta?: string;
+  detailsImage?: {
+    src: string;
+    alt: string;
+  };
 }
 
 export interface CanvasPromptBoxData {
