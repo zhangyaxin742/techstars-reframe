@@ -293,8 +293,8 @@ export function App() {
     return {
       id: "brand-context",
       nodeIds: ["brand-ctx"],
-      padding: 96,
-      maxZoom: 0.95,
+      padding: { top: 104, right: 384, bottom: 104, left: 72 },
+      maxZoom: 0.72,
       delayMs: 180,
       durationMs: 950,
     };

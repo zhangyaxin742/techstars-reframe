@@ -101,4 +101,30 @@ describe("infinite canvas geometry", () => {
     expect(recipeGroupCenter.x).toBeCloseTo(450);
     expect(recipeGroupCenter.y).toBeCloseTo(300);
   });
+
+  it("supports asymmetric padding for a right-side overlay while fitting a focused node", () => {
+    const brandNode: CanvasNode = {
+      id: "brand-ctx",
+      kind: "brand-context",
+      title: "Brand Context",
+      position: { x: 0, y: 0 },
+      size: { width: 1000, height: 700 },
+    };
+    const viewportWidth = 900;
+    const rightOverlayPadding = 384;
+    const bounds = calculateSelectionBounds([brandNode], new Set(["brand-ctx"]));
+    const viewport = fitBoundsToViewport(
+      bounds!,
+      { width: viewportWidth, height: 600 },
+      { top: 104, right: rightOverlayPadding, bottom: 104, left: 72 },
+      0.25,
+      0.72
+    );
+    const leftEdge = worldToScreen({ x: 0, y: 350 }, viewport).x;
+    const rightEdge = worldToScreen({ x: 1000, y: 350 }, viewport).x;
+
+    expect(viewport.zoom).toBeLessThan(0.5);
+    expect(leftEdge).toBeGreaterThanOrEqual(72);
+    expect(rightEdge).toBeLessThanOrEqual(viewportWidth - rightOverlayPadding);
+  });
 });

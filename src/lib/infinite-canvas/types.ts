@@ -10,6 +10,13 @@ export interface CanvasSize {
 
 export interface CanvasRect extends CanvasPoint, CanvasSize {}
 
+export interface CanvasViewportPadding {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
+
 export type CanvasNodeKind =
   | "image"
   | "note"
@@ -62,7 +69,7 @@ export interface CanvasViewportState {
 export interface CanvasViewportFocus {
   id: string;
   nodeIds: string[];
-  padding?: number;
+  padding?: number | CanvasViewportPadding;
   minZoom?: number;
   maxZoom?: number;
   delayMs?: number;
