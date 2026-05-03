@@ -19,7 +19,7 @@ import type {
 import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNavigationRail } from "./canvas-navigation-rail";
-import { CanvasNodeView } from "./canvas-node-view";
+import { CanvasNodeView, type BrandCtxPhase, type TrendRecipePhase } from "./canvas-node-view";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { MarqueeOverlay } from "./marquee-overlay";
 import { SelectionToolbar } from "./selection-toolbar";
@@ -38,6 +38,8 @@ interface InfiniteCanvasProps {
   onPromptChange?: (nodeId: string, value: string) => void;
   onPromptSubmit?: (nodeId: string, value: string) => void;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
+  brandCtxPhase?: BrandCtxPhase;
+  trendRecipePhase?: TrendRecipePhase;
   className?: string;
 }
 
@@ -69,6 +71,8 @@ export function InfiniteCanvas({
   onPromptChange,
   onPromptSubmit,
   resolveImageUrl,
+  brandCtxPhase,
+  trendRecipePhase,
   className,
 }: InfiniteCanvasProps) {
   const { containerRef, viewport, setViewport, panByScreenDelta, wheelPan, zoomAtPoint } =
@@ -140,14 +144,19 @@ export function InfiniteCanvas({
         y: event.clientY - rect.top,
       };
 
+      // Normalize across deltaMode: 0=pixel (default), 1=line (~16px), 2=page (~300px)
+      const lineSize = 16;
+      const pageSize = 300;
+      const multiplier = event.deltaMode === 1 ? lineSize : event.deltaMode === 2 ? pageSize : 1;
+
       if (event.metaKey || event.ctrlKey) {
-        zoomAtPoint(event.deltaY, point);
+        zoomAtPoint(event.deltaY * multiplier, point);
         return;
       }
 
       if (event.shiftKey) {
         const horizontalDelta = event.deltaX !== 0 ? event.deltaX : event.deltaY;
-        wheelPan({ x: horizontalDelta, y: 0 });
+        wheelPan({ x: horizontalDelta * multiplier, y: 0 });
         return;
       }
 
@@ -441,6 +450,8 @@ export function InfiniteCanvas({
             position={nodePosition(node)}
             zoom={viewport.zoom}
             selected={selection.has(node.id)}
+            brandCtxPhase={brandCtxPhase}
+            trendRecipePhase={trendRecipePhase}
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}

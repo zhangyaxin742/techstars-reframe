@@ -39,6 +39,8 @@ export type AiFlowStep =
   | "source-intake"
   | "media-connect"
   | "analysis"
+  | "brand-context-ready"
+  | "trend-search"
   | "recipes-ready"
   | "recipe-selected"
   | "timeline-ready"
@@ -128,6 +130,40 @@ export interface ExportTarget {
 // Brand context
 // ---------------------------------------------------------------------------
 
+export interface VisualProofItem {
+  id: string;
+  label: string;
+  tag: string;
+  score: number;
+  scoreLabel: string;
+  color: string;
+  imageUrl?: string;
+}
+
+export type SignalLevel = "High" | "Medium" | "Low";
+
+export interface TrendMatchSignal {
+  rank: number;
+  label: string;
+  level: SignalLevel;
+}
+
+export interface BrandContextCardData {
+  thesis: string;
+  tagline: string;
+  audience: string;
+  pain: string;
+  desiredIdentity: string;
+  conversionGoal: { name: string; description: string };
+  successLooksLike: string;
+  visualProof: VisualProofItem[];
+  trendSignals: TrendMatchSignal[];
+  scriptRules: string[];
+  tone: { label: string; value: number }[];
+  doList: string[];
+  avoidList: string[];
+}
+
 export interface BrandContext {
   name: string;
   tagline: string;
@@ -136,6 +172,7 @@ export interface BrandContext {
   tone: string[];
   colors: string[];
   sources: SourceBadge[];
+  card: BrandContextCardData;
 }
 
 // ---------------------------------------------------------------------------
@@ -156,6 +193,61 @@ export const brandContext: BrandContext = {
     { id: "src-yt", platform: "youtube", label: "Petite Outdoors", url: "https://youtube.com/@petiteoutdoors" },
     { id: "src-shop", platform: "shopify", label: "Shopify Store", url: "https://petiteoutdoors.myshopify.com" },
   ],
+  card: {
+    thesis: "Gear that finally fits petite movement",
+    tagline: "Technical outdoor apparel for women 5'4\" and under",
+    audience: "Petite women who hike, travel, and move outdoors",
+    pain: "Long hems, bulky proportions, tailoring friction",
+    desiredIdentity: "capable, prepared, not treated as an afterthought",
+    conversionGoal: {
+      name: "Spring 2026 preorders",
+      description: "Drive early demand with fit proof, founder credibility, and trail testing.",
+    },
+    successLooksLike: "Petite hikers feel seen, trust the fit, and preorder before launch.",
+    visualProof: [
+      { id: "vp-1", label: "bunched hem close-up", tag: "OPENING HOOK", score: 92, scoreLabel: "fit", color: "#3B6B4A", imageUrl: "/assets/brand-context-images/bunched%20hem%20close-up.jpg" },
+      { id: "vp-2", label: "standard vs petite fit", tag: "FIT PROOF", score: 90, scoreLabel: "fit", color: "#264653", imageUrl: "/assets/brand-context-images/standard%20vs%20petite%20fit.jpg" },
+      { id: "vp-3", label: "trail step-over", tag: "MOVEMENT PROOF", score: 88, scoreLabel: "motion", color: "#4A7C59", imageUrl: "/assets/brand-context-images/trail%20step-over.jpg" },
+      { id: "vp-4", label: "fabric detail", tag: "TECHNICAL CREDIBILITY", score: 87, scoreLabel: "tech", color: "#2D5A40", imageUrl: "/assets/brand-context-images/fabric%20detail.jpg" },
+      { id: "vp-5", label: "founder measuring inseam", tag: "FOUNDER POV", score: 91, scoreLabel: "trust", color: "#5C4033", imageUrl: "/assets/brand-context-images/founder%20measuring%20inseam.jpg" },
+      { id: "vp-6", label: "waistband adjustment", tag: "FIT PROOF", score: 86, scoreLabel: "fit", color: "#3B6B4A", imageUrl: "/assets/brand-context-images/waistband%20adjustment.jpg" },
+      { id: "vp-7", label: "pack-and-go flat lay", tag: "CTA SUPPORT", score: 83, scoreLabel: "cta", color: "#264653", imageUrl: "/assets/brand-context-images/pack-and-go%20flat%20lay.jpg" },
+      { id: "vp-8", label: "summit movement", tag: "MOVEMENT PROOF", score: 89, scoreLabel: "motion", color: "#1B3A2D", imageUrl: "/assets/brand-context-images/summit%20movement.jpg" },
+    ],
+    trendSignals: [
+      { rank: 1, label: "before / after", level: "High" },
+      { rank: 2, label: "fit failure", level: "High" },
+      { rank: 3, label: "founder POV", level: "High" },
+      { rank: 4, label: "trail test", level: "Medium" },
+      { rank: 5, label: "problem-solution", level: "Medium" },
+      { rank: 6, label: "micro demo", level: "Medium" },
+    ],
+    scriptRules: [
+      "show problem in first 2 sec",
+      "avoid body-shaming",
+      "lead with product proof",
+      "use specific fit language",
+      "CTA: preorder, not sale",
+    ],
+    tone: [
+      { label: "direct", value: 82 },
+      { label: "technical", value: 70 },
+      { label: "warm", value: 55 },
+      { label: "humorous", value: 20 },
+    ],
+    doList: [
+      "specific fit language",
+      "real trail + movement",
+      "founder perspective",
+      "clear preorder CTA",
+    ],
+    avoidList: [
+      "generic empowerment copy",
+      "body-focused language",
+      "overused viral slang",
+      "vague benefits",
+    ],
+  },
 };
 
 export const mediaImportOptions: MediaImportOption[] = [
@@ -233,13 +325,28 @@ export const timelineSegments: TimelineSegment[] = [
 ];
 
 export const chatHistory: ChatMessage[] = [
-  { id: "msg-1", role: "assistant", content: "What would you like to create? Paste your brand links and let AI do the rest.", timestamp: 1, step: "source-intake" },
-  { id: "msg-2", role: "user", content: "Here are our brand sources.", timestamp: 2, badges: brandContext.sources.slice(0, 3), step: "source-intake" },
-  { id: "msg-3", role: "assistant", content: "Where should I pull your clips from?", timestamp: 3, step: "media-connect" },
-  { id: "msg-4", role: "system", content: "Connected website, Instagram, TikTok, Shopify, Google Drive, and camera-roll sources.", timestamp: 4, step: "media-connect" },
-  { id: "msg-5", role: "assistant", content: "I've pulled your brand context and built trend recipes for you.", timestamp: 5, step: "recipes-ready" },
-  { id: "msg-6", role: "user", content: "Looks great. Show me more recipes.", timestamp: 6, step: "recipes-ready" },
-  { id: "msg-7", role: "assistant", content: "Here are more that match your brand. Pick one recipe and I'll auto-fill the timeline.", timestamp: 7, step: "recipes-ready" },
+  { id: "msg-1", role: "assistant", content: "What would you like to create? Paste your brand links, upload media, and let AI do the rest.", timestamp: 1, step: "source-intake" },
+  {
+    id: "msg-2",
+    role: "user",
+    content: "Create a preorder launch video for Petite Outdoors. Here are the brand links and product media.",
+    timestamp: 2,
+    badges: [
+      ...brandContext.sources.slice(0, 3),
+      { id: "src-upload", platform: "upload", label: "Product media" },
+      { id: "src-camera-roll", platform: "phone-camera", label: "Camera roll" },
+    ],
+    step: "source-intake",
+  },
+  { id: "msg-3", role: "assistant", content: "Okay, brand context created.", timestamp: 3, step: "brand-context-ready" },
+  {
+    id: "msg-4",
+    role: "assistant",
+    content: "I am analyzing the brand context and searching the web, Instagram, TikTok, YouTube Shorts, and competitor posts for trend patterns.",
+    timestamp: 4,
+    step: "trend-search",
+  },
+  { id: "msg-5", role: "assistant", content: "I found three top trends that align with your goal and your brand.", timestamp: 5, step: "recipes-ready" },
 ];
 
 export const initialAiToolCalls: SimulatedToolCall[] = [
@@ -270,12 +377,48 @@ export const initialAiToolCalls: SimulatedToolCall[] = [
     durationMs: 1300,
   },
   {
+    id: "tool-build-brand-context",
+    name: "build_brand_context",
+    label: "Creating brand context",
+    state: "pending",
+    output: "Created a reusable brand context for Petite Outdoors.",
+    durationMs: 1200,
+  },
+];
+
+export const trendSearchAiToolCalls: SimulatedToolCall[] = [
+  {
+    id: "tool-search-web",
+    name: "search_web_trends",
+    label: "Searching the web",
+    state: "running",
+    input: { goal: "preorder launch video", brand: brandContext.name },
+    output: "Found fit-proof and before-after trend formats across ecommerce launch content.",
+    durationMs: 700,
+  },
+  {
+    id: "tool-search-instagram",
+    name: "search_instagram_reels",
+    label: "Searching Instagram",
+    state: "pending",
+    output: "Matched founder POV, fit-failure demos, and trail testing reels.",
+    durationMs: 800,
+  },
+  {
+    id: "tool-search-tiktok",
+    name: "search_tiktok_trends",
+    label: "Searching TikTok",
+    state: "pending",
+    output: "Found POV transformation and comparison hooks that fit the brand guardrails.",
+    durationMs: 800,
+  },
+  {
     id: "tool-build-recipes",
     name: "build_trend_recipes",
-    label: "Building brand context and recipes",
+    label: "Generating trend recipes",
     state: "pending",
     output: "Created three trend recipes matched to Petite Outdoors.",
-    durationMs: 1200,
+    durationMs: 900,
   },
 ];
 
@@ -335,16 +478,15 @@ export const reframeDemoNodes: CanvasNode[] = [
     id: "brand-ctx",
     kind: "brand-context",
     title: "Brand Context",
-    body: `${brandContext.name} — ${brandContext.tagline}\n${brandContext.category}\nAudience: ${brandContext.audience}\nTone: ${brandContext.tone.join(", ")}`,
     position: { x: 0, y: 0 },
-    size: { width: 320, height: 220 },
+    size: { width: 1000, height: 700 },
   },
   {
     id: "recipe-1",
     kind: "trend-recipe",
     title: trendRecipes[0].title,
     body: `${trendRecipes[0].hook}\n\nFormat: ${trendRecipes[0].format}\nLength: ${trendRecipes[0].estimatedLength}\nMatch: ${trendRecipes[0].matchScore}%`,
-    position: { x: 400, y: -40 },
+    position: { x: 980, y: -40 },
     size: { width: 300, height: 200 },
   },
   {
@@ -352,7 +494,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[1].title,
     body: `${trendRecipes[1].hook}\n\nFormat: ${trendRecipes[1].format}\nLength: ${trendRecipes[1].estimatedLength}\nMatch: ${trendRecipes[1].matchScore}%`,
-    position: { x: 400, y: 200 },
+    position: { x: 980, y: 200 },
     size: { width: 300, height: 200 },
   },
   {
@@ -360,7 +502,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[2].title,
     body: `${trendRecipes[2].hook}\n\nFormat: ${trendRecipes[2].format}\nLength: ${trendRecipes[2].estimatedLength}\nMatch: ${trendRecipes[2].matchScore}%`,
-    position: { x: 400, y: 440 },
+    position: { x: 980, y: 440 },
     size: { width: 300, height: 200 },
   },
   {
@@ -368,7 +510,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "timeline",
     title: "Side-by-Side Fit Failure Demo — Timeline",
     body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
-    position: { x: 800, y: -20 },
+    position: { x: 1360, y: -20 },
     size: { width: 480, height: 280 },
   },
   {
@@ -377,7 +519,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
     imageUrl: mediaAssets[0].thumbnail,
-    position: { x: 1360, y: 20 },
+    position: { x: 1920, y: 20 },
     size: { width: 260, height: 180 },
   },
 ];

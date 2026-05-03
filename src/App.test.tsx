@@ -13,10 +13,14 @@ describe("App", () => {
 
     expect(screen.getByTestId("chat-history-panel")).toHaveTextContent("Chat History");
     expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
-    expect(screen.getByText("Preparing your creative canvas")).toBeInTheDocument();
-    expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Preparing your creative canvas")).not.toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
+    expect(screen.queryByText("1. Paste Brand Sources")).not.toBeInTheDocument();
+    expect(screen.queryByText("2. Connect Media")).not.toBeInTheDocument();
+    expect(screen.queryByText("3. Analyze Brand")).not.toBeInTheDocument();
     act(() => {
-      vi.advanceTimersByTime(7800);
+      vi.advanceTimersByTime(4300);
     });
     expect(screen.getByTestId("simulated-tool-tool-read-sources")).toHaveAttribute(
       "data-tool-state",
@@ -27,12 +31,46 @@ describe("App", () => {
     expect(screen.queryByText("Canvas workspace")).not.toBeInTheDocument();
   });
 
-  it("advances the initial simulated tool calls into recipe-ready canvas nodes", () => {
+  it("separates brand context creation from trend recipe generation", () => {
     vi.useFakeTimers();
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(13000);
+      vi.advanceTimersByTime(12500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+
+    expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
+    expect(screen.getByTestId("simulated-tool-tool-build-brand-context")).toHaveAttribute(
+      "data-tool-state",
+      "completed"
+    );
+  });
+
+  it("shows trend recipe skeletons during search before revealing generated cards", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    act(() => {
+      vi.advanceTimersByTime(16500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+
+    expect(screen.getByText(/searching the web, Instagram, TikTok/i)).toBeInTheDocument();
+    expect(screen.getByTestId("trend-recipe-skeleton-recipe-1")).toBeInTheDocument();
+    expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(4800);
+    });
+    act(() => {
+      vi.advanceTimersByTime(1200);
     });
 
     expect(screen.getByTestId("simulated-tool-tool-build-recipes")).toHaveAttribute(
@@ -41,6 +79,7 @@ describe("App", () => {
     );
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
     expect(screen.getByText("Side-by-Side Fit Failure Demo")).toBeInTheDocument();
+    expect(screen.queryByTestId("trend-recipe-skeleton-recipe-1")).not.toBeInTheDocument();
   });
 
   it("selecting a trend recipe runs the timeline generation flow", () => {
@@ -48,7 +87,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(13000);
+      vi.advanceTimersByTime(22000);
     });
     fireEvent.click(screen.getByTestId("canvas-node-recipe-1"));
 
@@ -59,11 +98,13 @@ describe("App", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(1900);
+      vi.advanceTimersByTime(3600);
+    });
+    act(() => {
+      vi.advanceTimersByTime(1400);
     });
 
-    expect(screen.getByTestId("timeline-assembly")).toBeInTheDocument();
-    expect(screen.getByTestId("media-library-panel")).toBeInTheDocument();
+    expect(screen.getByText(/Timeline is filled/)).toBeInTheDocument();
   });
 
   it("bottom prompt submit appends user prompt and simulated tool activity", async () => {
@@ -71,7 +112,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(13000);
+      vi.advanceTimersByTime(22000);
     });
 
     fireEvent.change(screen.getByPlaceholderText("Ask Reframe anything..."), {
@@ -94,7 +135,7 @@ describe("App", () => {
       vi.advanceTimersByTime(2700);
     });
 
-    const userMessage = screen.getByText("Here are our brand sources.");
+    const userMessage = screen.getByText(/Here are the brand links and product media/);
     expect(userMessage).toHaveClass("bg-foreground");
     expect(userMessage).toHaveClass("text-background");
     expect(screen.queryByTestId("chat-message-avatar")).not.toBeInTheDocument();
@@ -104,22 +145,30 @@ describe("App", () => {
     vi.useFakeTimers();
     render(<App />);
 
-    expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Here are the brand links and product media/)).not.toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(350);
     });
     expect(screen.getByText("Starting Reframe")).toBeInTheDocument();
-    expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Here are the brand links and product media/)).not.toBeInTheDocument();
 
     act(() => {
-      vi.advanceTimersByTime(2350);
+      vi.advanceTimersByTime(900);
     });
-    expect(screen.getByText("Here are our brand sources.")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+    expect(screen.getByText("What would you like to create? Paste your brand links, upload media, and let AI do the rest.")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(screen.getByText(/Here are the brand links and product media/)).toBeInTheDocument();
     expect(screen.queryByTestId("simulated-tool-tool-read-sources")).not.toBeInTheDocument();
 
     act(() => {
-      vi.advanceTimersByTime(5200);
+      vi.advanceTimersByTime(1700);
     });
     expect(screen.getByTestId("simulated-tool-tool-read-sources")).toHaveAttribute(
       "data-tool-state",

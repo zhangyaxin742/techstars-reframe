@@ -19,6 +19,7 @@ import {
   reframeDemoNodes,
   timelineSegments,
   trendRecipes,
+  trendSearchAiToolCalls,
 } from "./data/reframe-demo";
 
 type ToolSequenceConfig = {
@@ -57,12 +58,6 @@ function completedToolCallsThroughIndex(
     .map((toolCall) => ({ ...toolCall, state: "completed" as const }));
 }
 
-const connectedMediaUserMessage: ChatMessage = {
-  ...chatHistory[3],
-  role: "user",
-  content: "Connect website, Instagram, TikTok, Shopify, Google Drive, and Phone Camera Roll.",
-};
-
 export function App() {
   const [nodes, setNodes] = useState(reframeDemoNodes);
   const [connections, setConnections] = useState(reframeDemoConnections);
@@ -70,6 +65,7 @@ export function App() {
   const [bottomPrompt, setBottomPrompt] = useState("");
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
   const [brandCtxPhase, setBrandCtxPhase] = useState<"skeleton" | "revealing">("skeleton");
+  const [trendRecipePhase, setTrendRecipePhase] = useState<"hidden" | "skeleton" | "revealing">("hidden");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -245,47 +241,58 @@ export function App() {
       thinkingText: "Starting Reframe",
     });
     queueMessage(chatHistory[1], 2600);
-    queueAssistantMessage({
-      message: chatHistory[2],
-      startDelay: 3800,
-      thinkingDelay: 1000,
-      thinkingText: "Checking available connectors",
-    });
-    queueMessage(connectedMediaUserMessage, 6200);
     queueTimeout(() => {
       startToolSequence({
         messageId: "auto-analysis",
         content: "I am reading those sources and connected clips now.",
-        thinkingText: "Building your Reframe workspace",
+        thinkingText: "Building brand context",
         step: "analysis",
         toolCalls: initialAiToolCalls,
-        doneContent: "Brand context and trend recipes are ready. Pick one recipe to auto-fill the timeline.",
+        doneContent: chatHistory[2].content,
         onDone: () => {
-          setFlowStep("recipes-ready");
-          // Show skeleton immediately; reveal card content after a beat
-          queueTimeout(() => setBrandCtxPhase("revealing"), 1300);
-          queueMessage(chatHistory[5], 900);
-          queueAssistantMessage({
-            message: chatHistory[6],
-            startDelay: 1800,
-            thinkingDelay: 850,
-            thinkingText: "Choosing recipes that match Petite Outdoors",
-          });
+          setFlowStep("brand-context-ready");
+          setBrandCtxPhase("revealing");
+          queueTimeout(() => {
+            setFlowStep("trend-search");
+            setTrendRecipePhase("skeleton");
+            startToolSequence({
+              messageId: "auto-trend-search",
+              content: chatHistory[3].content,
+              thinkingText: "Searching for trend recipes",
+              step: "trend-search",
+              toolCalls: trendSearchAiToolCalls,
+              doneContent: chatHistory[4].content,
+              onDone: () => {
+                setFlowStep("recipes-ready");
+                setTrendRecipePhase("revealing");
+              },
+            });
+          }, 2400);
         },
       });
-    }, 7600);
+    }, 4200);
 
     return () => {
       initialSequenceStartedRef.current = false;
     };
-  }, [queueAssistantMessage, queueMessage, queueTimeout, startToolSequence]);
+  }, [
+    queueAssistantMessage,
+    queueMessage,
+    queueTimeout,
+    startToolSequence,
+  ]);
 
   const visibleNodes = useMemo(() => {
-    if (flowStep === "analysis" || flowStep === "media-connect" || flowStep === "source-intake") {
+    if (
+      flowStep === "analysis" ||
+      flowStep === "media-connect" ||
+      flowStep === "source-intake" ||
+      flowStep === "brand-context-ready"
+    ) {
       return nodes.filter((node) => node.kind === "brand-context");
     }
 
-    if (flowStep === "recipes-ready" || flowStep === "recipe-selected") {
+    if (flowStep === "trend-search" || flowStep === "recipes-ready" || flowStep === "recipe-selected") {
       return nodes.filter((node) => node.kind === "brand-context" || node.kind === "trend-recipe");
     }
 
@@ -428,6 +435,7 @@ export function App() {
           onDeleteSelected={handleDeleteSelected}
           onExportSelected={handleExportSelected}
           brandCtxPhase={brandCtxPhase}
+          trendRecipePhase={trendRecipePhase}
         />
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28"

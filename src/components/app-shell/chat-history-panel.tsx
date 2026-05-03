@@ -41,13 +41,15 @@ const platformIcon: Record<SourcePlatform, React.ElementType> = {
 };
 
 const stepLabel: Record<NonNullable<ChatMessage["step"]>, string> = {
-  "source-intake": "1. Paste Brand Sources",
-  "media-connect": "2. Connect Media",
-  analysis: "3. Analyze Brand",
-  "recipes-ready": "3. Brand Context + Recipes",
-  "recipe-selected": "4. Pick a Trend Recipe",
-  "timeline-ready": "5. Timeline Auto-Fills",
-  "export-ready": "6. Swap, Preview, Export",
+  "source-intake": "Intake",
+  "media-connect": "Media",
+  analysis: "Building Brand Context",
+  "brand-context-ready": "Brand Context Created",
+  "trend-search": "Searching Trends",
+  "recipes-ready": "Trend Recipes Ready",
+  "recipe-selected": "Recipe Selected",
+  "timeline-ready": "Timeline Ready",
+  "export-ready": "Export Ready",
 };
 
 interface ChatHistoryPanelProps {
@@ -156,19 +158,9 @@ export function ChatHistoryPanel({
             {/* Messages */}
             <ChatContainerRoot className="scrollbar-hover-visible min-h-0 flex-1 px-3 py-3">
               <ChatContainerContent className="space-y-3">
-                {messages.map((message, index) => {
-                  const previousStep = messages[index - 1]?.step;
-                  const showStepLabel = message.step && message.step !== previousStep;
-
+                {messages.map((message) => {
                   return (
                     <div key={message.id} className="space-y-1.5">
-                      {showStepLabel && message.step ? (
-                        <div className="flex items-center gap-2 py-1 text-[10px] font-medium text-muted-foreground">
-                          <span className="h-px flex-1 bg-border" aria-hidden="true" />
-                          <span>{stepLabel[message.step]}</span>
-                          <span className="h-px flex-1 bg-border" aria-hidden="true" />
-                        </div>
-                      ) : null}
                       <Message role={message.role}>
                       {message.role === "assistant" ? (
                         message.content ? (
