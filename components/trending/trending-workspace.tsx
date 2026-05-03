@@ -1,5 +1,6 @@
 "use client";
 
+import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -38,16 +39,17 @@ export function TrendingWorkspace({
   const [audibleVideoId, setAudibleVideoId] = useState<string | null>(null);
 
   useEffect(() => {
-    for (const video of Object.values(videoRefs.current)) {
+    for (const [videoId, video] of Object.entries(videoRefs.current)) {
       if (!video) {
         continue;
       }
 
-      video.muted = true;
-      video.volume = 0;
+      const isAudible = videoId === audibleVideoId;
+      video.muted = !isAudible;
+      video.volume = isAudible ? 1 : 0;
       attemptPlay(video);
     }
-  }, []);
+  }, [audibleVideoId]);
 
   function registerVideo(id: string) {
     return (node: HTMLVideoElement | null) => {
@@ -55,58 +57,18 @@ export function TrendingWorkspace({
     };
   }
 
-  function setMutedLoopState() {
-    for (const video of Object.values(videoRefs.current)) {
-      if (!video) {
-        continue;
-      }
-
-      video.muted = true;
-      video.volume = 0;
-      attemptPlay(video);
-    }
-
+  function clearActiveState() {
     setActiveVideoId(null);
     setAudibleVideoId(null);
   }
 
   function focusVideo(id: string) {
     setActiveVideoId(id);
-    setAudibleVideoId(null);
+  }
 
-    for (const [videoId, video] of Object.entries(videoRefs.current)) {
-      if (!video) {
-        continue;
-      }
-
-      const isTarget = videoId === id;
-      video.muted = !isTarget;
-      video.volume = isTarget ? 1 : 0;
-      video.currentTime = isTarget ? video.currentTime : 0;
-
-      const playPromise = video.play();
-      if (!playPromise) {
-        continue;
-      }
-
-      if (!isTarget) {
-        playPromise.catch(() => {});
-        continue;
-      }
-
-      playPromise
-        .then(() => {
-          if (!video.muted) {
-            setAudibleVideoId(id);
-          }
-        })
-        .catch(() => {
-          video.muted = true;
-          video.volume = 0;
-          setAudibleVideoId(null);
-          attemptPlay(video);
-        });
-    }
+  function toggleAudio(id: string) {
+    setActiveVideoId(id);
+    setAudibleVideoId((current) => (current === id ? null : id));
   }
 
   return (
@@ -178,7 +140,7 @@ export function TrendingWorkspace({
                     5 active cuts
                   </span>
                   <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5">
-                    Hover for audio
+                    Click for audio
                   </span>
                 </div>
               </div>
@@ -192,8 +154,9 @@ export function TrendingWorkspace({
                     activeVideoId={activeVideoId}
                     audibleVideoId={audibleVideoId}
                     registerVideo={registerVideo}
-                    onBlur={setMutedLoopState}
+                    onBlur={clearActiveState}
                     onFocus={focusVideo}
+                    onToggleAudio={toggleAudio}
                     tall={index === 0}
                   />
                 ))}
@@ -228,8 +191,9 @@ export function TrendingWorkspace({
                   activeVideoId={activeVideoId}
                   audibleVideoId={audibleVideoId}
                   registerVideo={registerVideo}
-                  onBlur={setMutedLoopState}
+                  onBlur={clearActiveState}
                   onFocus={focusVideo}
+                  onToggleAudio={toggleAudio}
                 />
               ))}
             </div>
@@ -247,6 +211,7 @@ function VideoTile({
   index,
   onBlur,
   onFocus,
+  onToggleAudio,
   registerVideo,
   tall = false,
 }: {
@@ -256,6 +221,7 @@ function VideoTile({
   index: number;
   onBlur: () => void;
   onFocus: (id: string) => void;
+  onToggleAudio: (id: string) => void;
   registerVideo: (id: string) => (node: HTMLVideoElement | null) => void;
   tall?: boolean;
 }) {
@@ -276,6 +242,7 @@ function VideoTile({
       onMouseLeave={onBlur}
       onFocus={() => onFocus(card.id)}
       onBlur={onBlur}
+      data-testid={`trending-video-tile-${card.id}`}
       className={[
         "group relative overflow-hidden rounded-[28px] border border-white/10 bg-black/30 outline-none transition duration-300",
         "hover:border-[#f0c979]/40 hover:shadow-[0_24px_60px_rgba(0,0,0,0.45)]",
@@ -292,8 +259,21 @@ function VideoTile({
           autoPlay
           playsInline
           preload="metadata"
+          aria-label={card.title}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
+        <button
+          type="button"
+          aria-label={isAudible ? `Mute ${card.title}` : `Play sound for ${card.title}`}
+          aria-pressed={isAudible}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleAudio(card.id);
+          }}
+          className="absolute right-3 top-3 z-10 flex size-10 items-center justify-center rounded-2xl border border-white/12 bg-black/35 text-white/80 backdrop-blur-md transition hover:border-[#f0c979]/40 hover:text-[#f6e5b3]"
+        >
+          {isAudible ? <SpeakerHigh className="size-4" weight="fill" /> : <SpeakerSlash className="size-4" weight="fill" />}
+        </button>
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0.08)_32%,rgba(0,0,0,0.78)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_0,transparent_40%,rgba(0,0,0,0.3)_100%)]" />
 
@@ -302,7 +282,7 @@ function VideoTile({
             {card.label}
           </span>
           <span className="rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-white/56 backdrop-blur-md">
-            {isAudible ? "audio on" : "looping"}
+            {isAudible ? "audio on" : "click for audio"}
           </span>
         </div>
 
