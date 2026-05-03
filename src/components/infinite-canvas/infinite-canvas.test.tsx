@@ -232,6 +232,7 @@ describe("InfiniteCanvas", () => {
     expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Download preview")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Publish preview")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Post to Instagram")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
   });
 
@@ -255,12 +256,40 @@ describe("InfiniteCanvas", () => {
     });
 
     fireEvent.click(screen.getByLabelText("Download preview"));
-    fireEvent.click(screen.getByLabelText("Publish preview"));
+    fireEvent.click(screen.getByLabelText("Post to Instagram"));
 
     expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
     expect(onDownloadPreview).toHaveBeenCalledWith(new Set(["preview-1"]));
     expect(onPublishPreview).toHaveBeenCalledWith(new Set(["preview-1"]));
     expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
+  });
+
+  it("shows hover tooltips for preview toolbar actions", async () => {
+    const user = userEvent.setup();
+    const labels = ["Download preview", "Post to Instagram", "Delete selected nodes"];
+
+    for (const label of labels) {
+      renderCanvas({
+        nodes: [
+          {
+            id: "preview-1",
+            kind: "preview",
+            title: "Preview",
+            position: { x: 100, y: 160 },
+            size: { width: 210, height: 380 },
+          },
+        ],
+        selectedNodeIds: new Set(["preview-1"]),
+        onDeleteSelected: vi.fn(),
+        onDownloadPreview: vi.fn(),
+        onPublishPreview: vi.fn(),
+      });
+
+      await user.hover(screen.getByLabelText(label));
+      expect((await screen.findAllByText(label)).length).toBeGreaterThan(0);
+
+      cleanup();
+    }
   });
 
   it("shows editor export options for a selected timeline node", async () => {
@@ -294,6 +323,29 @@ describe("InfiniteCanvas", () => {
 
     expect(onExportTimeline).toHaveBeenCalledWith("capcut", new Set(["timeline-1"]));
     expect(screen.getByLabelText("Delete selected nodes")).toBeEnabled();
+  });
+
+  it("shows a hover tooltip for the timeline export action", async () => {
+    const user = userEvent.setup();
+    renderCanvas({
+      nodes: [
+        {
+          id: "timeline-1",
+          kind: "timeline",
+          title: "Timeline",
+          position: { x: 100, y: 160 },
+          size: { width: 480, height: 280 },
+        },
+      ],
+      selectedNodeIds: new Set(["timeline-1"]),
+      exportTargets,
+      onExportTimeline: vi.fn(),
+      onDeleteSelected: vi.fn(),
+    });
+
+    await user.hover(screen.getByLabelText("Export timeline"));
+
+    expect((await screen.findAllByText("Export timeline")).length).toBeGreaterThan(0);
   });
 
   it("reports node drag updates", () => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { CaretDown, DownloadSimple, Export, Play, Trash } from "@phosphor-icons/react";
+import { CaretDown, DownloadSimple, Export, InstagramLogo, Trash } from "@phosphor-icons/react";
 import type { ExportTarget } from "../../data/reframe-demo";
 import { Button } from "../ui/button";
 import {
@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { EditorLogo } from "../export/editor-logo";
 import { worldToScreen } from "../../lib/infinite-canvas/geometry";
 import type {
@@ -54,75 +55,97 @@ export function SelectionToolbar({
   const top = Math.max(12, topCenter.y - 76);
 
   return (
-    <div
-      data-testid="selection-toolbar"
-      className="absolute z-30 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
-      style={{ left, top }}
-      onPointerDown={(event) => event.stopPropagation()}
-    >
-      {showTimelineExport ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+    <TooltipProvider delayDuration={120}>
+      <div
+        data-testid="selection-toolbar"
+        className="absolute z-30 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+        style={{ left, top }}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        {showTimelineExport ? (
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="w-auto gap-1.5 px-2.5"
+                    aria-label="Export timeline"
+                    disabled={!onExportTimeline}
+                  >
+                    <Export />
+                    <CaretDown className="size-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="top">Export timeline</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="center">
+              {exportTargets.map((target) => (
+                <DropdownMenuItem
+                  key={target.id}
+                  onSelect={() => onExportTimeline?.(target.id)}
+                  className="gap-2"
+                >
+                  <EditorLogo targetId={target.id} className="size-4 rounded-sm object-contain" />
+                  <span>{target.editor}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
+        {showPreviewActions ? (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Download preview"
+                  onClick={onDownloadPreview}
+                  disabled={!onDownloadPreview}
+                >
+                  <DownloadSimple />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Download preview</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Post to Instagram"
+                  onClick={onPublishPreview}
+                  disabled={!onPublishPreview}
+                >
+                  <InstagramLogo />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Post to Instagram</TooltipContent>
+            </Tooltip>
+          </>
+        ) : null}
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="w-auto gap-1.5 px-2.5"
-              aria-label="Export timeline"
-              disabled={!onExportTimeline}
+              aria-label="Delete selected nodes"
+              onClick={onDelete}
+              disabled={!onDelete}
             >
-              <Export />
-              <CaretDown className="size-3" />
+              <Trash />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center">
-            {exportTargets.map((target) => (
-              <DropdownMenuItem
-                key={target.id}
-                onSelect={() => onExportTimeline?.(target.id)}
-                className="gap-2"
-              >
-                <EditorLogo targetId={target.id} className="size-4 rounded-sm object-contain" />
-                <span>{target.editor}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : null}
-      {showPreviewActions ? (
-        <>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Download preview"
-            onClick={onDownloadPreview}
-            disabled={!onDownloadPreview}
-          >
-            <DownloadSimple />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Publish preview"
-            onClick={onPublishPreview}
-            disabled={!onPublishPreview}
-          >
-            <Play />
-          </Button>
-        </>
-      ) : null}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label="Delete selected nodes"
-        onClick={onDelete}
-        disabled={!onDelete}
-      >
-        <Trash />
-      </Button>
-    </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">Delete selected nodes</TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   );
 }
