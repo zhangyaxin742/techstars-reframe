@@ -378,17 +378,19 @@ function TimelineRevealCard({
 
         {audioSegments.length > 0 ? (
           <div
-            className="flex h-10 items-center gap-[1.5px] rounded-md border border-border bg-secondary/40 px-2.5"
+            className="flex h-10 items-center rounded-md border border-border bg-secondary px-2.5"
             data-testid={`timeline-audio-preview-${node.id}`}
             aria-label="Audio beat preview"
           >
-            {Array.from({ length: 36 }, (_, index) => (
-              <span
-                key={index}
-                className="flex-1 rounded-full bg-accent/65"
-                style={{ height: `${MINI_WAVE_HEIGHTS[index % MINI_WAVE_HEIGHTS.length]}%` }}
-              />
-            ))}
+            <div className="flex h-6 w-full items-center gap-[1.5px]">
+              {Array.from({ length: 36 }, (_, index) => (
+                <span
+                  key={index}
+                  className="flex-1 rounded-full bg-foreground opacity-40"
+                  style={{ height: `${MINI_WAVE_HEIGHTS[index % MINI_WAVE_HEIGHTS.length]}%` }}
+                />
+              ))}
+            </div>
           </div>
         ) : null}
       </motion.div>
