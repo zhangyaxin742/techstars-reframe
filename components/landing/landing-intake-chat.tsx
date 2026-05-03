@@ -3,6 +3,7 @@
 import {
   ArrowUp,
   CloudArrowUp,
+  DeviceMobileCamera,
   Globe,
   GoogleDriveLogo,
   InstagramLogo,
@@ -12,8 +13,8 @@ import {
 } from "@phosphor-icons/react";
 import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SourceBadge, SourcePlatform } from "@/src/data/reframe-demo";
-import { brandContext, mediaImportOptions } from "@/src/data/reframe-demo";
+import type { MediaImportOption, SourceBadge, SourcePlatform } from "@/src/data/reframe-demo";
+import { brandContext } from "@/src/data/reframe-demo";
 
 const platformIcons: Record<SourcePlatform, React.ElementType> = {
   website: Globe,
@@ -22,6 +23,7 @@ const platformIcons: Record<SourcePlatform, React.ElementType> = {
   youtube: YoutubeLogo,
   shopify: ShoppingBag,
   "google-drive": GoogleDriveLogo,
+  "phone-camera": DeviceMobileCamera,
   upload: CloudArrowUp,
 };
 
@@ -32,8 +34,18 @@ const platformColors: Record<SourcePlatform, string> = {
   youtube: "bg-red-500/10 text-red-300 border-red-500/20",
   shopify: "bg-green-500/10 text-green-300 border-green-500/20",
   "google-drive": "bg-yellow-500/10 text-yellow-300 border-yellow-500/20",
+  "phone-camera": "bg-orange-500/10 text-orange-300 border-orange-500/20",
   upload: "bg-white/10 text-cream border-white/20",
 };
+
+const landingMediaImportOptions: MediaImportOption[] = [
+  { id: "imp-upload", platform: "upload", label: "Upload Files", description: "Photos, videos, logos", icon: "upload" },
+  { id: "imp-gdrive", platform: "google-drive", label: "Google Drive", description: "Connect your Drive folder", icon: "google-drive" },
+  { id: "imp-shopify", platform: "shopify", label: "Shopify / Website", description: "Pull product images", icon: "shopify" },
+  { id: "imp-ig", platform: "instagram", label: "Instagram", description: "Import posts & reels", icon: "instagram" },
+  { id: "imp-tt", platform: "tiktok", label: "TikTok", description: "Import existing videos", icon: "tiktok" },
+  { id: "imp-yt", platform: "youtube", label: "YouTube", description: "Import shorts & clips", icon: "youtube" },
+];
 
 interface LandingIntakeChatProps {
   className?: string;
@@ -166,7 +178,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                 Connect your media
               </p>
               <div className="grid grid-cols-2 gap-2" data-testid="media-options">
-                {mediaImportOptions.map((option) => {
+                {landingMediaImportOptions.map((option) => {
                   const Icon = platformIcons[option.platform];
                   const isSelected = selectedMediaSources.has(option.id);
                   return (
