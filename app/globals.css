@@ -37,6 +37,14 @@
 * {
   box-sizing: border-box;
   border-color: var(--color-border);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 html,
@@ -63,42 +71,12 @@ a {
   text-decoration: none;
 }
 
+[data-sidebar-inset] {
+  scrollbar-gutter: stable;
+}
+
 .font-display {
   font-family: var(--font-display), serif;
-}
-
-.scrollbar-hover-visible {
-  scrollbar-color: transparent transparent;
-  scrollbar-width: thin;
-}
-
-.scrollbar-hover-visible:hover,
-.scrollbar-hover-visible:focus-within,
-.scrollbar-hover-visible:active {
-  scrollbar-color: color-mix(in srgb, var(--color-muted-foreground) 38%, transparent) transparent;
-}
-
-.scrollbar-hover-visible::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.scrollbar-hover-visible::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-hover-visible::-webkit-scrollbar-thumb {
-  background-clip: content-box;
-  background-color: transparent;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  transition: background-color 180ms ease;
-}
-
-.scrollbar-hover-visible:hover::-webkit-scrollbar-thumb,
-.scrollbar-hover-visible:focus-within::-webkit-scrollbar-thumb,
-.scrollbar-hover-visible:active::-webkit-scrollbar-thumb {
-  background-color: color-mix(in srgb, var(--color-muted-foreground) 38%, transparent);
 }
 
 .glass-pill {
@@ -148,24 +126,6 @@ a {
   transform-origin: center center;
 }
 
-.prompt-kit-text-shimmer {
-  display: inline-block;
-  color: transparent;
-  background-image: linear-gradient(
-    110deg,
-    var(--color-muted-foreground) 0%,
-    var(--color-muted-foreground) 38%,
-    var(--color-foreground) 50%,
-    var(--color-muted-foreground) 62%,
-    var(--color-muted-foreground) 100%
-  );
-  background-size: var(--text-shimmer-spread, 20rem) 100%;
-  background-position: 100% 0;
-  background-clip: text;
-  -webkit-background-clip: text;
-  animation: prompt-kit-text-shimmer var(--text-shimmer-duration, 4s) linear infinite;
-}
-
 @keyframes kenburns {
   from {
     transform: scale(1);
@@ -176,29 +136,14 @@ a {
   }
 }
 
-@keyframes prompt-kit-text-shimmer {
-  from {
-    background-position: 100% 0;
-  }
-
-  to {
-    background-position: -100% 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-kenburns {
     animation: none;
     transform: scale(1.04);
   }
 
-  .prompt-kit-text-shimmer {
-    animation: none;
-    color: var(--color-muted-foreground);
-    background-image: none;
-  }
-
   * {
     scroll-behavior: auto;
   }
 }
+

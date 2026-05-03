@@ -39,13 +39,8 @@ describe("LandingIntakeChat", () => {
     await user.click(screen.getByText("Connect media sources →"));
 
     expect(screen.getByTestId("media-options")).toBeInTheDocument();
-    expect(screen.getByText("Upload Folder")).toBeInTheDocument();
-    expect(screen.getByText("Phone Camera Roll")).toBeInTheDocument();
+    expect(screen.getByText("Upload Files")).toBeInTheDocument();
     expect(screen.getByText("Google Drive")).toBeInTheDocument();
-    expect(screen.getByText("Shopify")).toBeInTheDocument();
-    expect(screen.getByText("Instagram")).toBeInTheDocument();
-    expect(screen.getByText("TikTok")).toBeInTheDocument();
-    expect(screen.getByText("YouTube")).toBeInTheDocument();
   });
 
   it("navigates to /app on final submit", async () => {
