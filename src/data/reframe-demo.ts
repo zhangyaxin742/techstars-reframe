@@ -606,6 +606,7 @@ export const reframeDemoConnections: CanvasConnection[] = [
   { id: "ctx-r1", sourceNodeId: "brand-ctx", targetNodeId: "recipe-1" },
   { id: "ctx-r2", sourceNodeId: "brand-ctx", targetNodeId: "recipe-2" },
   { id: "ctx-r3", sourceNodeId: "brand-ctx", targetNodeId: "recipe-3" },
+  { id: "library-tl", sourceNodeId: "library", targetNodeId: "timeline-1" },
   { id: "r1-tl", sourceNodeId: "recipe-1", targetNodeId: "timeline-1" },
   { id: "tl-prev", sourceNodeId: "timeline-1", targetNodeId: "preview-1" },
 ];
