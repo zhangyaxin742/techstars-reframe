@@ -495,7 +495,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[1].title,
     body: `${trendRecipes[1].hook}\n\nFormat: ${trendRecipes[1].format}\nLength: ${trendRecipes[1].estimatedLength}\nMatch: ${trendRecipes[1].matchScore}%`,
-    position: { x: 1096, y: 264 },
+    position: { x: 1096, y: 280 },
     size: { width: 300, height: 200 },
   },
   {
@@ -503,7 +503,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "trend-recipe",
     title: trendRecipes[2].title,
     body: `${trendRecipes[2].hook}\n\nFormat: ${trendRecipes[2].format}\nLength: ${trendRecipes[2].estimatedLength}\nMatch: ${trendRecipes[2].matchScore}%`,
-    position: { x: 1096, y: 528 },
+    position: { x: 1096, y: 560 },
     size: { width: 300, height: 200 },
   },
   {

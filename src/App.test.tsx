@@ -86,8 +86,8 @@ describe("App", () => {
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx").style.transform).toBe("translate(0px, 0px)");
     expect(screen.getByTestId("canvas-node-recipe-1").style.transform).toBe("translate(1096px, 0px)");
-    expect(screen.getByTestId("canvas-node-recipe-2").style.transform).toBe("translate(1096px, 264px)");
-    expect(screen.getByTestId("canvas-node-recipe-3").style.transform).toBe("translate(1096px, 528px)");
+    expect(screen.getByTestId("canvas-node-recipe-2").style.transform).toBe("translate(1096px, 280px)");
+    expect(screen.getByTestId("canvas-node-recipe-3").style.transform).toBe("translate(1096px, 560px)");
     expect(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).toHaveAttribute(
       "data-preview-mode",
       "preview"
