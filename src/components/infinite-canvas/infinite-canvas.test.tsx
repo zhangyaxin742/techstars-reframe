@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
-import type { CanvasNode } from "../../lib/infinite-canvas/types";
+import type { CanvasConnection, CanvasNode } from "../../lib/infinite-canvas/types";
 import { exportTargets } from "../../data/reframe-demo";
 
 const nodes: CanvasNode[] = [
@@ -116,6 +116,43 @@ describe("InfiniteCanvas", () => {
     await waitFor(() => {
       expect(transformLayer?.style.transform).not.toBe(initialTransform);
     });
+  });
+
+  it("draws trend-to-timeline connections from the source bottom to timeline top", () => {
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    const trendTimelineNodes: CanvasNode[] = [
+      {
+        id: "recipe-1",
+        kind: "video",
+        title: "Founder confessional",
+        video: { src: "/videos/trend1.mp4", label: "trend" },
+        position: { x: 100, y: 100 },
+        size: { width: 220, height: 391 },
+      },
+      {
+        id: "timeline-1",
+        kind: "timeline",
+        title: "Founder Confessional",
+        position: { x: 100, y: 587 },
+        size: { width: 480, height: 280 },
+      },
+    ];
+    const connections: CanvasConnection[] = [
+      { id: "r1-tl", sourceNodeId: "recipe-1", targetNodeId: "timeline-1" },
+    ];
+
+    renderCanvas({ nodes: trendTimelineNodes, connections });
+
+    const path = screen.getByTestId("canvas-connection-r1-tl").getAttribute("d") ?? "";
+    const numbers = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+    const [sourceX, sourceY, firstControlX, firstControlY, secondControlX, secondControlY, targetX, targetY] = numbers;
+
+    expect(path).toMatch(/^M /);
+    expect(sourceY).toBeLessThan(targetY);
+    expect(firstControlX).toBe(sourceX);
+    expect(secondControlX).toBe(targetX);
+    expect(firstControlY).toBeCloseTo((sourceY + targetY) / 2);
+    expect(secondControlY).toBeCloseTo((sourceY + targetY) / 2);
   });
 
   it("pans instead of marquee selecting while space is held", async () => {

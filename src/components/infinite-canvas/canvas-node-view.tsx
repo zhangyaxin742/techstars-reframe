@@ -248,19 +248,31 @@ function TimelineGhostPreview({
   persistent: boolean;
 }) {
   return (
-    <div
-      data-testid={`canvas-node-timeline-ghost-${nodeId}`}
-      data-preview-mode="preview"
-      className={cn(
-        "pointer-events-none absolute left-full top-0 z-10 ml-24 h-[280px] w-[480px] origin-left",
-        "transition-[opacity,transform] duration-200",
-        persistent
-          ? "scale-100 opacity-100"
-          : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
-      )}
-    >
-      <TimelinePreviewSurface mode="preview" />
-    </div>
+    <>
+      <div
+        data-testid={`canvas-node-timeline-ghost-connector-${nodeId}`}
+        className={cn(
+          "pointer-events-none absolute left-1/2 top-full z-10 h-24 w-0.5 -translate-x-1/2 rounded-full bg-accent",
+          "origin-top transition-[opacity,transform] duration-200",
+          persistent
+            ? "scale-y-100 opacity-100"
+            : "scale-y-0 opacity-0 peer-hover:scale-y-100 peer-hover:opacity-100 peer-focus-visible:scale-y-100 peer-focus-visible:opacity-100"
+        )}
+      />
+      <div
+        data-testid={`canvas-node-timeline-ghost-${nodeId}`}
+        data-preview-mode="preview"
+        className={cn(
+          "pointer-events-none absolute left-0 top-full z-10 mt-24 h-[280px] w-[480px] origin-top",
+          "transition-[opacity,transform] duration-200",
+          persistent
+            ? "scale-100 opacity-100"
+            : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
+        )}
+      >
+        <TimelinePreviewSurface mode="preview" />
+      </div>
+    </>
   );
 }
 
@@ -717,14 +729,14 @@ export const CanvasNodeView = memo(function CanvasNodeView({
       {isTimelineSource ? (
         <div
           data-testid={`canvas-node-connector-${node.id}`}
-          className="pointer-events-none absolute left-full top-1/2 z-10 w-24 -translate-y-1/2"
+          className="pointer-events-none absolute left-1/2 top-full z-10 h-24 w-0.5 -translate-x-1/2"
         >
           <motion.div
-            className="h-0.5 w-full rounded-full bg-accent"
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{ scaleX: 1, opacity: 1 }}
+            className="h-full w-full rounded-full bg-accent"
+            initial={{ scaleY: 0, opacity: 0 }}
+            animate={{ scaleY: 1, opacity: 1 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            style={{ transformOrigin: "left center" }}
+            style={{ transformOrigin: "top center" }}
           />
         </div>
       ) : null}

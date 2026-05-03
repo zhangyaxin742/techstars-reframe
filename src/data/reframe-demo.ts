@@ -519,7 +519,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "timeline",
     title: "Founder Confessional",
     body: "6 clips · 1 missing shot · 1 text overlay · 1 audio track\n18s total",
-    position: { x: 1932, y: 0 },
+    position: { x: 1096, y: 487 },
     size: { width: 480, height: 280 },
   },
   {
@@ -528,7 +528,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
     imageUrl: mediaAssets[0].thumbnail,
-    position: { x: 2476, y: -50 },
+    position: { x: 1640, y: 437 },
     size: { width: 210, height: 380 },
   },
 ];

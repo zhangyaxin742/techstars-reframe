@@ -485,20 +485,30 @@ export function InfiniteCanvas({
 
           const sourcePosition = positions.get(sourceNode.id) ?? sourceNode.position;
           const targetPosition = positions.get(targetNode.id) ?? targetNode.position;
-          const sourceX =
-            (sourcePosition.x + sourceNode.size.width - viewport.offset.x) * viewport.zoom;
-          const sourceY =
-            (sourcePosition.y + sourceNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
-          const targetX = (targetPosition.x - viewport.offset.x) * viewport.zoom;
-          const targetY =
-            (targetPosition.y + targetNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+          const connectsTrendToTimeline = isTrendSourceNode(sourceNode) && targetNode.kind === "timeline";
+          const sourceX = connectsTrendToTimeline
+            ? (sourcePosition.x + sourceNode.size.width / 2 - viewport.offset.x) * viewport.zoom
+            : (sourcePosition.x + sourceNode.size.width - viewport.offset.x) * viewport.zoom;
+          const sourceY = connectsTrendToTimeline
+            ? (sourcePosition.y + sourceNode.size.height - viewport.offset.y) * viewport.zoom
+            : (sourcePosition.y + sourceNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
+          const targetX = connectsTrendToTimeline
+            ? (targetPosition.x + targetNode.size.width / 2 - viewport.offset.x) * viewport.zoom
+            : (targetPosition.x - viewport.offset.x) * viewport.zoom;
+          const targetY = connectsTrendToTimeline
+            ? (targetPosition.y - viewport.offset.y) * viewport.zoom
+            : (targetPosition.y + targetNode.size.height / 2 - viewport.offset.y) * viewport.zoom;
           const midpointX = (sourceX + targetX) / 2;
+          const midpointY = (sourceY + targetY) / 2;
+          const pathD = connectsTrendToTimeline
+            ? `M ${sourceX} ${sourceY} C ${sourceX} ${midpointY}, ${targetX} ${midpointY}, ${targetX} ${targetY}`
+            : `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`;
 
           return {
             id: connection.id,
-            d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
+            d: pathD,
             isTimelineConnection:
-              (isTrendSourceNode(sourceNode) && targetNode.kind === "timeline") ||
+              connectsTrendToTimeline ||
               (sourceNode.kind === "timeline" && targetNode.kind === "preview"),
           };
         })

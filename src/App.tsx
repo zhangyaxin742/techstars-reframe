@@ -293,7 +293,7 @@ export function App() {
       return {
         id: "trend-recipes",
         nodeIds: ["recipe-1", "recipe-2", "recipe-3"],
-        padding: 120,
+        padding: { top: 80, right: 120, bottom: 430, left: 120 },
         maxZoom: 0.95,
         delayMs: 220,
         durationMs: 1050,
@@ -504,17 +504,13 @@ export function App() {
       const timelineHeight = 280;
       const previewWidth = 210;
       const previewHeight = 380;
-      const canvasNodeGap = 96;
+      const verticalTimelineGap = 96;
       const previewNodeGap = 64;
-      const trendSourceRightEdge = Math.max(
-        recipeNode.position.x + recipeNode.size.width,
-        ...nodes
-          .filter(isTrendSourceNode)
-          .map((node) => node.position.x + node.size.width)
-      );
+      const timelineAnchorNode =
+        nodes.find((node) => node.id === "recipe-1" && isTrendSourceNode(node)) ?? recipeNode;
       const timelinePosition = {
-        x: trendSourceRightEdge + canvasNodeGap,
-        y: recipeNode.position.y,
+        x: timelineAnchorNode.position.x,
+        y: timelineAnchorNode.position.y + timelineAnchorNode.size.height + verticalTimelineGap,
       };
       setSelectedNodeIds(new Set([recipeNodeId]));
       setTimelineSourceNodeId(recipeNodeId);
