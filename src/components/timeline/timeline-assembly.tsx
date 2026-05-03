@@ -28,8 +28,6 @@ function formatMs(ms: number): string {
   return `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
-const WAVE_HEIGHTS = [20, 42, 74, 56, 30, 88, 64, 36, 52, 76, 44, 68, 25, 90, 58, 38];
-
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -327,16 +325,13 @@ export function TimelineAssembly({
                       )}
                     >
                       <div className="relative flex h-full items-center px-2">
-                        {/* Waveform bars */}
-                        <div className="flex h-8 w-full items-center gap-[1.5px]">
-                          {Array.from({ length: 120 }, (_, i) => (
-                            <span
-                              key={i}
-                              className="flex-1 rounded-full bg-accent/45"
-                              style={{ height: `${WAVE_HEIGHTS[i % WAVE_HEIGHTS.length]}%` }}
-                            />
-                          ))}
-                        </div>
+                        <img
+                          src="/assets/trending%20demo%20timeline/image%2012.png"
+                          alt=""
+                          className="h-10 w-full object-cover"
+                          draggable={false}
+                          data-testid={`timeline-audio-waveform-${seg.id}`}
+                        />
                         {/* Beat markers align to clip transition boundaries where possible. */}
                         {clipTransitionMarkers.map((markerMs) => (
                           <div

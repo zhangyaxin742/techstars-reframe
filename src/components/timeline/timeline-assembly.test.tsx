@@ -163,6 +163,10 @@ describe("TimelineAssembly", () => {
     expect(screen.getByTestId("timeline-segment-ts-7")).toHaveClass("bg-transparent");
     expect(screen.getByTestId("timeline-segment-ts-7")).not.toHaveClass("bg-accent");
     expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");
+    expect(screen.getByTestId("timeline-audio-waveform-ts-9")).toHaveAttribute(
+      "src",
+      "/assets/trending%20demo%20timeline/image%2012.png"
+    );
   });
 
   it("aligns audio beat markers to clip transition boundaries", () => {
