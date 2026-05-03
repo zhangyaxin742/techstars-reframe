@@ -25,10 +25,6 @@ export function MockVideoPreview({
   const [currentMs, setCurrentMs] = useState(0);
   const [durationMs, setDurationMs] = useState(() => Math.max(...segments.map((s) => s.endMs), 1));
   const totalMs = Math.max(durationMs, 1);
-  const currentOverlay = segments.find(
-    (segment) =>
-      segment.kind === "text-overlay" && currentMs >= segment.startMs && currentMs < segment.endMs
-  );
 
   useEffect(() => {
     const video = videoRef.current;
@@ -118,14 +114,6 @@ export function MockVideoPreview({
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
         />
-
-        {currentOverlay ? (
-          <div className="absolute inset-x-0 bottom-16 flex justify-center px-5">
-            <p className="max-w-[92%] text-center text-lg font-semibold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">
-              {currentOverlay.overlayText}
-            </p>
-          </div>
-        ) : null}
       </div>
 
       {/* Controls */}

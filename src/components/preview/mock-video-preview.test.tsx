@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { timelineSegments } from "../../data/reframe-demo";
 import { MockVideoPreview } from "./mock-video-preview";
@@ -26,15 +26,9 @@ describe("MockVideoPreview", () => {
     );
   });
 
-  it("renders active timeline text as white video text without a background chip", () => {
+  it("does not render timeline text over the preview video", () => {
     render(<MockVideoPreview segments={timelineSegments} open variant="floating" />);
 
-    const video = screen.getByLabelText("Timeline preview video") as HTMLVideoElement;
-    video.currentTime = 16;
-    fireEvent.timeUpdate(video);
-
-    const ctaOverlay = screen.getByText("Preorder now → petiteoutdoors.com");
-    expect(ctaOverlay).toHaveClass("text-white");
-    expect(ctaOverlay).not.toHaveClass("bg-black/60");
+    expect(screen.queryByText("Preorder now → petiteoutdoors.com")).not.toBeInTheDocument();
   });
 });
