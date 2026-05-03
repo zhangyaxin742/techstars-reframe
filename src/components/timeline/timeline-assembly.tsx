@@ -326,9 +326,9 @@ export function TimelineAssembly({
                     >
                       <div className="relative flex h-full items-center px-2">
                         <img
-                          src="/assets/trending%20demo%20timeline/image%2012.png"
+                          src="/assets/trending%20demo%20timeline/Rectangle.png"
                           alt=""
-                          className="h-10 w-full object-cover"
+                          className="h-10 w-full object-cover opacity-60"
                           draggable={false}
                           data-testid={`timeline-audio-waveform-${seg.id}`}
                         />
