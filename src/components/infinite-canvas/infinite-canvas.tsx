@@ -18,6 +18,7 @@ import type {
   CanvasViewportFocus,
   NodeMoveUpdate,
 } from "../../lib/infinite-canvas/types";
+import type { TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNavigationRail } from "./canvas-navigation-rail";
@@ -53,6 +54,7 @@ interface InfiniteCanvasProps {
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
   timelinePhase?: TimelinePhase;
+  previewSegments?: TimelineSegment[];
   chromeHidden?: boolean;
   className?: string;
 }
@@ -93,6 +95,7 @@ export function InfiniteCanvas({
   brandCtxPhase,
   trendRecipePhase,
   timelinePhase,
+  previewSegments,
   chromeHidden = false,
   className,
 }: InfiniteCanvasProps) {
@@ -561,6 +564,7 @@ export function InfiniteCanvas({
             brandCtxPhase={brandCtxPhase}
             trendRecipePhase={trendRecipePhase}
             timelinePhase={timelinePhase}
+            previewSegments={previewSegments}
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}

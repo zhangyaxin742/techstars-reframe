@@ -4,6 +4,11 @@ import { App } from "./App";
 import { brandContext } from "./data/reframe-demo";
 
 describe("App", () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+  });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
@@ -31,6 +36,18 @@ describe("App", () => {
       bottom: height,
       toJSON: () => ({}),
     });
+  }
+
+  function readTranslate(element: HTMLElement) {
+    const match = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(element.style.transform);
+    if (!match) {
+      throw new Error(`Expected translate transform, received: ${element.style.transform}`);
+    }
+
+    return {
+      x: Number(match[1]),
+      y: Number(match[2]),
+    };
   }
 
   it("renders the AI chat sidebar and canvas without the navigation menu", () => {
@@ -163,7 +180,7 @@ describe("App", () => {
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-id",
-      "timeline-recipe-1"
+      "timeline-skeleton-recipe-1"
     );
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-nodes",
@@ -192,6 +209,59 @@ describe("App", () => {
     expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByText("Side-by-Side Fit Failure Demo — Timeline")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "timeline-1 preview-1"
+    );
+    const previewNode = screen.getByTestId("canvas-node-preview-1");
+    expect(
+      within(previewNode).getByTestId("mock-video-preview")
+    ).toHaveAttribute("data-preview-variant", "node");
+    expect(within(previewNode).getByLabelText("Timeline preview video")).toHaveAttribute(
+      "src",
+      "/videos/final.mp4"
+    );
+  });
+
+  it("keeps the preview node attached when the timeline node moves", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    const canvas = screen.getByTestId("infinite-canvas");
+    const timelineNode = screen.getByTestId("canvas-node-timeline-1");
+    const previewNode = screen.getByTestId("canvas-node-preview-1");
+    const initialTimelinePosition = readTranslate(timelineNode);
+    const initialPreviewPosition = readTranslate(previewNode);
+
+    fireEvent.pointerDown(timelineNode, {
+      button: 0,
+      pointerId: 1,
+      clientX: 20,
+      clientY: 20,
+    });
+    fireEvent.pointerMove(canvas, {
+      pointerId: 1,
+      clientX: 120,
+      clientY: 70,
+    });
+    fireEvent.pointerUp(canvas, {
+      pointerId: 1,
+      clientX: 120,
+      clientY: 70,
+    });
+
+    const movedTimelinePosition = readTranslate(screen.getByTestId("canvas-node-timeline-1"));
+    const movedPreviewPosition = readTranslate(screen.getByTestId("canvas-node-preview-1"));
+    expect(movedTimelinePosition.x).toBeGreaterThan(initialTimelinePosition.x);
+    expect(movedTimelinePosition.y).toBeGreaterThan(initialTimelinePosition.y);
+    expect(movedPreviewPosition.x - movedTimelinePosition.x).toBeCloseTo(
+      initialPreviewPosition.x - initialTimelinePosition.x
+    );
+    expect(movedPreviewPosition.y - movedTimelinePosition.y).toBeCloseTo(
+      initialPreviewPosition.y - initialTimelinePosition.y
+    );
   });
 
   it("does not start timeline generation when clicking the recipe card body", () => {
@@ -225,7 +295,7 @@ describe("App", () => {
     expect(
       within(screen.getByTestId("timeline-floating-preview")).getByTestId("mock-video-preview")
     ).toHaveAttribute("data-preview-variant", "floating");
-    expect(screen.getByText("Opening frame: hem problem")).toBeInTheDocument();
+    expect(screen.getByText("Hook – Trail energy")).toBeInTheDocument();
     expect(screen.getByText(/Upbeat acoustic/)).toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toHaveAttribute("data-chrome-hidden", "true");
     expect(screen.queryByRole("navigation", { name: "Canvas navigation" })).not.toBeInTheDocument();
@@ -264,9 +334,11 @@ describe("App", () => {
     revealTimeline();
     fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
     fireEvent.click(screen.getByTestId("timeline-segment-ts-1"));
-    fireEvent.click(screen.getByTestId("alternate-alt-2"));
+    fireEvent.click(screen.getByTestId("alternate-ma-7"));
 
-    expect(screen.getByTestId("timeline-segment-ts-1")).toHaveTextContent("Product macro detail");
+    expect(screen.getByTestId("timeline-segment-ts-1")).toHaveTextContent(
+      "Kids running through meadow"
+    );
   });
 
   it("bottom prompt submit appends user prompt and simulated tool activity", async () => {

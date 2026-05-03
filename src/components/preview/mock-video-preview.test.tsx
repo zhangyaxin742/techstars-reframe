@@ -31,4 +31,18 @@ describe("MockVideoPreview", () => {
 
     expect(screen.queryByText("Preorder now → petiteoutdoors.com")).not.toBeInTheDocument();
   });
+
+  it("renders as an inline canvas node player", () => {
+    render(<MockVideoPreview segments={timelineSegments} open variant="node" />);
+
+    expect(screen.getByTestId("mock-video-preview")).toHaveAttribute(
+      "data-preview-variant",
+      "node"
+    );
+    expect(screen.getByTestId("mock-video-preview")).toHaveClass("h-full");
+    expect(screen.getByLabelText("Timeline preview video")).toHaveAttribute(
+      "src",
+      "/videos/final.mp4"
+    );
+  });
 });

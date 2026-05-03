@@ -6,7 +6,8 @@ import type { CanvasNode, CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
-import { brandContext } from "../../data/reframe-demo";
+import { MockVideoPreview } from "../preview/mock-video-preview";
+import { brandContext, type TimelineSegment } from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
@@ -20,6 +21,7 @@ interface CanvasNodeViewProps {
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
   timelinePhase?: TimelinePhase;
+  previewSegments?: TimelineSegment[];
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   onPointerDown: (event: React.PointerEvent, node: CanvasNode) => void;
   onClick: (event: React.MouseEvent, node: CanvasNode) => void;
@@ -248,6 +250,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   brandCtxPhase,
   trendRecipePhase = "revealing",
   timelinePhase = "revealing",
+  previewSegments = [],
   resolveImageUrl,
   onPointerDown,
   onClick,
@@ -446,6 +449,12 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               <TimelineRevealCard node={node} />
             )}
           </AnimatePresence>
+        ) : node.kind === "preview" ? (
+          <MockVideoPreview
+            segments={previewSegments}
+            open
+            variant="node"
+          />
         ) : (
           <div className="space-y-1 p-3">
             <div className="truncate text-sm font-semibold">{node.title}</div>

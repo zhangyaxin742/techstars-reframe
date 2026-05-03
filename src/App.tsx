@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
 import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
-import { MockVideoPreview } from "./components/preview/mock-video-preview";
 import { TimelineBottomDrawer } from "./components/timeline/timeline-bottom-drawer";
 import { Toaster } from "./components/ui/sonner";
 import type { CanvasConnection, CanvasNode, CanvasViewportFocus } from "./lib/infinite-canvas/types";
@@ -72,7 +71,6 @@ export function App() {
   const [timelineDraftSegments, setTimelineDraftSegments] = useState<TimelineSegment[]>(
     () => seededTimelineSegments
   );
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const timeoutIdsRef = useRef<number[]>([]);
   const initialSequenceStartedRef = useRef(false);
@@ -269,9 +267,11 @@ export function App() {
 
   const viewportFocus = useMemo<CanvasViewportFocus>(() => {
     if (timelinePhase !== "hidden") {
+      const timelineFocusNodeIds =
+        timelinePhase === "revealing" ? ["timeline-1", "preview-1"] : ["timeline-1"];
       return {
-        id: `timeline-${timelineSourceNodeId ?? "selected"}`,
-        nodeIds: ["timeline-1"],
+        id: `timeline-${timelinePhase}-${timelineSourceNodeId ?? "selected"}`,
+        nodeIds: timelineFocusNodeIds,
         padding: 140,
         maxZoom: 0.95,
         delayMs: 240,
@@ -313,13 +313,25 @@ export function App() {
   }, [nodes, selectedNodeIds]);
 
   const handleNodeMove = useCallback((updates: NodeMoveUpdate[]) => {
-    const updateMap = new Map(updates.map((update) => [update.nodeId, update.position]));
-    setNodes((currentNodes) =>
-      currentNodes.map((node) => {
+    setNodes((currentNodes) => {
+      const updateMap = new Map(updates.map((update) => [update.nodeId, update.position]));
+      const timelineUpdate = updateMap.get("timeline-1");
+      if (timelineUpdate && !updateMap.has("preview-1")) {
+        const timelineNode = currentNodes.find((node) => node.id === "timeline-1");
+        const previewNode = currentNodes.find((node) => node.id === "preview-1");
+        if (timelineNode && previewNode) {
+          updateMap.set("preview-1", {
+            x: previewNode.position.x + timelineUpdate.x - timelineNode.position.x,
+            y: previewNode.position.y + timelineUpdate.y - timelineNode.position.y,
+          });
+        }
+      }
+
+      return currentNodes.map((node) => {
         const position = updateMap.get(node.id);
         return position ? { ...node, position } : node;
-      })
-    );
+      });
+    });
   }, []);
 
   const handleDeleteSelected = useCallback((nodeIds: Set<string>) => {
@@ -393,7 +405,14 @@ export function App() {
       const connectionId = recipeNodeId === "recipe-1" ? "r1-tl" : `${recipeNodeId}-tl`;
       const timelineWidth = 480;
       const timelineHeight = 280;
+      const previewWidth = 210;
+      const previewHeight = 380;
       const canvasNodeGap = 96;
+      const previewNodeGap = 64;
+      const timelinePosition = {
+        x: recipeNode.position.x + recipeNode.size.width + canvasNodeGap,
+        y: recipeNode.position.y,
+      };
       setSelectedNodeIds(new Set([recipeNodeId]));
       setTimelineSourceNodeId(recipeNodeId);
       setRecipeSequenceStarted(true);
@@ -404,16 +423,25 @@ export function App() {
           node.id === "timeline-1"
             ? {
                 ...node,
-                position: {
-                  x: recipeNode.position.x + recipeNode.size.width + canvasNodeGap,
-                  y: recipeNode.position.y,
-                },
+                position: timelinePosition,
                 size: {
                   width: timelineWidth,
                   height: timelineHeight,
                 },
               }
-            : node
+            : node.id === "preview-1"
+              ? {
+                  ...node,
+                  position: {
+                    x: timelinePosition.x + timelineWidth + previewNodeGap,
+                    y: timelinePosition.y + (timelineHeight - previewHeight) / 2,
+                  },
+                  size: {
+                    width: previewWidth,
+                    height: previewHeight,
+                  },
+                }
+              : node
         )
       );
       setConnections((currentConnections) => upsertTimelineConnection(currentConnections, recipeNodeId));
@@ -508,6 +536,7 @@ export function App() {
           brandCtxPhase={brandCtxPhase}
           trendRecipePhase={trendRecipePhase}
           timelinePhase={timelinePhase}
+          previewSegments={timelineDraftSegments}
           chromeHidden={timelineDrawerOpen}
         />
         {!timelineDrawerOpen ? (
@@ -528,11 +557,6 @@ export function App() {
           </>
         ) : null}
       </main>
-      <MockVideoPreview
-        segments={timelineDraftSegments}
-        open={previewOpen}
-        onClose={() => setPreviewOpen(false)}
-      />
       <TimelineBottomDrawer
         open={timelineDrawerOpen}
         segments={timelineDraftSegments}

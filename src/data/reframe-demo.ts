@@ -521,8 +521,8 @@ export const reframeDemoNodes: CanvasNode[] = [
     title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
     imageUrl: mediaAssets[0].thumbnail,
-    position: { x: 2068, y: 0 },
-    size: { width: 260, height: 180 },
+    position: { x: 2036, y: -50 },
+    size: { width: 210, height: 380 },
   },
 ];
 

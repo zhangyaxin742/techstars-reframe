@@ -7,7 +7,7 @@ interface MockVideoPreviewProps {
   segments: TimelineSegment[];
   open: boolean;
   onClose?: () => void;
-  variant?: "modal" | "floating";
+  variant?: "modal" | "floating" | "node";
   videoSrc?: string;
   className?: string;
 }
@@ -70,21 +70,25 @@ export function MockVideoPreview({
 
   const progressPct = (currentMs / totalMs) * 100;
   const isFloating = variant === "floating";
+  const isNode = variant === "node";
+  const isInline = isFloating || isNode;
 
   const player = (
     <div
       className={cn(
         "relative overflow-hidden bg-neutral-950 shadow-2xl",
-        isFloating
+        isNode
+          ? "flex h-full w-full flex-col rounded-none border-0 shadow-none"
+          : isFloating
           ? "flex h-full w-auto flex-col rounded-2xl border border-white/10"
           : "w-full max-w-sm rounded-2xl",
         className
       )}
       data-testid="mock-video-preview"
       data-preview-variant={variant}
-      aria-label={isFloating ? "Timeline video preview" : undefined}
+      aria-label={isInline ? "Timeline video preview" : undefined}
     >
-      {onClose && !isFloating ? (
+      {onClose && !isInline ? (
         <button
           type="button"
           onClick={onClose}
@@ -99,7 +103,7 @@ export function MockVideoPreview({
       <div
         className={cn(
           "relative w-full overflow-hidden bg-neutral-900",
-          isFloating ? "min-h-0 flex-1" : "aspect-[9/16]"
+          isInline ? "min-h-0 flex-1" : "aspect-[9/16]"
         )}
       >
         <video
@@ -117,9 +121,9 @@ export function MockVideoPreview({
       </div>
 
       {/* Controls */}
-      <div className={cn("bg-neutral-950", isFloating ? "px-3 py-2" : "px-4 py-3")}>
+      <div className={cn("bg-neutral-950", isInline ? "px-3 py-2" : "px-4 py-3")}>
         {/* Progress bar */}
-        <div className={cn("overflow-hidden rounded-full bg-neutral-800", isFloating ? "mb-2 h-0.5" : "mb-3 h-1")}>
+        <div className={cn("overflow-hidden rounded-full bg-neutral-800", isInline ? "mb-2 h-0.5" : "mb-3 h-1")}>
           <div
             className="h-full rounded-full bg-white transition-[width] duration-100"
             style={{ width: `${progressPct}%` }}
@@ -129,29 +133,33 @@ export function MockVideoPreview({
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={togglePlay}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              togglePlay();
+            }}
             className={cn(
               "flex items-center justify-center rounded-full bg-white text-black transition hover:bg-neutral-200",
-              isFloating ? "size-8" : "size-10"
+              isInline ? "size-8" : "size-10"
             )}
             aria-label={playing ? "Pause" : "Play"}
           >
             {playing ? (
-              <Pause className={cn(isFloating ? "size-4" : "size-5")} weight="fill" />
+              <Pause className={cn(isInline ? "size-4" : "size-5")} weight="fill" />
             ) : (
-              <Play className={cn(isFloating ? "size-4" : "size-5")} weight="fill" />
+              <Play className={cn(isInline ? "size-4" : "size-5")} weight="fill" />
             )}
           </button>
           <span className="text-xs tabular-nums text-neutral-400">
             {(currentMs / 1000).toFixed(1)}s / {(totalMs / 1000).toFixed(1)}s
           </span>
-          {!isFloating ? <span className="text-xs text-neutral-500">final.mp4</span> : null}
+          {!isInline ? <span className="text-xs text-neutral-500">final.mp4</span> : null}
         </div>
       </div>
     </div>
   );
 
-  if (isFloating) {
+  if (isInline) {
     return player;
   }
 
