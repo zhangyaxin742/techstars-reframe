@@ -30,7 +30,7 @@ describe("CanvasNodeView", () => {
     renderNode({
       id: "recipe-1",
       kind: "trend-recipe",
-      title: "Side-by-Side Fit Failure Demo",
+      title: "Founder Confessional",
       body: "\"Most outdoor brands vs. gear made for your actual frame.\"\n\nFormat: Split-screen proof\nLength: 18s\nMatch: 94%",
       position: { x: 0, y: 0 },
       size: { width: 300, height: 200 },
@@ -38,7 +38,7 @@ describe("CanvasNodeView", () => {
 
     expect(screen.getByTestId("trend-recipe-reveal-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("trend-recipe-section-recipe-1-title")).toHaveTextContent(
-      "Side-by-Side Fit Failure Demo"
+      "Founder Confessional"
     );
     expect(screen.getByTestId("trend-recipe-section-recipe-1-hook")).toHaveTextContent(
       "Most outdoor brands"
@@ -52,7 +52,7 @@ describe("CanvasNodeView", () => {
       {
         id: "timeline-1",
         kind: "timeline",
-        title: "Side-by-Side Fit Failure Demo — Timeline",
+        title: "Founder Confessional",
         body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
         position: { x: 0, y: 0 },
         size: { width: 480, height: 280 },
@@ -63,7 +63,7 @@ describe("CanvasNodeView", () => {
     const timelineNode = screen.getByTestId("timeline-reveal-timeline-1");
     expect(timelineNode).toBeInTheDocument();
     expect(screen.getByTestId("timeline-section-timeline-1-title")).toHaveTextContent(
-      "Side-by-Side Fit Failure Demo"
+      "Founder Confessional"
     );
     expect(screen.getByText("Timeline ready")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("1 gap");

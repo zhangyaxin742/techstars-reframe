@@ -129,7 +129,7 @@ export function TimelineBottomDrawer({
                     </span>
                     <div className="min-w-0">
                       <DialogPrimitive.Title className="truncate text-sm font-semibold">
-                        Side-by-Side Fit Failure Demo Timeline
+                        Founder Confessional
                       </DialogPrimitive.Title>
                       <DialogPrimitive.Description className="truncate text-xs text-muted-foreground">
                         Inspect matched clips, missing shots, overlays, and audio timing.

@@ -275,7 +275,7 @@ export const mediaAssets: MediaAsset[] = [
 export const trendRecipes: TrendRecipe[] = [
   {
     id: "tr-1",
-    title: "Side-by-Side Fit Failure Demo",
+    title: "Founder Confessional",
     hook: "\"This is why regular hiking pants never worked for me.\"",
     format: "Visible fit issue → Mirror check → Trail movement → Product proof → CTA",
     estimatedLength: "15-30s",
@@ -502,7 +502,7 @@ export const reframeDemoNodes: CanvasNode[] = [
   {
     id: "timeline-1",
     kind: "timeline",
-    title: "Side-by-Side Fit Failure Demo — Timeline",
+    title: "Founder Confessional",
     body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
     position: { x: 1492, y: 0 },
     size: { width: 480, height: 280 },

@@ -62,7 +62,7 @@ describe("App", () => {
     );
     expect(screen.queryByText("Preparing your creative canvas")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
-    expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
     expect(screen.queryByText("1. Paste Brand Sources")).not.toBeInTheDocument();
     expect(screen.queryByText("2. Connect Media")).not.toBeInTheDocument();
     expect(screen.queryByText("3. Analyze Brand")).not.toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("App", () => {
 
     expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
-    expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
     expect(screen.getByTestId("simulated-tool-tool-build-brand-context")).toHaveAttribute(
       "data-tool-state",
       "completed"
@@ -128,7 +128,7 @@ describe("App", () => {
       "data-viewport-focus-nodes",
       "recipe-1 recipe-2 recipe-3"
     );
-    expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(7300);
@@ -159,7 +159,7 @@ describe("App", () => {
         "Loading timeline"
       )
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Side-by-Side Fit Failure Demo")).toBeInTheDocument();
+    expect(screen.getByText("Founder Confessional")).toBeInTheDocument();
     expect(screen.queryByTestId("trend-recipe-skeleton-recipe-1")).not.toBeInTheDocument();
   });
 
@@ -214,7 +214,9 @@ describe("App", () => {
     );
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-timeline-1-preview")).toBeInTheDocument();
-    expect(screen.getByText("Side-by-Side Fit Failure Demo — Timeline")).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("canvas-node-timeline-1")).getByText("Founder Confessional")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-nodes",
       "timeline-1 preview-1"
