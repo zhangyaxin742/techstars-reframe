@@ -102,6 +102,7 @@ export interface TimelineSegment {
   mediaAssetId?: string;
   thumbnail?: string;
   overlayText?: string;
+  captionAlternates?: string[];
   audioNote?: string;
   alternates?: MediaAsset[];
 }
@@ -313,7 +314,19 @@ const alternateClips: MediaAsset[] = [
 
 export const timelineSegments: TimelineSegment[] = [
   { id: "ts-1", kind: "clip", label: "Hook - Fit problem", startMs: 0, endMs: 3200, mediaAssetId: "final-1", thumbnail: mediaAssets[0].thumbnail },
-  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "I couldn't find hiking pants that fit so I made my own." },
+  {
+    id: "ts-2",
+    kind: "text-overlay",
+    label: "Hook text",
+    startMs: 0,
+    endMs: 3200,
+    overlayText: "I couldn't find hiking pants that fit so I made my own.",
+    captionAlternates: [
+      "Petite hikers deserve pants that actually fit.",
+      "I got tired of cuffing every hiking pant.",
+      "Built for shorter inseams, not scaled-down compromises.",
+    ],
+  },
   { id: "ts-3", kind: "clip", label: "Product reveal", startMs: 3200, endMs: 6000, mediaAssetId: "final-2", thumbnail: mediaAssets[1].thumbnail },
   { id: "ts-4", kind: "missing", label: "Missing shot - Movement proof", startMs: 6000, endMs: 8000, alternates: [mediaAssets[2]] },
   { id: "ts-5", kind: "clip", label: "Final 4 - Trail movement", startMs: 8000, endMs: 12100, mediaAssetId: "final-4", thumbnail: mediaAssets[3].thumbnail, alternates: alternateClips },

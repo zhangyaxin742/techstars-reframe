@@ -452,6 +452,25 @@ describe("App", () => {
     );
   });
 
+  it("updates drawer timeline captions from the caption dropdown", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    revealTimeline();
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+
+    fireEvent.pointerDown(screen.getByLabelText("Choose caption for Hook text"), {
+      button: 0,
+      ctrlKey: false,
+      pointerType: "mouse",
+    });
+    fireEvent.click(screen.getByTestId("caption-option-ts-2-1"));
+
+    expect(screen.getByTestId("timeline-segment-ts-2")).toHaveTextContent(
+      "Petite hikers deserve pants that actually fit."
+    );
+  });
+
   it("bottom prompt submit appends user prompt and simulated tool activity", async () => {
     vi.useFakeTimers();
     render(<App />);

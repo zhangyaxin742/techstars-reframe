@@ -1,5 +1,6 @@
 import {
   ArrowsClockwise,
+  CaretDown,
   Eye,
   FilmSlate,
   MagicWand,
@@ -10,12 +11,19 @@ import {
 import React, { useCallback, useState } from "react";
 import type { MediaAsset, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 interface TimelineAssemblyProps {
   segments: TimelineSegment[];
   selectedSegmentId: string | null;
   onSelectSegment: (segmentId: string | null) => void;
   onSwapClip?: (segmentId: string, newAsset: MediaAsset) => void;
+  onSelectCaption?: (segmentId: string, caption: string) => void;
   onGenerateMissingShotWithAi?: (segmentId: string, newAsset: MediaAsset) => void;
   aiGeneratingSegmentId?: string | null;
   aiGeneratedSegmentIds?: Set<string>;
@@ -51,6 +59,7 @@ export function TimelineAssembly({
   selectedSegmentId,
   onSelectSegment,
   onSwapClip,
+  onSelectCaption,
   onGenerateMissingShotWithAi,
   aiGeneratingSegmentId = null,
   aiGeneratedSegmentIds,
@@ -316,11 +325,17 @@ export function TimelineAssembly({
                     const widthPct = ((seg.endMs - seg.startMs) / totalMs) * 100;
                     const leftPct = (seg.startMs / totalMs) * 100;
                     const isCta = seg.label.toLowerCase().includes("cta");
+                    const captionOptions = Array.from(
+                      new Set(
+                        [seg.overlayText, ...(seg.captionAlternates ?? [])].filter(
+                          (caption): caption is string => Boolean(caption)
+                        )
+                      )
+                    );
+                    const hasCaptionOptions = captionOptions.length > 1;
                     return (
-                      <button
+                      <div
                         key={seg.id}
-                        type="button"
-                        onClick={() => handleSegmentClick(seg.id)}
                         data-testid={`timeline-segment-${seg.id}`}
                         className={cn(
                           "absolute top-3 flex h-8 items-center truncate rounded border px-3 text-left text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -331,8 +346,43 @@ export function TimelineAssembly({
                         )}
                         style={{ left: `${leftPct}%`, width: `${widthPct}%`, minWidth: 120 }}
                       >
-                        <span className="truncate">{seg.overlayText}</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSegmentClick(seg.id)}
+                          className="min-w-0 flex-1 truncate text-left focus-visible:outline-none"
+                          data-testid={`timeline-segment-${seg.id}-select`}
+                        >
+                          <span className="truncate">{seg.overlayText}</span>
+                        </button>
+                        {hasCaptionOptions ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label={`Choose caption for ${seg.label}`}
+                                className="ml-2 flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <CaretDown className="size-3" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-80">
+                              <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase text-muted-foreground">
+                                Suggested captions
+                              </div>
+                              {captionOptions.map((caption, index) => (
+                                <DropdownMenuItem
+                                  key={caption}
+                                  onSelect={() => onSelectCaption?.(seg.id, caption)}
+                                  className="items-start text-xs leading-5"
+                                  data-testid={`caption-option-${seg.id}-${index}`}
+                                >
+                                  <span className="text-pretty">{caption}</span>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>

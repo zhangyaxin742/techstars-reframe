@@ -223,6 +223,30 @@ describe("TimelineAssembly", () => {
     );
   });
 
+  it("shows drawer caption options and calls onSelectCaption", async () => {
+    const onSelectCaption = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <TimelineAssembly
+        segments={timelineSegments}
+        selectedSegmentId={null}
+        onSelectSegment={vi.fn()}
+        onSelectCaption={onSelectCaption}
+        variant="drawer"
+      />
+    );
+
+    await user.click(screen.getByLabelText("Choose caption for Hook text"));
+    expect(await screen.findByText("Suggested captions")).toBeInTheDocument();
+    await user.click(await screen.findByTestId("caption-option-ts-2-1"));
+
+    expect(onSelectCaption).toHaveBeenCalledWith(
+      "ts-2",
+      "Petite hikers deserve pants that actually fit."
+    );
+  });
+
   it("aligns audio beat markers to clip transition boundaries", () => {
     render(
       <TimelineAssembly
