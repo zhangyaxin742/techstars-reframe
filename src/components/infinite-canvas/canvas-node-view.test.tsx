@@ -81,8 +81,11 @@ describe("CanvasNodeView", () => {
     );
     expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toHaveClass("h-10");
-    expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toHaveClass("bg-secondary");
-    expect(screen.getByTestId("timeline-audio-preview-timeline-1").firstElementChild).toHaveClass("h-6");
+    expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toHaveClass("bg-black");
+    expect(screen.getByTestId("timeline-audio-preview-timeline-1").firstElementChild).toHaveAttribute(
+      "src",
+      "/assets/trending%20demo%20timeline/image%2012.png"
+    );
 
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("rounded-full");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("bg-secondary");

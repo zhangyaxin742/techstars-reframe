@@ -220,8 +220,6 @@ function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
   );
 }
 
-const MINI_WAVE_HEIGHTS = [35, 70, 50, 85, 45, 65, 90, 55, 75, 40, 60, 80];
-
 function TimelineRevealCard({
   node,
   segments,
@@ -378,19 +376,16 @@ function TimelineRevealCard({
 
         {audioSegments.length > 0 ? (
           <div
-            className="flex h-10 items-center rounded-md border border-border bg-secondary px-2.5"
+            className="flex h-10 items-center overflow-hidden rounded-md border border-border bg-black px-2"
             data-testid={`timeline-audio-preview-${node.id}`}
             aria-label="Audio beat preview"
           >
-            <div className="flex h-6 w-full items-center gap-[1.5px]">
-              {Array.from({ length: 36 }, (_, index) => (
-                <span
-                  key={index}
-                  className="flex-1 rounded-full bg-foreground opacity-40"
-                  style={{ height: `${MINI_WAVE_HEIGHTS[index % MINI_WAVE_HEIGHTS.length]}%` }}
-                />
-              ))}
-            </div>
+            <img
+              src="/assets/trending%20demo%20timeline/image%2012.png"
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           </div>
         ) : null}
       </motion.div>
