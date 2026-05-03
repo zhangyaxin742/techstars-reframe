@@ -374,7 +374,10 @@ describe("App", () => {
     const publishStatus = screen.getByTestId("preview-publish-status");
     expect(publishStatus).toHaveTextContent("Publishing to Instagram");
     expect(publishStatus).toHaveTextContent("18%");
-    expect(screen.getByTestId("preview-publish-progress")).toBeInTheDocument();
+    expect(screen.getByTestId("preview-publish-progress")).toHaveStyle({
+      backgroundImage:
+        "linear-gradient(90deg, #f9ce34 0%, #ee2a7b 38%, #c837ab 68%, #4f5bd5 100%)",
+    });
     expect(within(publishStatus).queryByText("views")).not.toBeInTheDocument();
 
     act(() => {

@@ -18,6 +18,8 @@ export type PreviewPublishStatus = "idle" | "publishing" | "published";
 const videoChromeTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
 const dialogMotionTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
 const dialogExitDurationMs = dialogMotionTransition.duration * 1000;
+const instagramProgressGradient =
+  "linear-gradient(90deg, #f9ce34 0%, #ee2a7b 38%, #c837ab 68%, #4f5bd5 100%)";
 
 export interface PreviewPublishState {
   status: PreviewPublishStatus;
@@ -220,7 +222,8 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
           <motion.div
             data-testid="preview-publish-progress"
-            className="h-full rounded-full bg-accent"
+            className="h-full rounded-full"
+            style={{ backgroundImage: instagramProgressGradient }}
             initial={false}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.35, ease: "easeOut" }}
