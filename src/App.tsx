@@ -7,7 +7,7 @@ import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canva
 import { MockVideoPreview } from "./components/preview/mock-video-preview";
 import { TimelineBottomDrawer } from "./components/timeline/timeline-bottom-drawer";
 import { Toaster } from "./components/ui/sonner";
-import type { CanvasConnection, CanvasNode } from "./lib/infinite-canvas/types";
+import type { CanvasConnection, CanvasNode, CanvasViewportFocus } from "./lib/infinite-canvas/types";
 import {
   type AiFlowStep,
   type ChatMessage,
@@ -267,6 +267,39 @@ export function App() {
     );
   }, [connections, visibleNodes]);
 
+  const viewportFocus = useMemo<CanvasViewportFocus>(() => {
+    if (timelinePhase !== "hidden") {
+      return {
+        id: `timeline-${timelineSourceNodeId ?? "selected"}`,
+        nodeIds: ["timeline-1"],
+        padding: 140,
+        maxZoom: 0.95,
+        delayMs: 240,
+        durationMs: 1050,
+      };
+    }
+
+    if (trendRecipePhase !== "hidden") {
+      return {
+        id: "trend-recipes",
+        nodeIds: ["recipe-1", "recipe-2", "recipe-3"],
+        padding: 120,
+        maxZoom: 0.95,
+        delayMs: 220,
+        durationMs: 1050,
+      };
+    }
+
+    return {
+      id: "brand-context",
+      nodeIds: ["brand-ctx"],
+      padding: 96,
+      maxZoom: 0.95,
+      delayMs: 180,
+      durationMs: 950,
+    };
+  }, [timelinePhase, timelineSourceNodeId, trendRecipePhase]);
+
   const isAiBusy = messages.some((message) =>
     Boolean(message.thinkingText) ||
     message.toolCalls?.some((toolCall) => toolCall.state === "running")
@@ -469,6 +502,7 @@ export function App() {
           onDeleteSelected={handleDeleteSelected}
           onExportSelected={handleExportSelected}
           timelineSourceNodeId={timelineSourceNodeId ?? undefined}
+          viewportFocus={viewportFocus}
           onCreateTimelineFromTrend={startTimelineFromRecipe}
           onOpenTimelineNode={handleOpenTimelineNode}
           animatedConnectionIds={animatedConnectionIds}

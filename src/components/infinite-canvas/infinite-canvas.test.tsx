@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
@@ -44,7 +44,26 @@ function renderCanvas(props: Partial<React.ComponentProps<typeof InfiniteCanvas>
   return { ...result, canvas };
 }
 
+function mockCanvasBounds(width = 900, height = 600) {
+  return vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+    x: 0,
+    y: 0,
+    width,
+    height,
+    top: 0,
+    left: 0,
+    right: width,
+    bottom: height,
+    toJSON: () => ({}),
+  });
+}
+
 describe("InfiniteCanvas", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   it("prevents default wheel behavior for canvas navigation", () => {
     const { canvas } = renderCanvas();
     const event = new WheelEvent("wheel", {
@@ -266,5 +285,115 @@ describe("InfiniteCanvas", () => {
 
       cleanup();
     }
+  });
+
+  it("centers a requested viewport focus target", async () => {
+    mockCanvasBounds();
+
+    render(
+      <div style={{ width: 900, height: 600 }}>
+        <InfiniteCanvas
+          nodes={nodes}
+          viewportFocus={{
+            id: "focus-a",
+            nodeIds: ["a"],
+            padding: 0,
+            maxZoom: 1,
+            delayMs: 0,
+            durationMs: 0,
+          }}
+        />
+      </div>
+    );
+
+    const transformLayer = screen.getByTestId("canvas-node-a").parentElement;
+
+    await waitFor(() => {
+      expect(transformLayer?.style.transform).toBe("translate(390px, 250px) scale(1)");
+    });
+  });
+
+  it("does not refocus repeatedly when the focus id is reused", async () => {
+    mockCanvasBounds();
+    const { rerender } = render(
+      <div style={{ width: 900, height: 600 }}>
+        <InfiniteCanvas
+          nodes={nodes}
+          viewportFocus={{
+            id: "focus-a",
+            nodeIds: ["a"],
+            padding: 0,
+            maxZoom: 1,
+            delayMs: 0,
+            durationMs: 0,
+          }}
+        />
+      </div>
+    );
+
+    const initialTransformLayer = screen.getByTestId("canvas-node-a").parentElement;
+    await waitFor(() => {
+      expect(initialTransformLayer?.style.transform).toBe("translate(390px, 250px) scale(1)");
+    });
+
+    rerender(
+      <div style={{ width: 900, height: 600 }}>
+        <InfiniteCanvas
+          nodes={[
+            { ...nodes[0], position: { x: 500, y: 500 } },
+            nodes[1],
+          ]}
+          viewportFocus={{
+            id: "focus-a",
+            nodeIds: ["a"],
+            padding: 0,
+            maxZoom: 1,
+            delayMs: 0,
+            durationMs: 0,
+          }}
+        />
+      </div>
+    );
+
+    expect(screen.getByTestId("canvas-node-a").parentElement?.style.transform).toBe(
+      "translate(390px, 250px) scale(1)"
+    );
+  });
+
+  it("lets manual wheel movement supersede a pending viewport focus animation", async () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+
+    render(
+      <div style={{ width: 900, height: 600 }}>
+        <InfiniteCanvas
+          nodes={nodes}
+          viewportFocus={{
+            id: "focus-a",
+            nodeIds: ["a"],
+            padding: 0,
+            maxZoom: 1,
+            delayMs: 500,
+            durationMs: 1000,
+          }}
+        />
+      </div>
+    );
+
+    const canvas = screen.getByTestId("infinite-canvas");
+    const transformLayer = screen.getByTestId("canvas-node-a").parentElement;
+    const event = new WheelEvent("wheel", {
+      deltaY: 120,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    canvas.dispatchEvent(event);
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(transformLayer?.style.transform).not.toBe("translate(390px, 250px) scale(1)");
   });
 });

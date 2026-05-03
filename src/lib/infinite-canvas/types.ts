@@ -59,6 +59,16 @@ export interface CanvasViewportState {
   zoom: number;
 }
 
+export interface CanvasViewportFocus {
+  id: string;
+  nodeIds: string[];
+  padding?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  delayMs?: number;
+  durationMs?: number;
+}
+
 export interface NodeMoveUpdate {
   nodeId: string;
   position: CanvasPoint;

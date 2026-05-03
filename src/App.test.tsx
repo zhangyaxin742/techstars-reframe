@@ -6,6 +6,7 @@ import { brandContext } from "./data/reframe-demo";
 describe("App", () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   function revealTimeline() {
@@ -18,12 +19,30 @@ describe("App", () => {
     });
   }
 
+  function mockCanvasBounds(width = 900, height = 600) {
+    return vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width,
+      height,
+      top: 0,
+      left: 0,
+      right: width,
+      bottom: height,
+      toJSON: () => ({}),
+    });
+  }
+
   it("renders the AI chat sidebar and canvas without the navigation menu", () => {
     vi.useFakeTimers();
     render(<App />);
 
     expect(screen.getByTestId("chat-history-panel")).toHaveTextContent("Building Brand Context");
     expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "brand-context"
+    );
     expect(screen.queryByText("Preparing your creative canvas")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
     expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
@@ -72,6 +91,7 @@ describe("App", () => {
 
   it("shows trend recipe skeletons during search before revealing generated cards", () => {
     vi.useFakeTimers();
+    mockCanvasBounds();
     render(<App />);
 
     act(() => {
@@ -83,6 +103,14 @@ describe("App", () => {
       "running"
     );
     expect(screen.getByTestId("trend-recipe-skeleton-recipe-1")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "trend-recipes"
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "recipe-1 recipe-2 recipe-3"
+    );
     expect(screen.queryByText("Side-by-Side Fit Failure Demo")).not.toBeInTheDocument();
 
     act(() => {
@@ -120,6 +148,7 @@ describe("App", () => {
 
   it("clicking a trend recipe plus action runs the timeline generation flow", () => {
     vi.useFakeTimers();
+    mockCanvasBounds();
     render(<App />);
 
     act(() => {
@@ -132,6 +161,14 @@ describe("App", () => {
     fireEvent.click(createTimelineButton);
 
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "timeline-recipe-1"
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "timeline-1"
+    );
     expect(screen.queryByTestId("canvas-node-create-timeline-recipe-1")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();

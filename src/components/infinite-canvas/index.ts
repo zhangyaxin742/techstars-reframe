@@ -13,6 +13,7 @@ export type {
   CanvasPromptBoxData,
   CanvasRect,
   CanvasSize,
+  CanvasViewportFocus,
   CanvasViewportState,
   NodeMoveUpdate,
 } from "../../lib/infinite-canvas/types";

@@ -15,6 +15,7 @@ import type {
   CanvasPromptBoxData,
   CanvasRect,
   CanvasSize,
+  CanvasViewportFocus,
   NodeMoveUpdate,
 } from "../../lib/infinite-canvas/types";
 import { cn } from "../../lib/utils";
@@ -44,6 +45,7 @@ interface InfiniteCanvasProps {
   onPromptChange?: (nodeId: string, value: string) => void;
   onPromptSubmit?: (nodeId: string, value: string) => void;
   timelineSourceNodeId?: string;
+  viewportFocus?: CanvasViewportFocus;
   onCreateTimelineFromTrend?: (node: CanvasNode) => void;
   onOpenTimelineNode?: (node: CanvasNode) => void;
   animatedConnectionIds?: Set<string>;
@@ -83,6 +85,7 @@ export function InfiniteCanvas({
   onPromptChange,
   onPromptSubmit,
   timelineSourceNodeId,
+  viewportFocus,
   onCreateTimelineFromTrend,
   onOpenTimelineNode,
   animatedConnectionIds,
@@ -93,7 +96,15 @@ export function InfiniteCanvas({
   chromeHidden = false,
   className,
 }: InfiniteCanvasProps) {
-  const { containerRef, viewport, setViewport, panByScreenDelta, wheelPan, zoomAtPoint } =
+  const {
+    containerRef,
+    viewport,
+    animateViewportTo,
+    stopViewportAnimation,
+    panByScreenDelta,
+    wheelPan,
+    zoomAtPoint,
+  } =
     useCanvasViewport();
   const [containerSize, setContainerSize] = useState<CanvasSize>({
     width: 0,
@@ -108,6 +119,7 @@ export function InfiniteCanvas({
   const [marqueeRect, setMarqueeRect] = useState<CanvasRect | null>(null);
   const lastPointerRef = useRef<CanvasPoint | null>(null);
   const suppressNextCanvasClickRef = useRef(Boolean(0));
+  const lastViewportFocusIdRef = useRef<string | null>(null);
 
   const selection = selectedNodeIds ?? internalSelection;
 
@@ -141,14 +153,28 @@ export function InfiniteCanvas({
       return;
     }
 
-    const bounds = calculateSelectionBounds(
-      nodes,
-      new Set(nodes.map((node) => node.id))
-    );
+    if (!viewportFocus || lastViewportFocusIdRef.current === viewportFocus.id) {
+      return;
+    }
+
+    const bounds = calculateSelectionBounds(nodes, new Set(viewportFocus.nodeIds));
     if (!bounds) return;
 
-    setViewport(fitBoundsToViewport(bounds, containerSize, 96, 0.25, 0.95));
-  }, [containerSize, nodes, setViewport]);
+    lastViewportFocusIdRef.current = viewportFocus.id;
+    animateViewportTo(
+      fitBoundsToViewport(
+        bounds,
+        containerSize,
+        viewportFocus.padding ?? 96,
+        viewportFocus.minZoom ?? 0.25,
+        viewportFocus.maxZoom ?? 0.95
+      ),
+      {
+        delayMs: viewportFocus.delayMs,
+        durationMs: viewportFocus.durationMs,
+      }
+    );
+  }, [animateViewportTo, containerSize, nodes, viewportFocus]);
 
   useEffect(() => {
     const element = containerRef.current;
@@ -228,6 +254,7 @@ export function InfiniteCanvas({
     (event: React.PointerEvent, node: CanvasNode) => {
       if (event.button !== 0) return;
       event.stopPropagation();
+      stopViewportAnimation();
 
       if (spacePanMode) {
         startPanning(event);
@@ -252,7 +279,7 @@ export function InfiniteCanvas({
         startPositions,
       });
     },
-    [nodePosition, nodes, selection, spacePanMode, startPanning]
+    [nodePosition, nodes, selection, spacePanMode, startPanning, stopViewportAnimation]
   );
 
   const handlePointerDown = useCallback(
@@ -460,6 +487,8 @@ export function InfiniteCanvas({
     <div
       ref={containerRef}
       data-testid="infinite-canvas"
+      data-viewport-focus-id={viewportFocus?.id}
+      data-viewport-focus-nodes={viewportFocus?.nodeIds.join(" ")}
       className={cn(
         "relative h-full min-h-0 w-full overflow-hidden bg-background outline-none",
         spacePanMode || panStart ? "cursor-grab active:cursor-grabbing" : "cursor-default",
