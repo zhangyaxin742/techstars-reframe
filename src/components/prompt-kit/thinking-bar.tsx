@@ -22,7 +22,7 @@ export function ThinkingBar({
 }: ThinkingBarProps) {
   const label = (
     <>
-      <TextShimmer className="font-medium" duration={2.8} spread={12}>
+      <TextShimmer className="font-medium" duration={2.3} spread={12}>
         {text}
       </TextShimmer>
       {onClick ? <CaretRight className="size-3.5 text-muted-foreground" weight="bold" /> : null}

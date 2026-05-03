@@ -32,7 +32,7 @@ export function Tool({ toolPart, className, ...props }: ToolProps) {
       {...props}
     >
       {isRunning ? (
-        <TextShimmer className="block truncate font-medium" duration={2.5} spread={10}>
+        <TextShimmer className="block truncate font-medium" duration={2.1} spread={10}>
           {toolPart.type}
         </TextShimmer>
       ) : (

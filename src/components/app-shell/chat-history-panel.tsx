@@ -15,7 +15,7 @@ import {
   TiktokLogo,
   YoutubeLogo,
 } from "@phosphor-icons/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import type { ChatMessage, SourcePlatform } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
@@ -136,17 +136,23 @@ export function ChatHistoryPanel({
         </motion.span>
       </motion.button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="chat-card"
-            initial={{ opacity: 0, y: -8, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.97 }}
-            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex flex-col overflow-hidden rounded-2xl border bg-card shadow-xl"
-            style={{ maxHeight: "calc(100dvh - 5rem)" }}
-          >
+      <motion.div
+        key="chat-card"
+        initial={false}
+        animate={{
+          opacity: open ? 1 : 0,
+          y: open ? 0 : -8,
+          scale: open ? 1 : 0.97,
+        }}
+        transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+        aria-hidden={!open}
+        inert={open ? undefined : true}
+        className={cn(
+          "flex flex-col overflow-hidden rounded-2xl border bg-card shadow-xl",
+          open ? "pointer-events-auto" : "pointer-events-none select-none"
+        )}
+        style={{ maxHeight: "calc(100dvh - 5rem)" }}
+      >
             {/* Header */}
             <div className="flex h-10 shrink-0 items-center justify-between border-b px-3">
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
@@ -320,9 +326,7 @@ export function ChatHistoryPanel({
                 </div>
               </div>
             ) : null}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
