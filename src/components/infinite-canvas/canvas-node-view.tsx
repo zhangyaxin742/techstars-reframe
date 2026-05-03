@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FilmSlate, Play, Target, TrendUp } from "@phosphor-icons/react";
+import { CheckCircle, FilmSlate, InstagramLogo, Play, Target, TrendUp } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import type { CanvasNode, CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
@@ -12,6 +12,14 @@ import { brandContext, type TimelineSegment } from "../../data/reframe-demo";
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
 export type TimelinePhase = "hidden" | "skeleton" | "revealing";
+export type PreviewPublishStatus = "idle" | "publishing" | "published";
+
+export interface PreviewPublishState {
+  status: PreviewPublishStatus;
+  progress: number;
+  views: number;
+  likes: number;
+}
 
 interface CanvasNodeViewProps {
   node: CanvasNode;
@@ -22,6 +30,7 @@ interface CanvasNodeViewProps {
   trendRecipePhase?: TrendRecipePhase;
   timelinePhase?: TimelinePhase;
   previewSegments?: TimelineSegment[];
+  previewPublishState?: PreviewPublishState;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   onPointerDown: (event: React.PointerEvent, node: CanvasNode) => void;
   onClick: (event: React.MouseEvent, node: CanvasNode) => void;
@@ -140,6 +149,73 @@ function formatTimelineDuration(ms: number): string {
 function getSegmentWidth(segment: TimelineSegment, totalMs: number) {
   if (totalMs <= 0) return "0%";
   return `${((segment.endMs - segment.startMs) / totalMs) * 100}%`;
+}
+
+function formatMetricCount(value: number) {
+  return new Intl.NumberFormat("en", {
+    notation: value >= 1000 ? "compact" : "standard",
+    maximumFractionDigits: value >= 1000 ? 1 : 0,
+  }).format(value);
+}
+
+function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
+  if (state.status === "idle") return null;
+
+  const isPublished = state.status === "published";
+  const progress = Math.min(Math.max(state.progress, 0), 100);
+
+  return (
+    <motion.div
+      data-testid="preview-publish-status"
+      className="pointer-events-none absolute left-0 top-full mt-2 w-full rounded-lg border border-border bg-card p-2.5 text-card-foreground shadow-[rgba(0,0,0,0.08)_0px_4px_10px_0px]"
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {isPublished ? (
+            <CheckCircle className="size-4 shrink-0 text-accent" weight="fill" />
+          ) : (
+            <InstagramLogo className="size-4 shrink-0 text-accent" weight="bold" />
+          )}
+          <span className="truncate text-xs font-medium">
+            {isPublished ? "Published" : "Publishing to Instagram"}
+          </span>
+        </div>
+        <span className="shrink-0 text-[10px] font-medium tabular-nums tracking-tight text-muted-foreground">
+          {isPublished ? "Live" : `${progress}%`}
+        </span>
+      </div>
+
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+        <motion.div
+          data-testid="preview-publish-progress"
+          className="h-full rounded-full bg-accent"
+          initial={false}
+          animate={{ width: `${isPublished ? 100 : progress}%` }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        />
+      </div>
+
+      {isPublished ? (
+        <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] font-medium text-muted-foreground">
+          <div className="rounded-md border border-border bg-secondary/40 px-2 py-1">
+            <span className="tabular-nums tracking-tight text-foreground">
+              {formatMetricCount(state.views)}
+            </span>{" "}
+            views
+          </div>
+          <div className="rounded-md border border-border bg-secondary/40 px-2 py-1">
+            <span className="tabular-nums tracking-tight text-foreground">
+              {formatMetricCount(state.likes)}
+            </span>{" "}
+            likes
+          </div>
+        </div>
+      ) : null}
+    </motion.div>
+  );
 }
 
 function TimelineGhostPreview({
@@ -426,6 +502,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   trendRecipePhase = "revealing",
   timelinePhase = "revealing",
   previewSegments = [],
+  previewPublishState,
   resolveImageUrl,
   onPointerDown,
   onClick,
@@ -656,6 +733,9 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           </div>
         )}
       </div>
+      {node.kind === "preview" && previewPublishState ? (
+        <PreviewPublishCard state={previewPublishState} />
+      ) : null}
     </motion.article>
   );
 });

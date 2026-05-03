@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner";
 import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
+import type { PreviewPublishState } from "./components/infinite-canvas/canvas-node-view";
 import { TimelineBottomDrawer } from "./components/timeline/timeline-bottom-drawer";
 import { Toaster } from "./components/ui/sonner";
 import type { CanvasConnection, CanvasNode, CanvasViewportFocus } from "./lib/infinite-canvas/types";
@@ -69,11 +70,18 @@ export function App() {
   const [animatedConnectionIds, setAnimatedConnectionIds] = useState<Set<string>>(new Set());
   const [timelineDrawerOpen, setTimelineDrawerOpen] = useState(false);
   const [selectedTimelineSegmentId, setSelectedTimelineSegmentId] = useState<string | null>(null);
+  const [previewPublishState, setPreviewPublishState] = useState<PreviewPublishState>({
+    status: "idle",
+    progress: 0,
+    views: 0,
+    likes: 0,
+  });
   const [timelineDraftSegments, setTimelineDraftSegments] = useState<TimelineSegment[]>(
     () => seededTimelineSegments
   );
   const timeoutIdsRef = useRef<number[]>([]);
   const initialSequenceStartedRef = useRef(false);
+  const previewPublishRunRef = useRef(0);
 
   const upsertMessageById = useCallback(
     (currentMessages: ChatMessage[], nextMessage: ChatMessage) => {
@@ -355,8 +363,54 @@ export function App() {
   }, []);
 
   const handlePublishPreview = useCallback(() => {
+    const runId = previewPublishRunRef.current + 1;
+    previewPublishRunRef.current = runId;
+
+    setPreviewPublishState({
+      status: "publishing",
+      progress: 18,
+      views: 0,
+      likes: 0,
+    });
     toast.success("Preview publish queued");
-  }, []);
+
+    queueTimeout(() => {
+      if (previewPublishRunRef.current !== runId) return;
+      setPreviewPublishState((currentState) => ({
+        ...currentState,
+        status: "publishing",
+        progress: 46,
+      }));
+    }, 700);
+
+    queueTimeout(() => {
+      if (previewPublishRunRef.current !== runId) return;
+      setPreviewPublishState((currentState) => ({
+        ...currentState,
+        status: "publishing",
+        progress: 78,
+      }));
+    }, 1600);
+
+    queueTimeout(() => {
+      if (previewPublishRunRef.current !== runId) return;
+      setPreviewPublishState({
+        status: "published",
+        progress: 100,
+        views: 48,
+        likes: 9,
+      });
+    }, 2800);
+
+    queueTimeout(() => {
+      if (previewPublishRunRef.current !== runId) return;
+      setPreviewPublishState((currentState) => ({
+        ...currentState,
+        views: 312,
+        likes: 58,
+      }));
+    }, 4300);
+  }, [queueTimeout]);
 
   const handleSelectionChange = useCallback((nodeIds: Set<string>) => {
     setSelectedNodeIds(nodeIds);
@@ -550,6 +604,7 @@ export function App() {
           trendRecipePhase={trendRecipePhase}
           timelinePhase={timelinePhase}
           previewSegments={timelineDraftSegments}
+          previewPublishState={previewPublishState}
           chromeHidden={timelineDrawerOpen}
         />
         {!timelineDrawerOpen ? (

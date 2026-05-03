@@ -25,6 +25,7 @@ import { CanvasNavigationRail } from "./canvas-navigation-rail";
 import {
   CanvasNodeView,
   type BrandCtxPhase,
+  type PreviewPublishState,
   type TimelinePhase,
   type TrendRecipePhase,
 } from "./canvas-node-view";
@@ -58,6 +59,7 @@ interface InfiniteCanvasProps {
   trendRecipePhase?: TrendRecipePhase;
   timelinePhase?: TimelinePhase;
   previewSegments?: TimelineSegment[];
+  previewPublishState?: PreviewPublishState;
   chromeHidden?: boolean;
   className?: string;
 }
@@ -104,6 +106,7 @@ export function InfiniteCanvas({
   trendRecipePhase,
   timelinePhase,
   previewSegments,
+  previewPublishState,
   chromeHidden = false,
   className,
 }: InfiniteCanvasProps) {
@@ -584,6 +587,7 @@ export function InfiniteCanvas({
             trendRecipePhase={trendRecipePhase}
             timelinePhase={timelinePhase}
             previewSegments={previewSegments}
+            previewPublishState={previewPublishState}
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}

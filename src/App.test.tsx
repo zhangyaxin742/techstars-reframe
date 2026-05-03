@@ -273,6 +273,39 @@ describe("App", () => {
     );
   });
 
+  it("shows Instagram publishing progress under the preview node before publishing metrics", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    fireEvent.click(screen.getByTestId("canvas-node-preview-1"));
+    fireEvent.click(screen.getByLabelText("Post to Instagram"));
+
+    const publishStatus = screen.getByTestId("preview-publish-status");
+    expect(publishStatus).toHaveTextContent("Publishing to Instagram");
+    expect(publishStatus).toHaveTextContent("18%");
+    expect(within(publishStatus).queryByText("views")).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("46%");
+
+    act(() => {
+      vi.advanceTimersByTime(2100);
+    });
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Published");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48 views");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9 likes");
+
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("312 views");
+    expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("58 likes");
+  });
+
   it("does not start timeline generation when clicking the recipe card body", () => {
     vi.useFakeTimers();
     render(<App />);
