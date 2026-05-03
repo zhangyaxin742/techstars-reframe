@@ -27,7 +27,6 @@ import {
 import { Message, MessageContent } from "../prompt-kit/message";
 import { ResponseStream } from "../prompt-kit/response-stream";
 import { SimulatedToolCall } from "../prompt-kit/simulated-tool-call";
-import { StepsContent, StepsItem, StepsRoot } from "../prompt-kit/steps";
 import { ThinkingBar } from "../prompt-kit/thinking-bar";
 
 const platformIcon: Record<SourcePlatform, React.ElementType> = {
@@ -201,20 +200,16 @@ export function ChatHistoryPanel({
                       )}
                       </Message>
                       {message.thinkingText ? (
-                        <div className="rounded-md border bg-secondary/40 px-2.5 py-2">
+                        <div className="px-1 py-0.5">
                           <ThinkingBar text={message.thinkingText} />
                         </div>
                       ) : null}
                       {message.toolCalls && message.toolCalls.length > 0 ? (
-                        <StepsRoot>
-                          <StepsContent>
-                            {message.toolCalls.map((toolCall) => (
-                              <StepsItem key={toolCall.id}>
-                                <SimulatedToolCall toolCall={toolCall} />
-                              </StepsItem>
-                            ))}
-                          </StepsContent>
-                        </StepsRoot>
+                        <div className="space-y-1 px-1 py-0.5">
+                          {message.toolCalls.map((toolCall) => (
+                            <SimulatedToolCall key={toolCall.id} toolCall={toolCall} />
+                          ))}
+                        </div>
                       ) : null}
                       {message.badges && message.badges.length > 0 && (
                         <div className="flex flex-wrap justify-end gap-1">
