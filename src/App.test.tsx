@@ -218,9 +218,8 @@ describe("App", () => {
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
     expect(screen.getByText("Opening frame: hem problem")).toBeInTheDocument();
     expect(screen.getByText(/Upbeat acoustic/)).toBeInTheDocument();
-    expect(screen.queryByTestId("chat-history-panel")).not.toBeInTheDocument();
+    expect(screen.getByTestId("chat-history-panel")).toHaveAttribute("data-chrome-hidden", "true");
     expect(screen.queryByRole("navigation", { name: "Canvas navigation" })).not.toBeInTheDocument();
-    expect(screen.queryByPlaceholderText("Ask Reframe anything...")).not.toBeInTheDocument();
     expect(screen.queryByTestId("workspace-top-label")).not.toBeInTheDocument();
     expect(screen.queryByTestId("workspace-top-fade")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Export selected nodes")).not.toBeInTheDocument();
@@ -241,6 +240,7 @@ describe("App", () => {
 
     expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toBeInTheDocument();
+    expect(screen.getByTestId("chat-history-panel")).toHaveAttribute("data-chrome-hidden", "false");
     expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Ask Reframe anything...")).toBeInTheDocument();
     expect(screen.getByTestId("workspace-top-label")).toBeInTheDocument();

@@ -52,12 +52,16 @@ const stepLabel: Record<NonNullable<ChatMessage["step"]>, string> = {
   "export-ready": "Export Ready",
 };
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+const transition = { duration: 0.2, ease: EASE };
+
 interface ChatHistoryPanelProps {
   messages: ChatMessage[];
   promptValue?: string;
   promptBusy?: boolean;
   promptPlaceholder?: string;
   promptSourceImageUrl?: string;
+  chromeHidden?: boolean;
   onPromptChange?: (value: string) => void;
   onPromptSubmit?: (value: string) => void;
   className?: string;
@@ -69,6 +73,7 @@ export function ChatHistoryPanel({
   promptBusy = false,
   promptPlaceholder = "Ask Reframe anything...",
   promptSourceImageUrl,
+  chromeHidden = false,
   onPromptChange,
   onPromptSubmit,
   className,
@@ -102,9 +107,22 @@ export function ChatHistoryPanel({
   };
 
   return (
-    <div
+    <motion.div
       data-testid="chat-history-panel"
-      className={cn("fixed right-4 top-4 z-50 flex w-72 flex-col items-stretch gap-2 lg:w-80", className)}
+      data-chrome-hidden={chromeHidden ? "true" : "false"}
+      aria-hidden={chromeHidden}
+      inert={chromeHidden ? true : undefined}
+      initial={false}
+      animate={{
+        opacity: chromeHidden ? 0 : 1,
+        x: chromeHidden ? 10 : 0,
+      }}
+      transition={transition}
+      className={cn(
+        "fixed right-4 top-4 z-50 flex w-72 flex-col items-stretch gap-2 lg:w-80",
+        chromeHidden ? "pointer-events-none select-none" : "pointer-events-auto",
+        className
+      )}
     >
       {/* Pill toggle */}
       <motion.button
@@ -299,6 +317,6 @@ export function ChatHistoryPanel({
               </div>
             ) : null}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

@@ -481,17 +481,16 @@ export function App() {
 
   return (
     <div className="reframe-workspace flex h-dvh min-h-0 overflow-hidden bg-background text-foreground">
-      {!timelineDrawerOpen ? (
-        <ChatHistoryPanel
-          messages={messages}
-          promptValue={bottomPrompt}
-          promptBusy={isAiBusy}
-          promptPlaceholder="Ask Reframe anything..."
-          promptSourceImageUrl={bottomPromptSourceImageUrl}
-          onPromptChange={handleBottomPromptChange}
-          onPromptSubmit={handleBottomPromptSubmit}
-        />
-      ) : null}
+      <ChatHistoryPanel
+        messages={messages}
+        promptValue={bottomPrompt}
+        promptBusy={isAiBusy}
+        promptPlaceholder="Ask Reframe anything..."
+        promptSourceImageUrl={bottomPromptSourceImageUrl}
+        chromeHidden={timelineDrawerOpen}
+        onPromptChange={handleBottomPromptChange}
+        onPromptSubmit={handleBottomPromptSubmit}
+      />
       <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <InfiniteCanvas
           nodes={visibleNodes}
