@@ -14,6 +14,8 @@ export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
 export type TimelinePhase = "hidden" | "skeleton" | "revealing";
 export type PreviewPublishStatus = "idle" | "publishing" | "published";
 
+const videoChromeTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
+
 export interface PreviewPublishState {
   status: PreviewPublishStatus;
   progress: number;
@@ -385,7 +387,14 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
           active ? "scale-105" : "scale-100"
         )}
       />
-      <div className="absolute left-3 top-3 flex items-center gap-2">
+      <motion.div
+        className="absolute left-3 top-3 flex items-center gap-2"
+        data-testid={`trend-video-badges-${node.id}`}
+        data-chrome-state={active ? "hidden" : "visible"}
+        initial={false}
+        animate={active ? { y: "-120%", opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={videoChromeTransition}
+      >
         {node.video.label ? (
           <span className="rounded-md border border-white/15 bg-black/55 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
             {node.video.label}
@@ -394,8 +403,15 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
         <span className="rounded-md border border-white/15 bg-black/55 px-2 py-1 text-[10px] font-medium text-white/75 backdrop-blur-sm">
           {active ? "Playing" : "Hover to play"}
         </span>
-      </div>
-      <div className="absolute inset-x-0 bottom-0 space-y-1 bg-black/65 p-3 text-white backdrop-blur-sm">
+      </motion.div>
+      <motion.div
+        className="absolute inset-x-0 bottom-0 space-y-1 bg-black/65 p-3 text-white backdrop-blur-sm"
+        data-testid={`trend-video-bottom-overlay-${node.id}`}
+        data-chrome-state={active ? "hidden" : "visible"}
+        initial={false}
+        animate={active ? { y: "100%", opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={videoChromeTransition}
+      >
         {node.video.meta ? (
           <p className="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-white/65">
             {node.video.meta}
@@ -405,7 +421,7 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
         {node.body ? (
           <p className="line-clamp-2 text-pretty text-xs leading-5 text-white/78">{node.body}</p>
         ) : null}
-      </div>
+      </motion.div>
     </div>
   );
 }

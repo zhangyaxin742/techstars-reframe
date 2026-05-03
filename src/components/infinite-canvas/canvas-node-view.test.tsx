@@ -65,7 +65,7 @@ describe("CanvasNodeView", () => {
           meta: "Hook refresh",
         },
         position: { x: 0, y: 0 },
-        size: { width: 300, height: 200 },
+        size: { width: 220, height: 391 },
       },
       { onCreateTimelineFromTrend }
     );
@@ -73,7 +73,13 @@ describe("CanvasNodeView", () => {
     const videoCard = screen.getByTestId("trend-video-reveal-recipe-1");
     const video = screen.getByTestId("canvas-node-video-recipe-1") as HTMLVideoElement;
     const plusButton = screen.getByTestId("canvas-node-create-timeline-recipe-1");
+    const badges = screen.getByTestId("trend-video-badges-recipe-1");
+    const bottomOverlay = screen.getByTestId("trend-video-bottom-overlay-recipe-1");
 
+    expect(screen.getByTestId("canvas-node-recipe-1")).toHaveStyle({
+      width: "220px",
+      height: "391px",
+    });
     expect(video).toHaveAttribute("src", "/videos/trend1.mp4");
     expect(video.loop).toBe(true);
     expect(video.muted).toBe(true);
@@ -88,11 +94,15 @@ describe("CanvasNodeView", () => {
 
     fireEvent.mouseEnter(videoCard);
     expect(play).toHaveBeenCalledTimes(1);
+    expect(badges).toHaveAttribute("data-chrome-state", "hidden");
+    expect(bottomOverlay).toHaveAttribute("data-chrome-state", "hidden");
 
     video.currentTime = 1.2;
     fireEvent.mouseLeave(videoCard);
     expect(pause).toHaveBeenCalledTimes(1);
     expect(video.currentTime).toBe(0);
+    expect(badges).toHaveAttribute("data-chrome-state", "visible");
+    expect(bottomOverlay).toHaveAttribute("data-chrome-state", "visible");
 
     fireEvent.click(plusButton);
     expect(onCreateTimelineFromTrend).toHaveBeenCalledTimes(1);

@@ -487,7 +487,7 @@ export const reframeDemoNodes: CanvasNode[] = [
       meta: trendVideos[0].meta,
     },
     position: { x: 1096, y: 0 },
-    size: { width: 300, height: 200 },
+    size: { width: 220, height: 391 },
   },
   {
     id: "recipe-2",
@@ -499,8 +499,8 @@ export const reframeDemoNodes: CanvasNode[] = [
       label: trendVideos[1].label,
       meta: trendVideos[1].meta,
     },
-    position: { x: 1096, y: 280 },
-    size: { width: 300, height: 200 },
+    position: { x: 1096, y: 431 },
+    size: { width: 220, height: 391 },
   },
   {
     id: "recipe-3",
@@ -512,15 +512,15 @@ export const reframeDemoNodes: CanvasNode[] = [
       label: trendVideos[2].label,
       meta: trendVideos[2].meta,
     },
-    position: { x: 1096, y: 560 },
-    size: { width: 300, height: 200 },
+    position: { x: 1096, y: 862 },
+    size: { width: 220, height: 391 },
   },
   {
     id: "timeline-1",
     kind: "timeline",
     title: "Founder Confessional",
     body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
-    position: { x: 1492, y: 0 },
+    position: { x: 1412, y: 0 },
     size: { width: 480, height: 280 },
   },
   {
@@ -529,7 +529,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
     imageUrl: mediaAssets[0].thumbnail,
-    position: { x: 2036, y: -50 },
+    position: { x: 1956, y: -50 },
     size: { width: 210, height: 380 },
   },
 ];

@@ -141,8 +141,12 @@ describe("App", () => {
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx").style.transform).toBe("translate(0px, 0px)");
     expect(screen.getByTestId("canvas-node-recipe-1").style.transform).toBe("translate(1096px, 0px)");
-    expect(screen.getByTestId("canvas-node-recipe-2").style.transform).toBe("translate(1096px, 280px)");
-    expect(screen.getByTestId("canvas-node-recipe-3").style.transform).toBe("translate(1096px, 560px)");
+    expect(screen.getByTestId("canvas-node-recipe-1")).toHaveStyle({
+      width: "220px",
+      height: "391px",
+    });
+    expect(screen.getByTestId("canvas-node-recipe-2").style.transform).toBe("translate(1096px, 431px)");
+    expect(screen.getByTestId("canvas-node-recipe-3").style.transform).toBe("translate(1096px, 862px)");
     expect(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).toHaveAttribute(
       "data-preview-mode",
       "preview"
@@ -207,7 +211,7 @@ describe("App", () => {
     expect(screen.getByTestId("timeline-node-skeleton-timeline-1")).toBeInTheDocument();
     expect(screen.getByLabelText("Loading timeline")).toBeInTheDocument();
     expect(screen.getByLabelText("Loading timeline")).toHaveClass("animate-skeleton-shimmer");
-    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1492px, 0px)");
+    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1412px, 0px)");
     expect(screen.getByTestId("simulated-tool-tool-match-clips")).toHaveAttribute(
       "data-tool-state",
       "running"
