@@ -389,7 +389,7 @@ function TimelineRevealCard({
       </motion.div>
 
       <motion.div
-        className="mt-auto grid grid-cols-4 gap-1.5 text-center"
+        className="mt-auto flex flex-wrap items-center gap-1.5"
         variants={cardRevealSoftSection}
       >
         {[
@@ -400,7 +400,7 @@ function TimelineRevealCard({
         ].map((metric, index) => (
           <div
             key={metric}
-            className="rounded-md border border-border bg-secondary/30 px-2 py-1.5 text-[10px] font-medium text-foreground/75"
+            className="rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
             data-testid={`timeline-node-metric-${node.id}-${index}`}
           >
             {metric}

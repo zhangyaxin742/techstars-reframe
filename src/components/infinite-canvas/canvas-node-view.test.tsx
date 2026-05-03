@@ -80,6 +80,8 @@ describe("CanvasNodeView", () => {
     );
     expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toBeInTheDocument();
 
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("rounded-full");
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("bg-secondary");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveTextContent("18s");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-1")).toHaveTextContent("6 clips");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-2")).toHaveTextContent("1 gap");
