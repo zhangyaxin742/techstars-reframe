@@ -84,11 +84,13 @@ function NodeLoadingSkeleton({
   className,
   shimmer,
   variant,
+  style,
 }: {
   label: string;
   className?: string;
   shimmer?: boolean;
   variant?: React.ComponentProps<typeof Skeleton>["variant"];
+  style?: React.CSSProperties;
 }) {
   return (
     <Skeleton
@@ -96,6 +98,7 @@ function NodeLoadingSkeleton({
       shimmer={shimmer}
       variant={variant}
       className={cn("h-full w-full rounded-none", className)}
+      style={style}
     />
   );
 }
@@ -116,7 +119,11 @@ function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
       label="Timeline preview"
       shimmer={false}
       variant="darker-light"
-      className="rounded-xl border border-dashed border-muted-foreground/45"
+      className="rounded-xl border border-dashed border-border/80"
+      style={{
+        "--skeleton-darker-light-bg": "color-mix(in srgb, var(--color-card) 82%, var(--color-muted) 18%)",
+        "--skeleton-darker-highlight": "color-mix(in srgb, var(--color-card) 92%, var(--color-muted) 8%)",
+      } as React.CSSProperties}
     />
   );
 }

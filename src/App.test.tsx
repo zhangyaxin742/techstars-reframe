@@ -154,6 +154,7 @@ describe("App", () => {
     expect(timelinePreview).not.toHaveClass("animate-skeleton-shimmer");
     expect(timelinePreview).toHaveStyle("background-image: none");
     expect(timelinePreview.getAttribute("style")).toContain("--skeleton-darker-light-bg");
+    expect(timelinePreview.getAttribute("style")).toContain("var(--color-card) 82%");
     expect(
       within(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).queryByLabelText(
         "Loading timeline"
