@@ -260,69 +260,70 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
                     <div className="px-3 pb-2 pt-1 text-[10px] uppercase tracking-[0.22em] text-gold/80">
                       {importMenuView === "root" ? "Import Sources" : importMenuView === "link" ? "Link Sources" : "Media Sources"}
                     </div>
-
-                    {importMenuView === "root" ? (
-                      <div className="space-y-1">
-                        <DropdownMenuItem
-                          onSelect={(event) => {
-                            event.preventDefault();
-                            setImportMenuView("link");
-                          }}
-                          className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
-                        >
-                          <Globe className="size-4 shrink-0" weight="fill" />
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-medium">Link</div>
-                            <div className="truncate text-[11px] text-cream/45">Website and social profiles</div>
-                          </div>
-                          <CaretRight className="size-3.5 shrink-0 text-cream/45" weight="bold" />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={(event) => {
-                            event.preventDefault();
-                            setImportMenuView("upload");
-                          }}
-                          className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
-                        >
-                          <CloudArrowUp className="size-4 shrink-0" weight="fill" />
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-medium">Upload</div>
-                            <div className="truncate text-[11px] text-cream/45">Files, libraries, and cloud drives</div>
-                          </div>
-                          <CaretRight className="size-3.5 shrink-0 text-cream/45" weight="bold" />
-                        </DropdownMenuItem>
-                      </div>
-                    ) : (
-                      <>
-                        <DropdownMenuItem
-                          onSelect={(event) => {
-                            event.preventDefault();
-                            setImportMenuView("root");
-                          }}
-                          className="mb-1 cursor-pointer rounded-xl px-3 py-2 text-cream/70 focus:bg-white/10 focus:text-cream"
-                        >
-                          <CaretLeft className="size-3.5 shrink-0" weight="bold" />
-                          <span className="text-sm font-medium">Back</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="my-2 h-px bg-white/10" />
-                        {(importMenuView === "link" ? landingLinkOptions : landingUploadOptions).map((option) => {
-                          const Icon = platformIcons[option.platform];
-                          return (
-                            <DropdownMenuItem
-                              key={option.id}
-                              onSelect={() => handleQueueImport(option)}
-                              className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
-                            >
-                              <Icon className="size-4 shrink-0" weight="fill" />
-                              <div className="min-w-0">
-                                <div className="truncate text-sm font-medium">{option.label}</div>
-                                <div className="truncate text-[11px] text-cream/45">{option.description}</div>
-                              </div>
-                            </DropdownMenuItem>
-                          );
-                        })}
-                      </>
-                    )}
+                    <div className="space-y-1">
+                      {importMenuView === "root" ? (
+                        <>
+                          <DropdownMenuItem
+                            onSelect={(event) => {
+                              event.preventDefault();
+                              setImportMenuView("link");
+                            }}
+                            className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
+                          >
+                            <Globe className="size-4 shrink-0" weight="fill" />
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-sm font-medium">Link</div>
+                              <div className="truncate text-[11px] text-cream/45">Website and social profiles</div>
+                            </div>
+                            <CaretRight className="size-3.5 shrink-0 text-cream/45" weight="bold" />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={(event) => {
+                              event.preventDefault();
+                              setImportMenuView("upload");
+                            }}
+                            className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
+                          >
+                            <CloudArrowUp className="size-4 shrink-0" weight="fill" />
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-sm font-medium">Upload</div>
+                              <div className="truncate text-[11px] text-cream/45">Files, libraries, and cloud drives</div>
+                            </div>
+                            <CaretRight className="size-3.5 shrink-0 text-cream/45" weight="bold" />
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <DropdownMenuItem
+                            onSelect={(event) => {
+                              event.preventDefault();
+                              setImportMenuView("root");
+                            }}
+                            className="mb-1 cursor-pointer rounded-xl px-3 py-2 text-cream/70 focus:bg-white/10 focus:text-cream"
+                          >
+                            <CaretLeft className="size-3.5 shrink-0" weight="bold" />
+                            <span className="text-sm font-medium">Back</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="my-2 h-px bg-white/10" />
+                          {(importMenuView === "link" ? landingLinkOptions : landingUploadOptions).map((option) => {
+                            const Icon = platformIcons[option.platform];
+                            return (
+                              <DropdownMenuItem
+                                key={option.id}
+                                onSelect={() => handleQueueImport(option)}
+                                className="cursor-pointer rounded-xl px-3 py-2.5 text-cream/80 focus:bg-white/10 focus:text-cream"
+                              >
+                                <Icon className="size-4 shrink-0" weight="fill" />
+                                <div className="min-w-0">
+                                  <div className="truncate text-sm font-medium">{option.label}</div>
+                                  <div className="truncate text-[11px] text-cream/45">{option.description}</div>
+                                </div>
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </>
+                      )}
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
