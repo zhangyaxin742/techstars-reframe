@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { InfiniteCanvas } from "./infinite-canvas";
@@ -228,8 +228,23 @@ describe("InfiniteCanvas", () => {
     fireEvent.click(screen.getByLabelText("Add new canvas item"));
 
     expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Documents")).toHaveAttribute("aria-current", "page");
+    expect(screen.getByLabelText("Library")).toHaveAttribute("aria-current", "page");
+    expect(screen.getByLabelText("Trends")).toBeInTheDocument();
+    expect(screen.getByLabelText("History")).toBeInTheDocument();
     expect(screen.queryByTestId("marquee-overlay")).not.toBeInTheDocument();
     expect(canvas).toBeInTheDocument();
+  });
+
+  it("shows hover tooltips for navigation rail items", async () => {
+    const user = userEvent.setup();
+
+    for (const label of ["Library", "Trends", "History"]) {
+      renderCanvas();
+
+      await user.hover(screen.getByLabelText(label));
+      expect((await screen.findAllByText(label)).length).toBeGreaterThan(0);
+
+      cleanup();
+    }
   });
 });
