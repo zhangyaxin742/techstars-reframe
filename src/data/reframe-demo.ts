@@ -1,4 +1,5 @@
 import type { CanvasConnection, CanvasNode } from "../components/infinite-canvas";
+import { trendVideos } from "./trending-videos";
 
 // ---------------------------------------------------------------------------
 // Brand / Source types
@@ -477,25 +478,40 @@ export const reframeDemoNodes: CanvasNode[] = [
   },
   {
     id: "recipe-1",
-    kind: "trend-recipe",
-    title: trendRecipes[0].title,
-    body: `${trendRecipes[0].hook}\n\nFormat: ${trendRecipes[0].format}\nLength: ${trendRecipes[0].estimatedLength}\nMatch: ${trendRecipes[0].matchScore}%`,
+    kind: "video",
+    title: trendVideos[0].title,
+    body: trendRecipes[0].hook,
+    video: {
+      src: trendVideos[0].src,
+      label: trendVideos[0].label,
+      meta: trendVideos[0].meta,
+    },
     position: { x: 1096, y: 0 },
     size: { width: 300, height: 200 },
   },
   {
     id: "recipe-2",
-    kind: "trend-recipe",
-    title: trendRecipes[1].title,
-    body: `${trendRecipes[1].hook}\n\nFormat: ${trendRecipes[1].format}\nLength: ${trendRecipes[1].estimatedLength}\nMatch: ${trendRecipes[1].matchScore}%`,
+    kind: "video",
+    title: trendVideos[1].title,
+    body: "A fast process edit that compresses sourcing, fitting, and trail testing into one saveable loop.",
+    video: {
+      src: trendVideos[1].src,
+      label: trendVideos[1].label,
+      meta: trendVideos[1].meta,
+    },
     position: { x: 1096, y: 280 },
     size: { width: 300, height: 200 },
   },
   {
     id: "recipe-3",
-    kind: "trend-recipe",
-    title: trendRecipes[2].title,
-    body: `${trendRecipes[2].hook}\n\nFormat: ${trendRecipes[2].format}\nLength: ${trendRecipes[2].estimatedLength}\nMatch: ${trendRecipes[2].matchScore}%`,
+    kind: "video",
+    title: trendVideos[2].title,
+    body: "A comment-led remix that turns customer proof into the hook before showing the product answer.",
+    video: {
+      src: trendVideos[2].src,
+      label: trendVideos[2].label,
+      meta: trendVideos[2].meta,
+    },
     position: { x: 1096, y: 560 },
     size: { width: 300, height: 200 },
   },

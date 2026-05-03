@@ -8,15 +8,16 @@ import {
   screenToWorld,
 } from "../../lib/infinite-canvas/geometry";
 import { useCanvasViewport } from "../../lib/infinite-canvas/use-canvas-viewport";
-import type {
-  CanvasConnection,
-  CanvasNode,
-  CanvasPoint,
-  CanvasPromptBoxData,
-  CanvasRect,
-  CanvasSize,
-  CanvasViewportFocus,
-  NodeMoveUpdate,
+import {
+  isTrendSourceNode,
+  type CanvasConnection,
+  type CanvasNode,
+  type CanvasPoint,
+  type CanvasPromptBoxData,
+  type CanvasRect,
+  type CanvasSize,
+  type CanvasViewportFocus,
+  type NodeMoveUpdate,
 } from "../../lib/infinite-canvas/types";
 import type { ExportTarget, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
@@ -497,7 +498,7 @@ export function InfiniteCanvas({
             id: connection.id,
             d: `M ${sourceX} ${sourceY} C ${midpointX} ${sourceY}, ${midpointX} ${targetY}, ${targetX} ${targetY}`,
             isTimelineConnection:
-              (sourceNode.kind === "trend-recipe" && targetNode.kind === "timeline") ||
+              (isTrendSourceNode(sourceNode) && targetNode.kind === "timeline") ||
               (sourceNode.kind === "timeline" && targetNode.kind === "preview"),
           };
         })

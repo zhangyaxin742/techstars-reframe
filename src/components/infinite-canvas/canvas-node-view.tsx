@@ -1,8 +1,8 @@
-import React, { memo } from "react";
+import React, { memo, useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, FilmSlate, InstagramLogo, Play, Target, TrendUp, Warning } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
-import type { CanvasNode, CanvasPoint } from "../../lib/infinite-canvas/types";
+import { isTrendSourceNode, type CanvasNode, type CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
@@ -45,6 +45,7 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
   "brand-context": { Icon: Target, label: "Brand Context" },
   "trend-recipe": { Icon: TrendUp, label: "Trend Recipe" },
   timeline: { Icon: FilmSlate, label: "Timeline" },
+  video: { Icon: Play, label: "Trend Video" },
   preview: { Icon: Play, label: "Preview" },
 };
 
@@ -322,6 +323,93 @@ function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
   );
 }
 
+function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [active, setActive] = useState(false);
+
+  const playVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    setActive(true);
+    void video.play().catch(() => {
+      setActive(false);
+    });
+  }, []);
+
+  const pauseVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
+    setActive(false);
+  }, []);
+
+  if (!node.video?.src) {
+    return (
+      <div className="space-y-1 p-3">
+        <div className="truncate text-sm font-semibold">{node.title}</div>
+        {node.body ? (
+          <p className="line-clamp-5 whitespace-pre-line text-pretty text-xs leading-5 text-muted-foreground">
+            {node.body}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      tabIndex={0}
+      className="group/video relative h-full w-full overflow-hidden bg-neutral-950 outline-none"
+      data-testid={`trend-video-reveal-${node.id}`}
+      onMouseEnter={playVideo}
+      onMouseLeave={pauseVideo}
+      onFocus={playVideo}
+      onBlur={pauseVideo}
+    >
+      <video
+        ref={videoRef}
+        data-testid={`canvas-node-video-${node.id}`}
+        aria-label={`${node.title} trend video`}
+        src={node.video.src}
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        draggable={false}
+        className={cn(
+          "absolute inset-0 size-full object-cover transition-transform duration-300",
+          active ? "scale-105" : "scale-100"
+        )}
+      />
+      <div className="absolute left-3 top-3 flex items-center gap-2">
+        {node.video.label ? (
+          <span className="rounded-md border border-white/15 bg-black/55 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+            {node.video.label}
+          </span>
+        ) : null}
+        <span className="rounded-md border border-white/15 bg-black/55 px-2 py-1 text-[10px] font-medium text-white/75 backdrop-blur-sm">
+          {active ? "Playing" : "Hover to play"}
+        </span>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 space-y-1 bg-black/65 p-3 text-white backdrop-blur-sm">
+        {node.video.meta ? (
+          <p className="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-white/65">
+            {node.video.meta}
+          </p>
+        ) : null}
+        <h3 className="truncate text-sm font-semibold">{node.title}</h3>
+        {node.body ? (
+          <p className="line-clamp-2 text-pretty text-xs leading-5 text-white/78">{node.body}</p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function TimelineRevealCard({
   node,
   segments,
@@ -565,8 +653,9 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   }
 
   const meta = kindMeta[node.kind];
-  const isTrendRecipe = node.kind === "trend-recipe" && trendRecipePhase === "revealing";
-  const isTimelineSource = isTrendRecipe && timelineSourceNodeId === node.id;
+  const isTrendSource = isTrendSourceNode(node);
+  const isRevealedTrendSource = isTrendSource && trendRecipePhase === "revealing";
+  const isTimelineSource = isRevealedTrendSource && timelineSourceNodeId === node.id;
   const isRevealedTimeline = node.kind === "timeline" && timelinePhase === "revealing";
 
   return (
@@ -582,13 +671,13 @@ export const CanvasNodeView = memo(function CanvasNodeView({
       onPointerDown={(event) => onPointerDown(event, node)}
       onClick={(event) => onClick(event, node)}
     >
-      {isTrendRecipe && !isTimelineSource ? (
+      {isRevealedTrendSource && !isTimelineSource ? (
         <button
           type="button"
           data-testid={`canvas-node-create-timeline-${node.id}`}
           aria-label={`Generate timeline from ${node.title}`}
           className={cn(
-            "peer absolute right-0 top-1/2 z-10 flex size-8 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border",
+            "peer absolute left-full top-1/2 z-30 ml-3 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border",
             "border-accent bg-accent text-accent-foreground shadow-[rgba(0,0,0,0.12)_0px_5px_12px_0px]",
             "transition-colors hover:bg-accent/90",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -604,7 +693,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           <span aria-hidden="true" className="text-xl font-normal leading-none">+</span>
         </button>
       ) : null}
-      {isTrendRecipe && !isTimelineSource ? (
+      {isRevealedTrendSource && !isTimelineSource ? (
         <>
           <TimelineGhostPreview nodeId={node.id} persistent={false} />
         </>
@@ -665,6 +754,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           clipping while letting the floating label escape above.
           ─────────────────────────────────────────────────────────────────── */}
       <div
+        data-testid={`canvas-node-card-${node.id}`}
         className={cn(
           "paper relative h-full w-full overflow-hidden rounded-xl border bg-card text-card-foreground",
           "shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]",
@@ -722,6 +812,24 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               </motion.div>
             ) : (
               <TrendRecipeRevealCard node={node} />
+            )}
+          </>
+        ) : node.kind === "video" ? (
+          <>
+            {isTrendSource && trendRecipePhase === "skeleton" ? (
+              <motion.div
+                key="trend-video-skeleton"
+                data-testid={`trend-video-skeleton-${node.id}`}
+                className="h-full w-full"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.55, ease: "easeOut" }}
+              >
+                <NodeLoadingSkeleton label="Loading trend video" />
+              </motion.div>
+            ) : (
+              <CanvasVideoNodeCard node={node} />
             )}
           </>
         ) : node.kind === "timeline" ? (

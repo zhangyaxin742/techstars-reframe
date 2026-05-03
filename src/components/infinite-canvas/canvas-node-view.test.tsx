@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { CanvasNodeView } from "./canvas-node-view";
 import type { CanvasNode } from "../../lib/infinite-canvas/types";
@@ -24,6 +24,7 @@ function renderNode(node: CanvasNode, props: Partial<React.ComponentProps<typeof
 describe("CanvasNodeView", () => {
   afterEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("reveals trend recipe cards as separate animated content sections", () => {
@@ -45,6 +46,56 @@ describe("CanvasNodeView", () => {
     );
     expect(within(screen.getByTestId("trend-recipe-section-recipe-1-details")).getByText("Format")).toBeInTheDocument();
     expect(screen.getByTestId("trend-recipe-detail-recipe-1-1")).toHaveTextContent("18s");
+  });
+
+  it("plays trend video nodes on hover and keeps the plus action outside the video", () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    const pause = vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    const onCreateTimelineFromTrend = vi.fn();
+
+    renderNode(
+      {
+        id: "recipe-1",
+        kind: "video",
+        title: "Founder confessional",
+        body: "\"This is why regular hiking pants never worked for me.\"",
+        video: {
+          src: "/videos/trend1.mp4",
+          label: "trend",
+          meta: "Hook refresh",
+        },
+        position: { x: 0, y: 0 },
+        size: { width: 300, height: 200 },
+      },
+      { onCreateTimelineFromTrend }
+    );
+
+    const videoCard = screen.getByTestId("trend-video-reveal-recipe-1");
+    const video = screen.getByTestId("canvas-node-video-recipe-1") as HTMLVideoElement;
+    const plusButton = screen.getByTestId("canvas-node-create-timeline-recipe-1");
+
+    expect(video).toHaveAttribute("src", "/videos/trend1.mp4");
+    expect(video.loop).toBe(true);
+    expect(video.muted).toBe(true);
+    expect(video.playsInline).toBe(true);
+    expect(plusButton).toHaveClass("left-full");
+    expect(plusButton).toHaveClass("ml-3");
+    expect(
+      within(screen.getByTestId("canvas-node-card-recipe-1")).queryByTestId(
+        "canvas-node-create-timeline-recipe-1"
+      )
+    ).not.toBeInTheDocument();
+
+    fireEvent.mouseEnter(videoCard);
+    expect(play).toHaveBeenCalledTimes(1);
+
+    video.currentTime = 1.2;
+    fireEvent.mouseLeave(videoCard);
+    expect(pause).toHaveBeenCalledTimes(1);
+    expect(video.currentTime).toBe(0);
+
+    fireEvent.click(plusButton);
+    expect(onCreateTimelineFromTrend).toHaveBeenCalledTimes(1);
   });
 
   it("renders the timeline node as a compact non-editable visual preview", () => {

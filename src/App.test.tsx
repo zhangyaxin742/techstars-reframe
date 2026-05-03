@@ -106,7 +106,7 @@ describe("App", () => {
     });
   });
 
-  it("shows trend recipe skeletons during search before revealing generated cards", () => {
+  it("shows trend video skeletons during search before revealing hover-play videos", () => {
     vi.useFakeTimers();
     mockCanvasBounds();
     render(<App />);
@@ -119,7 +119,7 @@ describe("App", () => {
       "data-tool-state",
       "running"
     );
-    expect(screen.getByTestId("trend-recipe-skeleton-recipe-1")).toBeInTheDocument();
+    expect(screen.getByTestId("trend-video-skeleton-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-id",
       "trend-recipes"
@@ -160,11 +160,25 @@ describe("App", () => {
         "Loading timeline"
       )
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Founder Confessional")).toBeInTheDocument();
-    expect(screen.queryByTestId("trend-recipe-skeleton-recipe-1")).not.toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-video-recipe-1")).toHaveAttribute(
+      "src",
+      "/videos/trend1.mp4"
+    );
+    expect(screen.getByTestId("canvas-node-video-recipe-2")).toHaveAttribute(
+      "src",
+      "/videos/trend2.mp4"
+    );
+    expect(screen.getByTestId("canvas-node-video-recipe-3")).toHaveAttribute(
+      "src",
+      "/videos/trend3.mp4"
+    );
+    expect(screen.getByText("Founder confessional")).toBeInTheDocument();
+    expect(screen.getByText("Process cutdown")).toBeInTheDocument();
+    expect(screen.getByText("Customer proof remix")).toBeInTheDocument();
+    expect(screen.queryByTestId("trend-video-skeleton-recipe-1")).not.toBeInTheDocument();
   });
 
-  it("clicking a trend recipe plus action runs the timeline generation flow", () => {
+  it("clicking a trend video plus action runs the timeline generation flow", () => {
     vi.useFakeTimers();
     mockCanvasBounds();
     render(<App />);

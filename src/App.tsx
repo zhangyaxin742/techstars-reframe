@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
-import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
+import { InfiniteCanvas, isTrendSourceNode, type NodeMoveUpdate } from "./components/infinite-canvas";
 import type { PreviewPublishState } from "./components/infinite-canvas/canvas-node-view";
 import { TimelineBottomDrawer } from "./components/timeline/timeline-bottom-drawer";
 import { Toaster } from "./components/ui/sonner";
@@ -251,14 +251,14 @@ export function App() {
     }
 
     if (flowStep === "trend-search" || flowStep === "recipes-ready") {
-      return nodes.filter((node) => node.kind === "brand-context" || node.kind === "trend-recipe");
+      return nodes.filter((node) => node.kind === "brand-context" || isTrendSourceNode(node));
     }
 
     if (flowStep === "recipe-selected") {
       return nodes.filter(
         (node) =>
           node.kind === "brand-context" ||
-          node.kind === "trend-recipe" ||
+          isTrendSourceNode(node) ||
           node.kind === "timeline"
       );
     }

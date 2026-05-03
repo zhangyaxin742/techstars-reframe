@@ -26,7 +26,14 @@ export type CanvasNodeKind =
   | "trend-recipe"
   | "timeline"
   | "media"
+  | "video"
   | "preview";
+
+export interface CanvasVideoData {
+  src: string;
+  label?: "trend" | "explore" | "media";
+  meta?: string;
+}
 
 export interface CanvasPromptBoxData {
   value?: string;
@@ -49,9 +56,14 @@ export interface CanvasNode {
   body?: string;
   prompt?: CanvasPromptBoxData;
   imageUrl?: string;
+  video?: CanvasVideoData;
   position: CanvasPoint;
   size: CanvasSize;
   createdAt?: number;
+}
+
+export function isTrendSourceNode(node: CanvasNode) {
+  return node.kind === "trend-recipe" || (node.kind === "video" && node.video?.label === "trend");
 }
 
 export interface CanvasConnection {
