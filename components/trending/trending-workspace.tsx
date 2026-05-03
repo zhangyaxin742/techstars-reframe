@@ -184,47 +184,6 @@ export function TrendingWorkspace({
       <div className="pointer-events-none absolute inset-x-[-10%] top-[-24%] h-[32rem] rounded-full bg-[radial-gradient(circle,rgba(244,184,85,0.24),transparent_62%)] blur-3xl" />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
-        <motion.header
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          className="glass-panel flex flex-col gap-4 rounded-[28px] px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between"
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/6 text-[0.7rem] font-medium uppercase tracking-[0.28em] text-[#f8e1a3] shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
-              RF
-            </div>
-            <div>
-              <p className="text-[0.65rem] uppercase tracking-[0.32em] text-white/45">
-                Reframe Studio
-              </p>
-              <p className="mt-1 text-sm text-white/86">
-                Trend desk for Instagram cutdowns and remix prompts
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-2 text-xs text-white/55">
-              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#f4be57] shadow-[0_0_14px_rgba(244,190,87,0.8)]" />
-              Live scan: 8 creator references
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm text-white/84 transition hover:border-white/20 hover:bg-white/10"
-              >
-                Remix
-              </button>
-              <button
-                type="button"
-                className="rounded-full bg-[#f4be57] px-5 py-2 text-sm font-medium text-[#120d07] shadow-[0_18px_38px_rgba(244,190,87,0.2)] transition hover:translate-y-[-1px] hover:bg-[#ffd279]"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </motion.header>
 
         <main className="mt-6 grid flex-1 gap-6 xl:grid-cols-[minmax(0,1.8fr)_360px]">
           <motion.section
@@ -238,9 +197,6 @@ export function TrendingWorkspace({
 
             <div className="flex flex-col gap-6 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <p className="text-[0.68rem] uppercase tracking-[0.38em] text-[#f0c979]">
-                  Desktop creation mode
-                </p>
                 <h1
                   className={`${titleClassName} mt-4 text-[clamp(3.2rem,9vw,7.8rem)] uppercase leading-[0.9] tracking-[0.02em] text-[#f6ead1] [text-shadow:0_12px_30px_rgba(0,0,0,0.45)]`}
                 >
@@ -249,10 +205,6 @@ export function TrendingWorkspace({
                     Trending
                   </span>
                 </h1>
-                <p className="mt-4 max-w-2xl font-display text-lg leading-7 text-white/70">
-                  A blank canvas for trend mining, remix references, and edit
-                  decisions before you ever open the timeline.
-                </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
