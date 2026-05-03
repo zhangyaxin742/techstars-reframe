@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { App } from "./App";
-import { brandContext } from "./data/reframe-demo";
 
 describe("App", () => {
   afterEach(() => {
@@ -47,17 +46,6 @@ describe("App", () => {
       "data-tool-state",
       "completed"
     );
-  });
-
-  it("fills the visual proof library with a complete 3-by-3 tile set", () => {
-    expect(brandContext.card.visualProof).toHaveLength(9);
-    expect(brandContext.card.visualProof.at(-1)).toMatchObject({
-      id: "vp-9",
-      label: "back view fit check",
-      tag: "SCALE PROOF",
-      scoreLabel: "fit",
-      imageUrl: "/assets/brand-context-images/back%20view.jpg",
-    });
   });
 
   it("shows trend recipe skeletons during search before revealing generated cards", () => {

@@ -213,7 +213,6 @@ export const brandContext: BrandContext = {
       { id: "vp-6", label: "waistband adjustment", tag: "FIT PROOF", score: 86, scoreLabel: "fit", color: "#3B6B4A", imageUrl: "/assets/brand-context-images/waistband%20adjustment.jpg" },
       { id: "vp-7", label: "pack-and-go flat lay", tag: "CTA SUPPORT", score: 83, scoreLabel: "cta", color: "#264653", imageUrl: "/assets/brand-context-images/pack-and-go%20flat%20lay.jpg" },
       { id: "vp-8", label: "summit movement", tag: "MOVEMENT PROOF", score: 89, scoreLabel: "motion", color: "#1B3A2D", imageUrl: "/assets/brand-context-images/summit%20movement.jpg" },
-      { id: "vp-9", label: "back view fit check", tag: "SCALE PROOF", score: 85, scoreLabel: "fit", color: "#4A7C59", imageUrl: "/assets/brand-context-images/back%20view.jpg" },
     ],
     trendSignals: [
       { rank: 1, label: "before / after", level: "High" },
