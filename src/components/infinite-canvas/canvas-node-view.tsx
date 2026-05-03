@@ -121,6 +121,20 @@ function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
   );
 }
 
+function formatTimelineDuration(ms: number): string {
+  const totalSecs = Math.round(ms / 1000);
+  if (totalSecs < 60) return `${totalSecs}s`;
+
+  const mins = Math.floor(totalSecs / 60);
+  const secs = totalSecs % 60;
+  return secs === 0 ? `${mins}m` : `${mins}m ${String(secs).padStart(2, "0")}s`;
+}
+
+function getSegmentWidth(segment: TimelineSegment, totalMs: number) {
+  if (totalMs <= 0) return "0%";
+  return `${((segment.endMs - segment.startMs) / totalMs) * 100}%`;
+}
+
 function TimelineGhostPreview({
   nodeId,
   persistent,
@@ -206,38 +220,190 @@ function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
   );
 }
 
-function TimelineRevealCard({ node }: { node: CanvasNode }) {
+const MINI_WAVE_HEIGHTS = [35, 70, 50, 85, 45, 65, 90, 55, 75, 40, 60, 80];
+
+function TimelineRevealCard({
+  node,
+  segments,
+}: {
+  node: CanvasNode;
+  segments: TimelineSegment[];
+}) {
   const bodySections = splitNodeBody(node.body);
+  const totalMs = Math.max(...segments.map((segment) => segment.endMs), 0);
+  const clipSegments = segments.filter((segment) => segment.kind === "clip" || segment.kind === "missing");
+  const videoSlotCount = clipSegments.length;
+  const gapCount = segments.filter((segment) => segment.kind === "missing").length;
+  const overlaySegments = segments.filter((segment) => segment.kind === "text-overlay");
+  const audioSegments = segments.filter((segment) => segment.kind === "audio");
+
+  if (segments.length === 0) {
+    return (
+      <motion.div
+        key="timeline-card"
+        className="space-y-2 p-3"
+        variants={cardRevealContainer}
+        initial="hidden"
+        animate="visible"
+        data-testid={`timeline-reveal-${node.id}`}
+      >
+        <motion.div
+          className="truncate text-sm font-semibold"
+          variants={cardRevealSection}
+          data-testid={`timeline-section-${node.id}-title`}
+        >
+          {node.title}
+        </motion.div>
+        {bodySections.map((section, index) => (
+          <motion.p
+            key={`${section}-${index}`}
+            className={cn(
+              "text-pretty text-xs leading-5",
+              index === 0 ? "text-foreground/85" : "text-muted-foreground"
+            )}
+            variants={cardRevealSoftSection}
+            data-testid={`timeline-section-${node.id}-${index}`}
+          >
+            {section}
+          </motion.p>
+        ))}
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
       key="timeline-card"
-      className="space-y-2 p-3"
+      className="flex h-full flex-col gap-3 p-3"
       variants={cardRevealContainer}
       initial="hidden"
       animate="visible"
       data-testid={`timeline-reveal-${node.id}`}
     >
       <motion.div
-        className="truncate text-sm font-semibold"
+        className="flex items-center justify-between gap-3"
         variants={cardRevealSection}
-        data-testid={`timeline-section-${node.id}-title`}
       >
-        {node.title}
-      </motion.div>
-      {bodySections.map((section, index) => (
-        <motion.p
-          key={`${section}-${index}`}
-          className={cn(
-            "text-pretty text-xs leading-5",
-            index === 0 ? "text-foreground/85" : "text-muted-foreground"
-          )}
-          variants={cardRevealSoftSection}
-          data-testid={`timeline-section-${node.id}-${index}`}
+        <div
+          className="min-w-0 truncate text-sm font-semibold"
+          data-testid={`timeline-section-${node.id}-title`}
         >
-          {section}
-        </motion.p>
-      ))}
+          {node.title}
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="rounded-md border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-foreground/75">
+            Timeline ready
+          </span>
+          <span
+            className="rounded-md border border-dashed border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground"
+            data-testid={`timeline-gap-pill-${node.id}`}
+          >
+            {gapCount} {gapCount === 1 ? "gap" : "gaps"}
+          </span>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="space-y-2"
+        variants={cardRevealSoftSection}
+        aria-label="Timeline node preview"
+      >
+        <div className="flex h-20 gap-0.5 overflow-hidden rounded-lg border border-border bg-secondary/40">
+          {clipSegments.map((segment) => {
+            const segmentLabel = segment.selectedAssetLabel ?? segment.label;
+
+            return (
+              <div
+                key={segment.id}
+                className={cn(
+                  "relative min-w-10 overflow-hidden",
+                  segment.kind === "missing"
+                    ? "border border-dashed border-border bg-background"
+                    : "bg-secondary"
+                )}
+                style={{ width: getSegmentWidth(segment, totalMs) }}
+                data-testid={`timeline-node-clip-${segment.id}`}
+                aria-label={segmentLabel}
+              >
+                {segment.kind === "clip" && segment.thumbnail ? (
+                  <img
+                    src={segment.thumbnail}
+                    alt={segmentLabel}
+                    className="h-full w-full object-cover"
+                    draggable={false}
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-1 px-2 text-center">
+                    <FilmSlate className="size-5 text-muted-foreground" weight="thin" />
+                    <span className="text-[9px] font-medium leading-tight text-muted-foreground">
+                      Missing shot
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {overlaySegments.length > 0 ? (
+          <div
+            className="relative h-7 rounded-md border border-border bg-secondary/30"
+            data-testid={`timeline-overlay-row-${node.id}`}
+          >
+            {overlaySegments.map((segment) => (
+              <div
+                key={segment.id}
+                className="absolute inset-y-1 flex min-w-12 items-center rounded border border-border bg-card px-1.5"
+                style={{
+                  left: `${totalMs > 0 ? (segment.startMs / totalMs) * 100 : 0}%`,
+                  width: getSegmentWidth(segment, totalMs),
+                }}
+                data-testid={`timeline-node-overlay-${segment.id}`}
+              >
+                <span className="truncate text-[9px] font-medium text-foreground/75">
+                  {segment.overlayText}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {audioSegments.length > 0 ? (
+          <div
+            className="flex h-7 items-center gap-px rounded-md border border-border bg-secondary/30 px-2"
+            data-testid={`timeline-audio-preview-${node.id}`}
+            aria-label="Audio beat preview"
+          >
+            {Array.from({ length: 36 }, (_, index) => (
+              <span
+                key={index}
+                className="flex-1 rounded-full bg-accent/45"
+                style={{ height: `${MINI_WAVE_HEIGHTS[index % MINI_WAVE_HEIGHTS.length]}%` }}
+              />
+            ))}
+          </div>
+        ) : null}
+      </motion.div>
+
+      <motion.div
+        className="mt-auto grid grid-cols-4 gap-1.5 text-center"
+        variants={cardRevealSoftSection}
+      >
+        {[
+          formatTimelineDuration(totalMs),
+          `${videoSlotCount} clips`,
+          `${gapCount} ${gapCount === 1 ? "gap" : "gaps"}`,
+          `${overlaySegments.length} overlays`,
+        ].map((metric, index) => (
+          <div
+            key={metric}
+            className="rounded-md border border-border bg-secondary/30 px-2 py-1.5 text-[10px] font-medium text-foreground/75"
+            data-testid={`timeline-node-metric-${node.id}-${index}`}
+          >
+            {metric}
+          </div>
+        ))}
+      </motion.div>
     </motion.div>
   );
 }
@@ -461,7 +627,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 <TimelinePreviewSurface mode="loading" />
               </motion.div>
             ) : (
-              <TimelineRevealCard node={node} />
+              <TimelineRevealCard node={node} segments={previewSegments} />
             )}
           </AnimatePresence>
         ) : node.kind === "preview" ? (

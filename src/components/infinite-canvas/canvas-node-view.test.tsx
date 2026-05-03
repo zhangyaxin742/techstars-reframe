@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import { CanvasNodeView } from "./canvas-node-view";
 import type { CanvasNode } from "../../lib/infinite-canvas/types";
+import { timelineSegments } from "../../data/reframe-demo";
 
 const noopPointerDown = vi.fn();
 const noopClick = vi.fn();
@@ -46,7 +47,7 @@ describe("CanvasNodeView", () => {
     expect(screen.getByTestId("trend-recipe-detail-recipe-1-1")).toHaveTextContent("18s");
   });
 
-  it("reveals timeline cards section by section after the loading state", () => {
+  it("renders the timeline node as a compact non-editable visual preview", () => {
     renderNode(
       {
         id: "timeline-1",
@@ -56,14 +57,31 @@ describe("CanvasNodeView", () => {
         position: { x: 0, y: 0 },
         size: { width: 480, height: 280 },
       },
-      { timelinePhase: "revealing" }
+      { timelinePhase: "revealing", previewSegments: timelineSegments }
     );
 
-    expect(screen.getByTestId("timeline-reveal-timeline-1")).toBeInTheDocument();
+    const timelineNode = screen.getByTestId("timeline-reveal-timeline-1");
+    expect(timelineNode).toBeInTheDocument();
     expect(screen.getByTestId("timeline-section-timeline-1-title")).toHaveTextContent(
       "Side-by-Side Fit Failure Demo"
     );
-    expect(screen.getByTestId("timeline-section-timeline-1-0")).toHaveTextContent("6 clips");
-    expect(screen.getByTestId("timeline-section-timeline-1-1")).toHaveTextContent("18s total");
+    expect(screen.getByText("Timeline ready")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("1 gap");
+
+    expect(screen.getByTestId("timeline-node-clip-ts-1")).toContainElement(
+      screen.getByAltText(timelineSegments[0].label)
+    );
+    expect(screen.getByTestId("timeline-node-clip-ts-4")).toHaveTextContent("Missing shot");
+    expect(screen.getByTestId("timeline-overlay-row-timeline-1")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-node-overlay-ts-2")).toHaveTextContent(
+      timelineSegments[1].overlayText ?? ""
+    );
+    expect(screen.getByTestId("timeline-audio-preview-timeline-1")).toBeInTheDocument();
+
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveTextContent("18s");
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-1")).toHaveTextContent("6 clips");
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-2")).toHaveTextContent("1 gap");
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-3")).toHaveTextContent("2 overlays");
+    expect(within(timelineNode).queryAllByRole("button")).toHaveLength(0);
   });
 });
