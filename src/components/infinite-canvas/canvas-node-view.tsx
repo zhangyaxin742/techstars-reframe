@@ -385,48 +385,48 @@ function TimelineRevealCard({
       </motion.div>
 
       <motion.div
-        className="space-y-2"
+        className="flex h-20 gap-0.5 overflow-hidden rounded-lg border border-border bg-secondary/40"
         variants={cardRevealSoftSection}
-        aria-label="Timeline node preview"
+        aria-label="Timeline node video preview"
       >
-        <div className="flex h-20 gap-0.5 overflow-hidden rounded-lg border border-border bg-secondary/40">
-          {clipSegments.map((segment) => {
-            const segmentLabel = segment.selectedAssetLabel ?? segment.label;
+        {clipSegments.map((segment) => {
+          const segmentLabel = segment.selectedAssetLabel ?? segment.label;
 
-            return (
-              <div
-                key={segment.id}
-                className={cn(
-                  "relative min-w-10 overflow-hidden",
-                  segment.kind === "missing"
-                    ? "border border-dashed border-yellow-500/50 bg-black"
-                    : "bg-secondary"
-                )}
-                style={{ width: getSegmentWidth(segment, totalMs) }}
-                data-testid={`timeline-node-clip-${segment.id}`}
-                aria-label={segmentLabel}
-              >
-                {segment.kind === "clip" && segment.thumbnail ? (
-                  <img
-                    src={segment.thumbnail}
-                    alt={segmentLabel}
-                    className="h-full w-full object-cover"
-                    draggable={false}
-                  />
-                ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2 text-center">
-                    <FilmSlate className="size-5 text-white/40" weight="thin" />
-                    <span className="text-[9px] font-medium leading-tight text-white/60">
-                      shot missing
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          return (
+            <div
+              key={segment.id}
+              className={cn(
+                "relative min-w-10 overflow-hidden",
+                segment.kind === "missing"
+                  ? "border border-dashed border-yellow-500/50 bg-black"
+                  : "bg-secondary"
+              )}
+              style={{ width: getSegmentWidth(segment, totalMs) }}
+              data-testid={`timeline-node-clip-${segment.id}`}
+              aria-label={segmentLabel}
+            >
+              {segment.kind === "clip" && segment.thumbnail ? (
+                <img
+                  src={segment.thumbnail}
+                  alt={segmentLabel}
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2 text-center">
+                  <FilmSlate className="size-5 text-white/40" weight="thin" />
+                  <span className="text-[9px] font-medium leading-tight text-white/60">
+                    shot missing
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </motion.div>
 
-        {overlaySegments.length > 0 ? (
+      {overlaySegments.length > 0 ? (
+        <motion.div variants={cardRevealSoftSection}>
           <div
             className="relative h-8 rounded-md border border-border bg-secondary/30"
             data-testid={`timeline-overlay-row-${node.id}`}
@@ -452,9 +452,11 @@ function TimelineRevealCard({
               ))}
             </div>
           </div>
-        ) : null}
+        </motion.div>
+      ) : null}
 
-        {audioSegments.length > 0 ? (
+      {audioSegments.length > 0 ? (
+        <motion.div variants={cardRevealSoftSection}>
           <div
             className="flex h-10 items-center overflow-hidden rounded-md border border-border bg-transparent"
             data-testid={`timeline-audio-preview-${node.id}`}
@@ -467,8 +469,8 @@ function TimelineRevealCard({
               draggable={false}
             />
           </div>
-        ) : null}
-      </motion.div>
+        </motion.div>
+      ) : null}
 
       <motion.div
         className="mt-auto flex flex-wrap items-center gap-1.5"
