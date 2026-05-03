@@ -26,6 +26,8 @@ export function Hero() {
   const [backgroundState, setBackgroundState] = useState<"playing" | "settled">("playing");
   const videoRef = useRef<HTMLVideoElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const headlineClassName =
+    "font-display text-[2rem] font-light leading-[0.95] tracking-[-0.045em] text-cream sm:text-[3.3rem] md:text-[3.75rem] lg:text-[3.9rem]";
 
   useEffect(() => {
     const video = videoRef.current;
@@ -78,22 +80,20 @@ export function Hero() {
 
         <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pb-10 pt-28 text-center sm:px-8 sm:pt-32 lg:px-10">
           <div className="mx-auto flex w-full max-w-5xl flex-col items-center">
-
-            <div className="mt-5 space-y-1 sm:space-y-2">
-              <h1 className="font-display text-[2.65rem] font-light leading-[0.95] tracking-[-0.045em] text-cream sm:text-[4.4rem] md:text-[5rem] lg:text-[5.2rem]">
+            <div className="mt-5 space-y-[0.1875rem] sm:space-y-[0.375rem]">
+              <h1 className={headlineClassName}>
                 Built for founders
               </h1>
-              <h1 className="font-display text-[2.65rem] font-light leading-[0.95] tracking-[-0.045em] text-cream sm:text-[4.4rem] md:text-[5rem] lg:text-[5.2rem]">
+              <h1 className={headlineClassName}>
                 who have a <em className="font-normal italic">product</em>
               </h1>
-              <h1 className="font-display text-[2.65rem] font-light leading-[0.95] tracking-[-0.045em] text-cream sm:text-[4.4rem] md:text-[5rem] lg:text-[5.2rem]">
+              <h1 className={headlineClassName}>
                 but no audience.
               </h1>
             </div>
 
             <p className="mt-6 max-w-xl text-sm leading-6 text-warm sm:text-base sm:leading-7 max-[374px]:hidden">
-              Reframe finds your people, tells you what to say, and gets you
-              posted.
+              Stop posting into the void. Start reaching the people who actually buy.
             </p>
 
             <motion.div

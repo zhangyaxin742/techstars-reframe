@@ -11,6 +11,9 @@ export type SourcePlatform =
   | "youtube"
   | "shopify"
   | "google-drive"
+  | "icloud"
+  | "image-library"
+  | "video-library"
   | "upload";
 
 export interface SourceBadge {
@@ -137,7 +140,10 @@ export const brandContext: BrandContext = {
 
 export const mediaImportOptions: MediaImportOption[] = [
   { id: "imp-upload", platform: "upload", label: "Upload Files", description: "Photos, videos, logos", icon: "upload" },
+  { id: "imp-images", platform: "image-library", label: "Image Library", description: "Bring in stills and product shots", icon: "image-library" },
+  { id: "imp-video", platform: "video-library", label: "Video Library", description: "Import clips, reels, and b-roll", icon: "video-library" },
   { id: "imp-gdrive", platform: "google-drive", label: "Google Drive", description: "Connect your Drive folder", icon: "google-drive" },
+  { id: "imp-icloud", platform: "icloud", label: "iCloud Drive", description: "Pull media from iCloud folders", icon: "icloud" },
   { id: "imp-shopify", platform: "shopify", label: "Shopify / Website", description: "Pull product images", icon: "shopify" },
   { id: "imp-ig", platform: "instagram", label: "Instagram", description: "Import posts & reels", icon: "instagram" },
   { id: "imp-tt", platform: "tiktok", label: "TikTok", description: "Import existing videos", icon: "tiktok" },

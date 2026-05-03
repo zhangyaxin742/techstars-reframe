@@ -19,6 +19,17 @@ describe("LandingIntakeChat", () => {
     expect(screen.getByTestId("intake-input")).toBeInTheDocument();
   });
 
+  it("queues import sources from the plus menu", async () => {
+    const user = userEvent.setup();
+    render(<LandingIntakeChat />);
+
+    await user.click(screen.getByRole("button", { name: "Add import source" }));
+    await user.click(screen.getByText("Google Drive"));
+
+    expect(screen.getByTestId("queued-imports")).toBeInTheDocument();
+    expect(screen.getAllByText("Google Drive")[0]).toBeInTheDocument();
+  });
+
   it("shows source badges after submitting brand context", async () => {
     const user = userEvent.setup();
     render(<LandingIntakeChat />);
@@ -36,11 +47,12 @@ describe("LandingIntakeChat", () => {
 
     await user.type(screen.getByTestId("intake-input"), "petiteoutdoors.com");
     await user.click(screen.getByRole("button", { name: "Submit" }));
-    await user.click(screen.getByText("Connect media sources →"));
+    await user.click(screen.getByRole("button", { name: /Connect media sources/i }));
 
     expect(screen.getByTestId("media-options")).toBeInTheDocument();
     expect(screen.getByText("Upload Files")).toBeInTheDocument();
     expect(screen.getByText("Google Drive")).toBeInTheDocument();
+    expect(screen.getByText("iCloud Drive")).toBeInTheDocument();
   });
 
   it("navigates to /app on final submit", async () => {
@@ -49,8 +61,8 @@ describe("LandingIntakeChat", () => {
 
     await user.type(screen.getByTestId("intake-input"), "petiteoutdoors.com");
     await user.click(screen.getByRole("button", { name: "Submit" }));
-    await user.click(screen.getByText("Connect media sources →"));
-    await user.click(screen.getByText("Start building →"));
+    await user.click(screen.getByRole("button", { name: /Connect media sources/i }));
+    await user.click(screen.getByRole("button", { name: /Start building/i }));
 
     await vi.waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/app");

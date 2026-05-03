@@ -2,12 +2,15 @@ import {
   CaretDoubleLeft,
   CaretDoubleRight,
   ChatCircleDots,
+  Cloud,
   Globe,
+  ImageSquare,
   InstagramLogo,
   Robot,
   ShoppingBag,
   TiktokLogo,
   User,
+  VideoCamera,
   YoutubeLogo,
 } from "@phosphor-icons/react";
 import React, { useState } from "react";
@@ -21,6 +24,9 @@ const platformIcon: Record<SourcePlatform, React.ElementType> = {
   youtube: YoutubeLogo,
   shopify: ShoppingBag,
   "google-drive": Globe,
+  icloud: Cloud,
+  "image-library": ImageSquare,
+  "video-library": VideoCamera,
   upload: Globe,
 };
 
