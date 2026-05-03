@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Instrument_Sans } from "next/font/google";
+import { AgentationToolbar } from "@/src/components/agentation/agentation-toolbar";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${display.variable} ${sans.variable}`}>
         {children}
+        <AgentationToolbar />
       </body>
     </html>
   );
