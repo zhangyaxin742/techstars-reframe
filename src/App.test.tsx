@@ -108,6 +108,8 @@ describe("App", () => {
     act(() => {
       vi.advanceTimersByTime(22000);
     });
+    expect(screen.getByTestId("canvas-node-create-timeline-recipe-1")).toHaveClass("size-9");
+    expect(screen.getByTestId("canvas-node-create-timeline-recipe-1")).toHaveClass("bg-accent");
     fireEvent.click(screen.getByTestId("canvas-node-create-timeline-recipe-1"));
 
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();

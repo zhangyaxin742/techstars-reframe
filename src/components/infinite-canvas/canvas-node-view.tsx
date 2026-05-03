@@ -161,9 +161,9 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           data-testid={`canvas-node-create-timeline-${node.id}`}
           aria-label={`Generate timeline from ${node.title}`}
           className={cn(
-            "peer absolute right-0 top-1/2 z-10 size-8 -translate-y-1/2 translate-x-1/2 rounded-full border",
-            "border-accent bg-card text-accent shadow-[rgba(0,0,0,0.1)_0px_4px_10px_0px]",
-            "transition-colors hover:bg-accent hover:text-accent-foreground",
+            "peer absolute right-0 top-1/2 z-10 size-9 -translate-y-1/2 translate-x-1/2 rounded-full border",
+            "border-accent bg-accent text-accent-foreground shadow-[rgba(0,0,0,0.12)_0px_5px_12px_0px]",
+            "transition-colors hover:bg-accent/90",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           )}
           onPointerDown={(event) => {
@@ -174,7 +174,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
             onCreateTimelineFromTrend?.(node);
           }}
         >
-          <span aria-hidden="true" className="text-base leading-none">+</span>
+          <span aria-hidden="true" className="text-xl font-bold leading-none">+</span>
         </button>
       ) : null}
       {isTrendRecipe && !isTimelineSource ? (
