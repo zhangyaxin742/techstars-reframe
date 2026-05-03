@@ -1,12 +1,12 @@
-import React, { memo, useCallback, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, FilmSlate, Info, InstagramLogo, Play, Target, TrendUp, Warning } from "@phosphor-icons/react";
+import { CheckCircle, FilmSlate, Info, InstagramLogo, Play, Target, TrendUp, Warning, X } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { isTrendSourceNode, type CanvasNode, type CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { MockVideoPreview } from "../preview/mock-video-preview";
 import { brandContext, type TimelineSegment } from "../../data/reframe-demo";
 
@@ -16,6 +16,8 @@ export type TimelinePhase = "hidden" | "skeleton" | "revealing";
 export type PreviewPublishStatus = "idle" | "publishing" | "published";
 
 const videoChromeTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
+const dialogMotionTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
+const dialogExitDurationMs = dialogMotionTransition.duration * 1000;
 
 export interface PreviewPublishState {
   status: PreviewPublishStatus;
@@ -338,6 +340,109 @@ function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
   );
 }
 
+function TrendDetailsDialog({
+  node,
+  children,
+}: {
+  node: CanvasNode;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
+  const detailsImage = node.video?.detailsImage;
+
+  const clearCloseTimeout = useCallback(() => {
+    if (closeTimeoutRef.current === null) return;
+    window.clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = null;
+  }, []);
+
+  useEffect(() => clearCloseTimeout, [clearCloseTimeout]);
+
+  const requestClose = useCallback(() => {
+    if (exiting) return;
+    setExiting(true);
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      closeTimeoutRef.current = null;
+      setOpen(false);
+      setExiting(false);
+    }, dialogExitDurationMs);
+  }, [clearCloseTimeout, exiting]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        clearCloseTimeout();
+        setExiting(false);
+        setOpen(true);
+        return;
+      }
+
+      requestClose();
+    },
+    [clearCloseTimeout, requestClose]
+  );
+
+  if (!detailsImage) return null;
+
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+      <DialogPrimitive.Trigger asChild>{children}</DialogPrimitive.Trigger>
+      {open ? (
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay asChild>
+            <motion.div
+              className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={exiting ? { opacity: 0 } : { opacity: 1 }}
+              transition={dialogMotionTransition}
+            />
+          </DialogPrimitive.Overlay>
+          <DialogPrimitive.Content asChild>
+            <motion.section
+              className={cn(
+                "paper fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl overflow-hidden rounded-xl border bg-card p-3 text-card-foreground shadow-2xl sm:p-4",
+                "max-h-[calc(100dvh-2rem)] focus-visible:outline-none"
+              )}
+              initial={{ opacity: 0, x: "-50%", y: "calc(-50% + 10px)", scale: 0.985 }}
+              animate={
+                exiting
+                  ? { opacity: 0, x: "-50%", y: "calc(-50% + 10px)", scale: 0.985 }
+                  : { opacity: 1, x: "-50%", y: "-50%", scale: 1 }
+              }
+              transition={dialogMotionTransition}
+            >
+              <DialogPrimitive.Title className="sr-only">{node.title} trend breakdown</DialogPrimitive.Title>
+              <DialogPrimitive.Description className="sr-only">
+                Detailed visual breakdown of the {node.title} video trend.
+              </DialogPrimitive.Description>
+              <button
+                type="button"
+                onClick={requestClose}
+                className="absolute right-5 top-5 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                aria-label="Close trend breakdown"
+              >
+                <X className="size-4" />
+              </button>
+              <motion.img
+                src={detailsImage.src}
+                alt={detailsImage.alt}
+                className="h-auto max-h-[calc(100dvh-4rem)] w-full rounded-lg border border-border object-contain"
+                draggable={false}
+                initial={{ opacity: 0, y: 8, scale: 1.01 }}
+                animate={exiting ? { opacity: 0, y: 8, scale: 1.01 } : { opacity: 1, y: 0, scale: 1 }}
+                transition={{ ...dialogMotionTransition, delay: exiting ? 0 : 0.04 }}
+              />
+            </motion.section>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      ) : null}
+    </DialogPrimitive.Root>
+  );
+}
+
 function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [active, setActive] = useState(false);
@@ -428,46 +533,32 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
         </span>
       </motion.div>
       {node.video.detailsImage ? (
-        <Dialog>
-          <DialogTrigger asChild>
-            <button
-              type="button"
-              data-testid={`trend-video-more-info-${node.id}`}
-              className={cn(
-                "absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-md border border-white/15 bg-black/55 px-2 py-1",
-                "text-[10px] font-medium text-white/85 shadow-sm transition-colors hover:bg-black/70",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-              )}
-              onPointerDown={(event) => {
-                event.stopPropagation();
-              }}
-              onFocus={(event) => {
-                event.stopPropagation();
-              }}
-              onBlur={(event) => {
-                event.stopPropagation();
-              }}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-            >
-              <Info className="size-3 shrink-0" weight="bold" />
-              <span>More info</span>
-            </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-5xl p-3 sm:p-4">
-            <DialogTitle className="sr-only">{node.title} trend breakdown</DialogTitle>
-            <DialogDescription className="sr-only">
-              Detailed visual breakdown of the {node.title} video trend.
-            </DialogDescription>
-            <img
-              src={node.video.detailsImage.src}
-              alt={node.video.detailsImage.alt}
-              className="h-auto w-full rounded-md border border-border object-contain"
-              draggable={false}
-            />
-          </DialogContent>
-        </Dialog>
+        <TrendDetailsDialog node={node}>
+          <button
+            type="button"
+            data-testid={`trend-video-more-info-${node.id}`}
+            className={cn(
+              "absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-md border border-white/15 bg-black/55 px-2 py-1",
+              "text-[10px] font-medium text-white/85 shadow-sm transition-colors hover:bg-black/70",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            )}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onFocus={(event) => {
+              event.stopPropagation();
+            }}
+            onBlur={(event) => {
+              event.stopPropagation();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <Info className="size-3 shrink-0" weight="bold" />
+            <span>More info</span>
+          </button>
+        </TrendDetailsDialog>
       ) : null}
       <motion.div
         className="absolute inset-x-0 bottom-0 space-y-1 bg-black/65 p-3 text-white backdrop-blur-sm"
