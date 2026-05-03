@@ -114,9 +114,11 @@ describe("App", () => {
     act(() => {
       vi.advanceTimersByTime(22000);
     });
-    expect(screen.getByTestId("canvas-node-create-timeline-recipe-1")).toHaveClass("size-9");
-    expect(screen.getByTestId("canvas-node-create-timeline-recipe-1")).toHaveClass("bg-accent");
-    fireEvent.click(screen.getByTestId("canvas-node-create-timeline-recipe-1"));
+    const createTimelineButton = screen.getByTestId("canvas-node-create-timeline-recipe-1");
+    expect(createTimelineButton).toHaveClass("size-8");
+    expect(createTimelineButton).toHaveClass("bg-accent");
+    expect(within(createTimelineButton).getByText("+")).toHaveClass("text-xl");
+    fireEvent.click(createTimelineButton);
 
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();
     expect(screen.queryByTestId("canvas-node-create-timeline-recipe-1")).not.toBeInTheDocument();
