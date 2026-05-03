@@ -217,6 +217,9 @@ describe("App", () => {
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-floating-preview")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-floating-preview").getAttribute("style")).toContain(
+      "aspect-ratio: 9 / 16"
+    );
     expect(
       within(screen.getByTestId("timeline-floating-preview")).getByTestId("mock-video-preview")
     ).toHaveAttribute("data-preview-variant", "floating");

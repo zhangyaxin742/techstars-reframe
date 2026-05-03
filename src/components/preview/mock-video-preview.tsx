@@ -58,8 +58,10 @@ export function MockVideoPreview({
   const player = (
     <div
       className={cn(
-        "relative w-full overflow-hidden bg-neutral-950 shadow-2xl",
-        isFloating ? "rounded-2xl border border-white/10" : "max-w-sm rounded-2xl",
+        "relative overflow-hidden bg-neutral-950 shadow-2xl",
+        isFloating
+          ? "flex h-full w-auto flex-col rounded-2xl border border-white/10"
+          : "w-full max-w-sm rounded-2xl",
         className
       )}
       data-testid="mock-video-preview"
@@ -78,7 +80,12 @@ export function MockVideoPreview({
       ) : null}
 
       {/* 9:16 aspect ratio preview */}
-      <div className="relative aspect-[9/16] w-full overflow-hidden bg-neutral-900">
+      <div
+        className={cn(
+          "relative w-full overflow-hidden bg-neutral-900",
+          isFloating ? "min-h-0 flex-1" : "aspect-[9/16]"
+        )}
+      >
         {currentClip?.thumbnail ? (
           <img
             src={currentClip.thumbnail}

@@ -95,19 +95,28 @@ export function TimelineBottomDrawer({
               transition={transition}
               style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
             >
-              <motion.div
+              <div
                 data-testid="timeline-floating-preview"
-                className="pointer-events-auto absolute bottom-full left-1/2 mb-4 w-44 -translate-x-1/2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={exiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-                transition={transition}
+                className="pointer-events-auto absolute bottom-full left-1/2 mb-4 -translate-x-1/2"
+                style={{
+                  aspectRatio: "9 / 16",
+                  height: "calc(100dvh - 100% - 2rem - env(safe-area-inset-top))",
+                }}
               >
-                <MockVideoPreview
-                  segments={segments}
-                  open
-                  variant="floating"
-                />
-              </motion.div>
+                <motion.div
+                  className="h-full"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={exiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+                  transition={transition}
+                >
+                  <MockVideoPreview
+                    segments={segments}
+                    open
+                    variant="floating"
+                    className="h-full"
+                  />
+                </motion.div>
+              </div>
               <div className="flex h-full max-h-dvh flex-col overflow-hidden rounded-t-lg">
                 <div className="flex items-center justify-between border-b px-5 py-3">
                   <div className="flex min-w-0 items-center gap-3">
