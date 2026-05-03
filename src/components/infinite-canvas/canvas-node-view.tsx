@@ -252,7 +252,7 @@ function TimelineGhostPreview({
       <div
         data-testid={`canvas-node-timeline-ghost-connector-${nodeId}`}
         className={cn(
-          "pointer-events-none absolute left-1/2 top-full z-10 h-36 w-0.5 -translate-x-1/2 rounded-full bg-accent",
+          "pointer-events-none absolute left-1/2 top-full z-10 h-48 w-0.5 -translate-x-1/2 rounded-full bg-accent",
           "origin-top transition-[opacity,transform] duration-200",
           persistent
             ? "scale-y-100 opacity-100"
@@ -263,7 +263,7 @@ function TimelineGhostPreview({
         data-testid={`canvas-node-timeline-ghost-${nodeId}`}
         data-preview-mode="preview"
         className={cn(
-          "pointer-events-none absolute left-0 top-full z-10 mt-36 h-[280px] w-[480px] origin-top",
+          "pointer-events-none absolute left-0 top-full z-10 mt-48 h-[280px] w-[480px] origin-top",
           "transition-[opacity,transform] duration-200",
           persistent
             ? "scale-100 opacity-100"
@@ -729,7 +729,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
       {isTimelineSource ? (
         <div
           data-testid={`canvas-node-connector-${node.id}`}
-          className="pointer-events-none absolute left-1/2 top-full z-10 h-36 w-0.5 -translate-x-1/2"
+          className="pointer-events-none absolute left-1/2 top-full z-10 h-48 w-0.5 -translate-x-1/2"
         >
           <motion.div
             className="h-full w-full rounded-full bg-accent"

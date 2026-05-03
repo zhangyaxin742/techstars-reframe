@@ -504,7 +504,7 @@ export function App() {
       const timelineHeight = 280;
       const previewWidth = 210;
       const previewHeight = 380;
-      const verticalTimelineGap = 144;
+      const verticalTimelineGap = 192;
       const previewNodeGap = 64;
       const timelineAnchorNode =
         nodes.find((node) => node.id === "recipe-1" && isTrendSourceNode(node)) ?? recipeNode;
