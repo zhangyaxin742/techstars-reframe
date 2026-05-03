@@ -182,6 +182,20 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           <TimelineGhostPreview nodeId={node.id} persistent={false} />
         </>
       ) : null}
+      {isTimelineSource ? (
+        <div
+          data-testid={`canvas-node-connector-${node.id}`}
+          className="pointer-events-none absolute left-full top-1/2 z-10 w-24 -translate-y-1/2"
+        >
+          <motion.div
+            className="h-0.5 w-full rounded-full bg-accent"
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            style={{ transformOrigin: "left center" }}
+          />
+        </div>
+      ) : null}
 
       {/* ── Floating kind label (Figma section-header style) ────────────────
           Zero-height anchor at the card's top-left edge; inner div sits below

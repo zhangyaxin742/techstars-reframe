@@ -115,6 +115,7 @@ describe("App", () => {
     expect(screen.getByText("Auto-filling the timeline")).toBeInTheDocument();
     expect(screen.queryByTestId("canvas-node-create-timeline-recipe-1")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-node-skeleton-timeline-1")).toBeInTheDocument();
     expect(screen.getByLabelText("Loading timeline")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1492px, 0px)");
@@ -131,6 +132,8 @@ describe("App", () => {
     });
 
     expect(screen.getByText(/Timeline is filled/)).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByText("Side-by-Side Fit Failure Demo — Timeline")).toBeInTheDocument();
   });
 
