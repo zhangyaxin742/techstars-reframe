@@ -4,19 +4,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChatHistoryPanel } from "./components/app-shell/chat-history-panel";
 import { ExportHandoffPanel } from "./components/export/export-handoff-panel";
 import { InfiniteCanvas, type NodeMoveUpdate } from "./components/infinite-canvas";
-import { MediaLibraryPanel } from "./components/media/media-library-panel";
 import { MockVideoPreview } from "./components/preview/mock-video-preview";
-import { TimelineAssembly } from "./components/timeline/timeline-assembly";
 import { Toaster } from "./components/ui/sonner";
 import {
   type AiFlowStep,
   type ChatMessage,
-  type MediaAsset,
   type SimulatedToolCall,
   chatHistory,
   exportTargets,
   initialAiToolCalls,
-  mediaAssets,
   promptAiToolCalls,
   recipeAiToolCalls,
   reframeDemoConnections,
@@ -42,23 +38,23 @@ type TimedAssistantMessageConfig = {
   thinkingText: string;
 };
 
-function toolCallsAtIndex(
+function toolCallsThroughIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
 ): SimulatedToolCall[] {
-  return toolCalls.map((toolCall, index) => ({
+  return toolCalls.slice(0, activeIndex + 1).map((toolCall, index) => ({
     ...toolCall,
-    state:
-      index < activeIndex
-        ? "completed"
-        : index === activeIndex
-          ? "running"
-          : "pending",
+    state: index < activeIndex ? "completed" : "running",
   }));
 }
 
-function completeToolCalls(toolCalls: SimulatedToolCall[]): SimulatedToolCall[] {
-  return toolCalls.map((toolCall) => ({ ...toolCall, state: "completed" as const }));
+function completedToolCallsThroughIndex(
+  toolCalls: SimulatedToolCall[],
+  completedIndex: number
+): SimulatedToolCall[] {
+  return toolCalls
+    .slice(0, completedIndex + 1)
+    .map((toolCall) => ({ ...toolCall, state: "completed" as const }));
 }
 
 const connectedMediaUserMessage: ChatMessage = {
@@ -73,19 +69,35 @@ export function App() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [bottomPrompt, setBottomPrompt] = useState("");
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
+  const [brandCtxPhase, setBrandCtxPhase] = useState<"skeleton" | "revealing">("skeleton");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
-  const [timeline, setTimeline] = useState(timelineSegments);
-  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
-  const [mediaOpen, setMediaOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const timeoutIdsRef = useRef<number[]>([]);
   const initialSequenceStartedRef = useRef(false);
 
+  const upsertMessageById = useCallback(
+    (currentMessages: ChatMessage[], nextMessage: ChatMessage) => {
+      const existingIndex = currentMessages.findIndex((message) => message.id === nextMessage.id);
+      if (existingIndex === -1) {
+        return [...currentMessages, nextMessage];
+      }
+
+      const updatedMessages = [...currentMessages];
+      updatedMessages[existingIndex] = {
+        ...updatedMessages[existingIndex],
+        ...nextMessage,
+      };
+      return updatedMessages;
+    },
+    []
+  );
+
   useEffect(() => {
     return () => {
       timeoutIdsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      timeoutIdsRef.current = [];
     };
   }, []);
 
@@ -97,27 +109,25 @@ export function App() {
   const queueMessage = useCallback(
     (message: ChatMessage, delay: number) => {
       queueTimeout(() => {
-        setMessages((currentMessages) => [
-          ...currentMessages,
-          { ...message, timestamp: Date.now() },
-        ]);
+        setMessages((currentMessages) =>
+          upsertMessageById(currentMessages, { ...message, timestamp: Date.now() })
+        );
       }, delay);
     },
-    [queueTimeout]
+    [queueTimeout, upsertMessageById]
   );
 
   const queueAssistantMessage = useCallback(
     ({ message, startDelay, thinkingDelay, thinkingText }: TimedAssistantMessageConfig) => {
       queueTimeout(() => {
-        setMessages((currentMessages) => [
-          ...currentMessages,
-          {
+        setMessages((currentMessages) =>
+          upsertMessageById(currentMessages, {
             ...message,
             content: "",
             timestamp: Date.now(),
             thinkingText,
-          },
-        ]);
+          })
+        );
       }, startDelay);
 
       queueTimeout(() => {
@@ -134,7 +144,7 @@ export function App() {
         );
       }, startDelay + thinkingDelay);
     },
-    [queueTimeout]
+    [queueTimeout, upsertMessageById]
   );
 
   const startToolSequence = useCallback(
@@ -148,46 +158,80 @@ export function App() {
       onDone,
     }: ToolSequenceConfig) => {
       const startedAt = Date.now();
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
+      setMessages((currentMessages) =>
+        upsertMessageById(currentMessages, {
           id: messageId,
           role: "assistant",
           content,
           timestamp: startedAt,
           step,
           thinkingText,
-          toolCalls: toolCallsAtIndex(toolCalls, 0),
-        },
-      ]);
+          toolCalls: toolCallsThroughIndex(toolCalls, 0),
+        })
+      );
 
       let elapsed = 0;
+      const nextToolPauseMs = 700;
+      const completionPauseMs = 900;
+
       toolCalls.forEach((toolCall, index) => {
         elapsed += toolCall.durationMs ?? 500;
         queueTimeout(() => {
-          const nextActiveIndex = index + 1;
-          const isDone = nextActiveIndex >= toolCalls.length;
           setMessages((currentMessages) =>
             currentMessages.map((message) =>
               message.id === messageId
                 ? {
                     ...message,
-                    content: isDone ? doneContent : message.content,
-                    thinkingText: isDone ? undefined : message.thinkingText,
-                    toolCalls: isDone
-                      ? completeToolCalls(toolCalls)
-                      : toolCallsAtIndex(toolCalls, nextActiveIndex),
+                    toolCalls: completedToolCallsThroughIndex(toolCalls, index),
                   }
                 : message
             )
           );
-          if (isDone) {
-            onDone?.();
-          }
         }, elapsed);
+
+        if (index < toolCalls.length - 1) {
+          elapsed += nextToolPauseMs;
+          queueTimeout(() => {
+            setMessages((currentMessages) =>
+              currentMessages.map((message) =>
+                message.id === messageId
+                  ? {
+                      ...message,
+                      toolCalls: toolCallsThroughIndex(toolCalls, index + 1),
+                    }
+                  : message
+              )
+            );
+          }, elapsed);
+        } else {
+          elapsed += completionPauseMs;
+          queueTimeout(() => {
+            setMessages((currentMessages) =>
+              upsertMessageById(
+                currentMessages.map((message) =>
+                  message.id === messageId
+                    ? {
+                        ...message,
+                        thinkingText: undefined,
+                        toolCalls: completedToolCallsThroughIndex(toolCalls, index),
+                      }
+                    : message
+                ),
+                {
+                  id: `${messageId}-complete`,
+                  role: "assistant",
+                  content: doneContent,
+                  timestamp: Date.now(),
+                  step,
+                }
+              )
+            );
+            onDone?.();
+          }, elapsed);
+        }
       });
     },
-    [queueTimeout]
+    [queueTimeout, upsertMessageById]
   );
 
   useEffect(() => {
@@ -218,6 +262,8 @@ export function App() {
         doneContent: "Brand context and trend recipes are ready. Pick one recipe to auto-fill the timeline.",
         onDone: () => {
           setFlowStep("recipes-ready");
+          // Show skeleton immediately; reveal card content after a beat
+          queueTimeout(() => setBrandCtxPhase("revealing"), 1300);
           queueMessage(chatHistory[5], 900);
           queueAssistantMessage({
             message: chatHistory[6],
@@ -228,11 +274,15 @@ export function App() {
         },
       });
     }, 7600);
+
+    return () => {
+      initialSequenceStartedRef.current = false;
+    };
   }, [queueAssistantMessage, queueMessage, queueTimeout, startToolSequence]);
 
   const visibleNodes = useMemo(() => {
     if (flowStep === "analysis" || flowStep === "media-connect" || flowStep === "source-intake") {
-      return [];
+      return nodes.filter((node) => node.kind === "brand-context");
     }
 
     if (flowStep === "recipes-ready" || flowStep === "recipe-selected") {
@@ -318,7 +368,6 @@ export function App() {
           "Timeline is filled. I left one missing uphill-movement shot and found alternate clips for swaps.",
         onDone: () => {
           setFlowStep("timeline-ready");
-          setMediaOpen(true);
         },
       });
     },
@@ -358,35 +407,17 @@ export function App() {
     [flowStep, isAiBusy, startToolSequence]
   );
 
-  const handleSwapClip = useCallback((segmentId: string, newAsset: MediaAsset) => {
-    setTimeline((currentTimeline) =>
-      currentTimeline.map((segment) =>
-        segment.id === segmentId
-          ? {
-              ...segment,
-              label: newAsset.label,
-              mediaAssetId: newAsset.id,
-              thumbnail: newAsset.thumbnail,
-            }
-          : segment
-      )
-    );
-    setFlowStep("export-ready");
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: `swap-${Date.now()}`,
-        role: "assistant",
-        content: `Swapped in ${newAsset.label}. Preview and export are ready when you are.`,
-        timestamp: Date.now(),
-        step: "export-ready",
-      },
-    ]);
-  }, []);
-
   return (
-    <div className="flex h-dvh min-h-0 overflow-hidden bg-background text-foreground">
-      <ChatHistoryPanel messages={messages} />
+    <div className="reframe-workspace flex h-dvh min-h-0 overflow-hidden bg-background text-foreground">
+      <ChatHistoryPanel
+        messages={messages}
+        promptValue={bottomPrompt}
+        promptBusy={isAiBusy}
+        promptPlaceholder="Ask Reframe anything..."
+        promptSourceImageUrl={bottomPromptSourceImageUrl}
+        onPromptChange={handleBottomPromptChange}
+        onPromptSubmit={handleBottomPromptSubmit}
+      />
       <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <InfiniteCanvas
           nodes={visibleNodes}
@@ -396,79 +427,20 @@ export function App() {
           onNodeMove={handleNodeMove}
           onDeleteSelected={handleDeleteSelected}
           onExportSelected={handleExportSelected}
-          bottomPromptBox={{
-            value: bottomPrompt,
-            placeholder: "Ask Reframe to build, edit, or remix...",
-            actionLabel: "Generate",
-            busyLabel: "Building",
-            sourceImageUrl: bottomPromptSourceImageUrl,
-            sourceAlt: "",
-            disabled: isAiBusy,
-            busy: isAiBusy,
-          }}
-          onBottomPromptChange={handleBottomPromptChange}
-          onBottomPromptSubmit={handleBottomPromptSubmit}
+          brandCtxPhase={brandCtxPhase}
         />
-        {flowStep === "analysis" ? (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-            <div className="pointer-events-auto w-full max-w-sm rounded-lg border bg-card p-4 shadow-lg">
-              <p className="text-sm font-medium">Preparing your creative canvas</p>
-              <p className="mt-1 text-pretty text-xs leading-5 text-muted-foreground">
-                Reframe is reading your sources, syncing media, and building trend recipes.
-              </p>
-            </div>
-          </div>
-        ) : null}
-        {flowStep === "timeline-ready" || flowStep === "export-ready" ? (
-          <div className="absolute right-4 top-4 z-20 w-full max-w-md rounded-lg border bg-card p-3 shadow-lg">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div>
-                <p className="text-xs font-medium">Timeline Auto-Fills</p>
-                <p className="text-[10px] text-muted-foreground">Swap, preview, or export</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setPreviewOpen(true)}
-                  className="rounded-md border px-2 py-1 text-[10px] font-medium transition hover:bg-secondary"
-                >
-                  Preview
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExportOpen(true)}
-                  className="rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground transition hover:bg-primary/90"
-                >
-                  Export
-                </button>
-              </div>
-            </div>
-            <TimelineAssembly
-              segments={timeline}
-              selectedSegmentId={selectedSegmentId}
-              onSelectSegment={setSelectedSegmentId}
-              onSwapClip={handleSwapClip}
-            />
-          </div>
-        ) : null}
-        {!mediaOpen && (flowStep === "timeline-ready" || flowStep === "export-ready") ? (
-          <button
-            type="button"
-            onClick={() => setMediaOpen(true)}
-            className="absolute bottom-28 right-4 z-20 rounded-md border bg-card px-3 py-2 text-xs font-medium shadow-sm transition hover:bg-secondary"
-          >
-            Open media
-          </button>
-        ) : null}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28"
+          style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--color-background) 92%, transparent) 0%, transparent 100%)" }}
+        />
+        <div className="pointer-events-none absolute left-7 top-4 z-30">
+          <span className="text-sm font-semibold text-foreground/90">
+            Petite Outdoors
+          </span>
+        </div>
       </main>
-      <MediaLibraryPanel
-        assets={mediaAssets}
-        open={mediaOpen}
-        onClose={() => setMediaOpen(false)}
-        onSelectAsset={(asset) => selectedSegmentId && handleSwapClip(selectedSegmentId, asset)}
-      />
       <MockVideoPreview
-        segments={timeline}
+        segments={timelineSegments}
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
       />
