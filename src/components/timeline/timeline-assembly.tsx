@@ -255,7 +255,7 @@ export function TimelineAssembly({
                         className={cn(
                           "absolute top-3 flex h-8 items-center truncate rounded border px-3 text-left text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           isCta
-                            ? "border-accent/20 bg-accent text-accent-foreground hover:bg-accent/90"
+                            ? "border-accent/40 bg-transparent text-accent hover:border-accent/70"
                             : "border-border bg-card text-foreground/80 hover:border-accent/60",
                           seg.id === selectedSegmentId && "border-accent ring-2 ring-ring"
                         )}
