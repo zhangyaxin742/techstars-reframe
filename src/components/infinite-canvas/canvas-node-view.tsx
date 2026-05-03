@@ -540,34 +540,6 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
           {active ? "Playing" : "Hover to play"}
         </span>
       </motion.div>
-      {node.video.detailsImage ? (
-        <TrendDetailsDialog node={node}>
-          <button
-            type="button"
-            data-testid={`trend-video-more-info-${node.id}`}
-            className={cn(
-              "absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-md border border-white/15 bg-black/55 px-2 py-1",
-              "text-[10px] font-medium text-white/85 shadow-sm transition-colors hover:bg-black/70",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-            )}
-            onPointerDown={(event) => {
-              event.stopPropagation();
-            }}
-            onFocus={(event) => {
-              event.stopPropagation();
-            }}
-            onBlur={(event) => {
-              event.stopPropagation();
-            }}
-            onClick={(event) => {
-              event.stopPropagation();
-            }}
-          >
-            <Info className="size-3 shrink-0" weight="bold" />
-            <span>More info</span>
-          </button>
-        </TrendDetailsDialog>
-      ) : null}
       <motion.div
         className="absolute inset-x-0 bottom-0 space-y-1 bg-black/65 p-3 text-white backdrop-blur-sm"
         data-testid={`trend-video-bottom-overlay-${node.id}`}
@@ -918,12 +890,37 @@ export const CanvasNodeView = memo(function CanvasNodeView({
             className="absolute bottom-0 left-0 origin-bottom-left"
             style={{ transform: `scale(${1 / zoom})` }}
           >
-            <div className="mb-1.5 flex items-center gap-1 whitespace-nowrap rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]">
-              <meta.Icon className="size-3 shrink-0" weight="bold" />
-              <span>{meta.label}</span>
-              {node.kind === "brand-context" && (
-                <span className="text-foreground/35">· {brandContext.name}</span>
-              )}
+            <div className="mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <div className="flex items-center gap-1 rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]">
+                <meta.Icon className="size-3 shrink-0" weight="bold" />
+                <span>{meta.label}</span>
+                {node.kind === "brand-context" && (
+                  <span className="text-foreground/35">· {brandContext.name}</span>
+                )}
+              </div>
+              {node.video?.detailsImage ? (
+                <TrendDetailsDialog node={node}>
+                  <button
+                    type="button"
+                    data-testid={`trend-video-more-info-${node.id}`}
+                    className={cn(
+                      "pointer-events-auto flex items-center gap-1 rounded border border-border bg-card px-1.5 py-0.5",
+                      "text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]",
+                      "transition-colors hover:border-accent hover:text-foreground",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    )}
+                    onPointerDown={(event) => {
+                      event.stopPropagation();
+                    }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                    }}
+                  >
+                    <Info className="size-3 shrink-0" weight="bold" />
+                    <span>More details</span>
+                  </button>
+                </TrendDetailsDialog>
+              ) : null}
             </div>
           </div>
         </div>

@@ -87,7 +87,7 @@ describe("CanvasNodeView", () => {
     expect(video.playsInline).toBe(true);
     expect(plusButton).toHaveClass("top-full");
     expect(plusButton).toHaveClass("mt-3");
-    expect(screen.queryByRole("button", { name: /more info/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /more details/i })).not.toBeInTheDocument();
     expect(
       within(screen.getByTestId("canvas-node-card-recipe-1")).queryByTestId(
         "canvas-node-create-timeline-recipe-1"
@@ -137,10 +137,13 @@ describe("CanvasNodeView", () => {
       { onCreateTimelineFromTrend }
     );
 
-    const moreInfoButton = screen.getByRole("button", { name: /more info/i });
+    const videoCard = screen.getByTestId("canvas-node-card-recipe-1");
+    const moreDetailsButton = screen.getByRole("button", { name: /more details/i });
 
-    fireEvent.pointerDown(moreInfoButton);
-    fireEvent.click(moreInfoButton);
+    expect(within(videoCard).queryByRole("button", { name: /more details/i })).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(moreDetailsButton);
+    fireEvent.click(moreDetailsButton);
 
     expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
     const closeButton = screen.getByRole("button", { name: /close trend breakdown/i });
