@@ -179,7 +179,7 @@ describe("InfiniteCanvas", () => {
     const recipePosition = readTranslate(screen.getByTestId("canvas-node-recipe-1"));
     const path = screen.getByTestId("canvas-connection-ctx-r1").getAttribute("d") ?? "";
     const numbers = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
-    const [sourceX, sourceY, firstControlX, firstControlY, secondControlX, secondControlY, targetX, targetY] =
+    const [sourceX, sourceY, firstLeadX, firstLeadY, secondLeadX, secondLeadY, targetX, targetY] =
       numbers;
 
     expect(path).toMatch(/^M /);
@@ -187,10 +187,12 @@ describe("InfiniteCanvas", () => {
     expect(sourceY).toBeCloseTo(layerTransform.y + (brandPosition.y + 350) * layerTransform.zoom);
     expect(targetX).toBeCloseTo(layerTransform.x + recipePosition.x * layerTransform.zoom);
     expect(targetY).toBeCloseTo(layerTransform.y + (recipePosition.y + 195.5) * layerTransform.zoom);
-    expect(firstControlX).toBeGreaterThan(sourceX);
-    expect(secondControlX).toBeLessThan(targetX);
-    expect(firstControlY).toBe(sourceY);
-    expect(secondControlY).toBe(targetY);
+    expect(firstLeadX).toBeGreaterThan(sourceX);
+    expect(firstLeadX).toBeLessThan(targetX);
+    expect(firstLeadY).toBe(sourceY);
+    expect(secondLeadX).toBeGreaterThan(firstLeadX);
+    expect(secondLeadX).toBeLessThanOrEqual(targetX);
+    expect(secondLeadY).toBe(targetY);
   });
 
   it("draws trend-to-timeline connections from the source bottom to timeline top", () => {

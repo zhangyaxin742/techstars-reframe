@@ -128,9 +128,11 @@ function buildConnectionPath({
   }
 
   if (connectsBrandToTrend) {
-    const controlOffset = Math.min(Math.max((targetX - sourceX) * 0.22, 88), 168);
+    const gap = Math.max(targetX - sourceX, 0);
+    const lead = Math.min(Math.max(gap * 0.34, 18), 36);
+    const nearTargetX = Math.max(targetX - lead, sourceX + lead);
     return {
-      d: `M ${sourceX} ${sourceY} C ${sourceX + controlOffset} ${sourceY}, ${targetX - controlOffset} ${targetY}, ${targetX} ${targetY}`,
+      d: `M ${sourceX} ${sourceY} L ${sourceX + lead} ${sourceY} L ${nearTargetX} ${targetY} L ${targetX} ${targetY}`,
       isTimelineConnection: false,
       isBrandFeedConnection: true,
     };
@@ -619,7 +621,13 @@ export function InfiniteCanvas({
         size={containerSize}
         positions={positions}
       />
-      <svg className="pointer-events-none absolute inset-0" aria-hidden="true">
+      <svg
+        className="pointer-events-none absolute inset-0"
+        width={containerSize.width}
+        height={containerSize.height}
+        viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+        aria-hidden="true"
+      >
         {connectionPaths.map((connectionPath) => {
           const animateIn = animatedConnectionIds?.has(connectionPath.id) ?? false;
           return (
@@ -632,17 +640,18 @@ export function InfiniteCanvas({
                 connectionPath.isTimelineConnection
                   ? "rgb(0, 129, 192)"
                   : connectionPath.isBrandFeedConnection
-                    ? "rgba(180, 184, 180, 0.9)"
+                    ? "rgba(0, 129, 192, 0.52)"
                   : "rgba(180, 184, 180, 0.78)"
               }
               strokeWidth={
                 connectionPath.isTimelineConnection
                   ? 2
                   : connectionPath.isBrandFeedConnection
-                    ? 1.75
+                    ? 2.25
                     : 1.5
               }
               strokeLinecap="round"
+              strokeLinejoin="round"
               initial={animateIn ? { pathLength: 0, opacity: 0.4 } : false}
               animate={{ pathLength: 1, opacity: 1 }}
               transition={animateIn ? { duration: 0.45, ease: "easeOut" } : { duration: 0 }}
