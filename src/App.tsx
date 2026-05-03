@@ -493,6 +493,10 @@ export function App() {
         shares: 2,
         reach: 46,
       });
+      queueTimeout(() => {
+        if (previewPublishRunRef.current !== runId) return;
+        triggerPreviewCameraIntent("visible-canvas-overview");
+      }, PREVIEW_PUBLISH_OVERVIEW_DELAY_MS);
     }, 2800);
 
     queueTimeout(() => {
@@ -507,10 +511,6 @@ export function App() {
       }));
     }, 5300);
 
-    queueTimeout(() => {
-      if (previewPublishRunRef.current !== runId) return;
-      triggerPreviewCameraIntent("visible-canvas-overview");
-    }, 5300 + PREVIEW_PUBLISH_OVERVIEW_DELAY_MS);
     setPendingPreviewCloseHandoff(false);
     triggerPreviewCameraIntent("preview-publish-status");
   }, [queueTimeout, triggerPreviewCameraIntent]);
@@ -548,6 +548,9 @@ export function App() {
 
   const handleSwapTimelineClip = useCallback(
     (segmentId: string, newAsset: MediaAsset) => {
+      const swappedSegment = timelineDraftSegments.find((segment) => segment.id === segmentId);
+      const shouldTriggerPreviewCloseHandoff = swappedSegment?.kind === "missing";
+
       applyTimelineClipSwap(segmentId, newAsset);
       setAiGeneratedSegmentIds((currentSegmentIds) => {
         if (!currentSegmentIds.has(segmentId)) return currentSegmentIds;
@@ -555,8 +558,11 @@ export function App() {
         nextSegmentIds.delete(segmentId);
         return nextSegmentIds;
       });
+      if (shouldTriggerPreviewCloseHandoff) {
+        setPendingPreviewCloseHandoff(true);
+      }
     },
-    [applyTimelineClipSwap]
+    [applyTimelineClipSwap, timelineDraftSegments]
   );
 
   const handleSelectTimelineCaption = useCallback((segmentId: string, caption: string) => {

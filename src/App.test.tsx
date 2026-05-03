@@ -430,15 +430,6 @@ describe("App", () => {
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("305");
     expect(screen.getByTestId("preview-publish-engagement-rate")).toHaveTextContent("27.5%");
 
-    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
-      "data-viewport-focus-nodes",
-      "preview-1"
-    );
-
-    act(() => {
-      vi.advanceTimersByTime(2200);
-    });
-
     const canvas = screen.getByTestId("infinite-canvas");
     expect(canvas.getAttribute("data-viewport-focus-id")).toMatch(/^visible-canvas-overview-/);
     expect(canvas.getAttribute("data-viewport-focus-nodes")?.split(" ")).toEqual([
@@ -552,6 +543,31 @@ describe("App", () => {
     act(() => {
       vi.advanceTimersByTime(650);
     });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-close-handoff-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
+  });
+
+  it("pans to the preview after closing the drawer once following missing shot upload", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-upload"));
 
     fireEvent.click(screen.getByLabelText("Close timeline drawer"));
     act(() => {
