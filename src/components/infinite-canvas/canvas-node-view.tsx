@@ -1,13 +1,14 @@
-import React, { memo, useCallback, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, FilmSlate, InstagramLogo, Play, Target, TrendUp, Warning } from "@phosphor-icons/react";
+import { CheckCircle, FilmSlate, ImageSquare, Info, InstagramLogo, Play, Target, TrendUp, Warning, X } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { isTrendSourceNode, type CanvasNode, type CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
 import { MockVideoPreview } from "../preview/mock-video-preview";
-import { brandContext, type TimelineSegment } from "../../data/reframe-demo";
+import { brandContext, libraryMediaAssets, type MediaAsset, type TimelineSegment } from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
@@ -15,6 +16,8 @@ export type TimelinePhase = "hidden" | "skeleton" | "revealing";
 export type PreviewPublishStatus = "idle" | "publishing" | "published";
 
 const videoChromeTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
+const dialogMotionTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
+const dialogExitDurationMs = dialogMotionTransition.duration * 1000;
 
 export interface PreviewPublishState {
   status: PreviewPublishStatus;
@@ -47,6 +50,7 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
   "brand-context": { Icon: Target, label: "Brand Context" },
   "trend-recipe": { Icon: TrendUp, label: "Trend Recipe" },
   timeline: { Icon: FilmSlate, label: "Timeline" },
+  media: { Icon: ImageSquare, label: "Library" },
   video: { Icon: Play, label: "Trend Video" },
   preview: { Icon: Play, label: "Preview" },
 };
@@ -337,6 +341,119 @@ function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
   );
 }
 
+function TrendDetailsDialog({
+  node,
+  children,
+}: {
+  node: CanvasNode;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
+  const detailsImage = node.video?.detailsImage;
+
+  const clearCloseTimeout = useCallback(() => {
+    if (closeTimeoutRef.current === null) return;
+    window.clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = null;
+  }, []);
+
+  useEffect(() => clearCloseTimeout, [clearCloseTimeout]);
+
+  const requestClose = useCallback(() => {
+    if (exiting) return;
+    setExiting(true);
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      closeTimeoutRef.current = null;
+      setOpen(false);
+      setExiting(false);
+    }, dialogExitDurationMs);
+  }, [clearCloseTimeout, exiting]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        clearCloseTimeout();
+        setExiting(false);
+        setOpen(true);
+        return;
+      }
+
+      requestClose();
+    },
+    [clearCloseTimeout, requestClose]
+  );
+
+  if (!detailsImage) return null;
+
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+      <DialogPrimitive.Trigger asChild>{children}</DialogPrimitive.Trigger>
+      {open ? (
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay asChild>
+            <motion.div
+              data-testid={`trend-details-overlay-${node.id}`}
+              className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={exiting ? { opacity: 0 } : { opacity: 1 }}
+              transition={dialogMotionTransition}
+              onPointerDown={requestClose}
+            />
+          </DialogPrimitive.Overlay>
+          <DialogPrimitive.Content asChild>
+            <motion.section
+              className={cn(
+                "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl overflow-visible pt-12 text-card-foreground",
+                "max-h-[calc(100dvh-2rem)] focus-visible:outline-none"
+              )}
+              initial={{ opacity: 0, x: "-50%", y: "calc(-50% + 10px)", scale: 0.985 }}
+              animate={
+                exiting
+                  ? { opacity: 0, x: "-50%", y: "calc(-50% + 10px)", scale: 0.985 }
+                  : { opacity: 1, x: "-50%", y: "-50%", scale: 1 }
+              }
+              transition={dialogMotionTransition}
+            >
+              <DialogPrimitive.Title className="sr-only">{node.title} trend breakdown</DialogPrimitive.Title>
+              <DialogPrimitive.Description className="sr-only">
+                Detailed visual breakdown of the {node.title} video trend.
+              </DialogPrimitive.Description>
+              <button
+                type="button"
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                  requestClose();
+                }}
+                onClick={requestClose}
+                className="absolute right-0 top-0 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                aria-label="Close trend breakdown"
+              >
+                <X className="size-4" />
+              </button>
+              <div className="paper overflow-hidden rounded-xl border bg-card p-3 shadow-2xl sm:p-4">
+                <motion.img
+                  src={detailsImage.src}
+                  alt={detailsImage.alt}
+                  width={detailsImage.width}
+                  height={detailsImage.height}
+                  className="h-auto max-h-[calc(100dvh-7rem)] w-full rounded-lg border border-border object-contain"
+                  draggable={false}
+                  initial={{ opacity: 0, y: 8, scale: 1.01 }}
+                  animate={exiting ? { opacity: 0, y: 8, scale: 1.01 } : { opacity: 1, y: 0, scale: 1 }}
+                  transition={{ ...dialogMotionTransition, delay: exiting ? 0 : 0.04 }}
+                />
+              </div>
+            </motion.section>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      ) : null}
+    </DialogPrimitive.Root>
+  );
+}
+
 function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [active, setActive] = useState(false);
@@ -361,6 +478,16 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
     setActive(false);
   }, []);
 
+  const handleCardFocus = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) return;
+    playVideo();
+  }, [playVideo]);
+
+  const handleCardBlur = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) return;
+    pauseVideo();
+  }, [pauseVideo]);
+
   if (!node.video?.src) {
     return (
       <div className="space-y-1 p-3">
@@ -381,8 +508,8 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
       data-testid={`trend-video-reveal-${node.id}`}
       onMouseEnter={playVideo}
       onMouseLeave={pauseVideo}
-      onFocus={playVideo}
-      onBlur={pauseVideo}
+      onFocus={handleCardFocus}
+      onBlur={handleCardBlur}
     >
       <video
         ref={videoRef}
@@ -435,6 +562,93 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
         ) : null}
       </motion.div>
     </div>
+  );
+}
+
+function LibraryCard({
+  node,
+  assets = libraryMediaAssets,
+}: {
+  node: CanvasNode;
+  assets?: MediaAsset[];
+}) {
+  const visibleAssets = assets.slice(0, 30);
+  const tagCount = new Set(visibleAssets.flatMap((asset) => asset.tags)).size;
+
+  return (
+    <motion.div
+      key="library-card"
+      className="flex h-full flex-col gap-2 p-3"
+      variants={cardRevealContainer}
+      initial="hidden"
+      animate="visible"
+      data-testid={`library-card-${node.id}`}
+    >
+      <motion.div
+        className="flex items-start justify-between gap-3"
+        variants={cardRevealSection}
+      >
+        <div className="min-w-0">
+          <h3
+            className="truncate text-base font-semibold text-foreground"
+            data-testid={`library-card-title-${node.id}`}
+          >
+            {node.title}
+          </h3>
+          {node.body ? (
+            <p className="mt-1 line-clamp-2 text-pretty text-xs leading-5 text-muted-foreground">
+              {node.body}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground">
+          <ImageSquare className="size-3 text-accent" weight="bold" />
+          <span className="tabular-nums tracking-tight text-foreground">{visibleAssets.length}</span>
+          photos
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="grid min-h-0 flex-1 grid-cols-10 gap-1.5"
+        variants={cardRevealSoftSection}
+        data-testid={`library-grid-${node.id}`}
+      >
+        {visibleAssets.map((asset) => (
+          <motion.article
+            key={asset.id}
+            className="group/library relative min-w-0 overflow-hidden rounded-md border border-border bg-background"
+            variants={cardRevealSoftSection}
+            data-testid={`library-asset-${asset.id}`}
+            title={`${asset.label} - ${asset.trendFit}`}
+          >
+            <div className="relative aspect-square overflow-hidden bg-secondary">
+              <img
+                src={asset.thumbnail}
+                alt={asset.label}
+                className="size-full object-cover transition-transform duration-150 group-hover/library:scale-105"
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
+              <span className="absolute inset-x-1 bottom-1 truncate rounded bg-card/90 px-1 py-0.5 text-[8px] font-medium text-foreground shadow-sm">
+                {asset.tags[0]}
+              </span>
+            </div>
+          </motion.article>
+        ))}
+      </motion.div>
+
+      <motion.div
+        className="flex flex-wrap items-center gap-2 border-t border-border pt-2 text-[10px] font-medium text-muted-foreground"
+        variants={cardRevealSoftSection}
+      >
+        <span>
+          <span className="tabular-nums tracking-tight text-foreground">{tagCount}</span> AI tags
+        </span>
+        <span>Matched to trend moments</span>
+        <span>Ready for timeline swaps</span>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -766,12 +980,37 @@ export const CanvasNodeView = memo(function CanvasNodeView({
             className="absolute bottom-0 left-0 origin-bottom-left"
             style={{ transform: `scale(${1 / zoom})` }}
           >
-            <div className="mb-1.5 flex items-center gap-1 whitespace-nowrap rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]">
-              <meta.Icon className="size-3 shrink-0" weight="bold" />
-              <span>{meta.label}</span>
-              {node.kind === "brand-context" && (
-                <span className="text-foreground/35">· {brandContext.name}</span>
-              )}
+            <div className="mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <div className="flex items-center gap-1 rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]">
+                <meta.Icon className="size-3 shrink-0" weight="bold" />
+                <span>{meta.label}</span>
+                {node.kind === "brand-context" && (
+                  <span className="text-foreground/35">· {brandContext.name}</span>
+                )}
+              </div>
+              {node.video?.detailsImage ? (
+                <TrendDetailsDialog node={node}>
+                  <button
+                    type="button"
+                    data-testid={`trend-video-more-info-${node.id}`}
+                    className={cn(
+                      "pointer-events-auto flex items-center gap-1 rounded border border-border bg-card px-1.5 py-0.5",
+                      "text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]",
+                      "transition-colors hover:border-accent hover:text-foreground",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    )}
+                    onPointerDown={(event) => {
+                      event.stopPropagation();
+                    }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                    }}
+                  >
+                    <Info className="size-3 shrink-0" weight="bold" />
+                    <span>More details</span>
+                  </button>
+                </TrendDetailsDialog>
+              ) : null}
             </div>
           </div>
         </div>
@@ -860,6 +1099,8 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               <CanvasVideoNodeCard node={node} />
             )}
           </>
+        ) : node.kind === "media" ? (
+          <LibraryCard node={node} />
         ) : node.kind === "timeline" ? (
           <AnimatePresence>
             {timelinePhase === "skeleton" ? (

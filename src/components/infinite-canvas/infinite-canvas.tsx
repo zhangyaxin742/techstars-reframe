@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion";
 import {
   calculateSelectionBounds,
+  expandBounds,
   fitBoundsToViewport,
   getNodesInRect,
   normalizeRect,
@@ -179,11 +180,14 @@ export function InfiniteCanvas({
 
     const bounds = calculateSelectionBounds(nodes, new Set(viewportFocus.nodeIds));
     if (!bounds) return;
+    const focusBounds = viewportFocus.boundsInset
+      ? expandBounds(bounds, viewportFocus.boundsInset)
+      : bounds;
 
     lastViewportFocusIdRef.current = viewportFocus.id;
     animateViewportTo(
       fitBoundsToViewport(
-        bounds,
+        focusBounds,
         containerSize,
         viewportFocus.padding ?? 96,
         viewportFocus.minZoom ?? 0.25,

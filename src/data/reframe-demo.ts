@@ -277,6 +277,45 @@ export const mediaAssets: MediaAsset[] = [
   { id: "final-6", label: "Final 6 - Closing CTA", thumbnail: `${trendingTimelineAssetBase}/final_6.jpg`, tags: ["cta", "closing"], shotType: "Closing frame", trendFit: "Conversion CTA", matchReason: "Closes with the preorder handoff", duration: 2400 },
 ];
 
+const petiteOutdoorsInstagramAssetBase = "/assets/instagram/petiteoutdoors";
+
+const petiteOutdoorsInstagramAssets: MediaAsset[] = [
+  { id: "ig-362170-c1", label: "Instagram trail carousel 1", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c1.jpg`, tags: ["instagram", "trail"], shotType: "Trail proof", trendFit: "Movement proof", matchReason: "Shows real outdoor product context." },
+  { id: "ig-362170-c2", label: "Instagram trail carousel 2", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c2.jpg`, tags: ["instagram", "trail"], shotType: "Trail proof", trendFit: "Movement proof", matchReason: "Adds a second outdoor angle for trend cuts." },
+  { id: "ig-362170-c3", label: "Instagram trail carousel 3", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c3.jpg`, tags: ["instagram", "movement"], shotType: "Movement proof", trendFit: "Trail proof", matchReason: "Works as a middle proof beat." },
+  { id: "ig-362170-c4", label: "Instagram trail carousel 4", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c4.jpg`, tags: ["instagram", "fit"], shotType: "Fit proof", trendFit: "Fit check", matchReason: "Supports fit-problem storytelling." },
+  { id: "ig-362170-c5", label: "Instagram trail carousel 5", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c5.jpg`, tags: ["instagram", "product"], shotType: "Product proof", trendFit: "Product detail", matchReason: "Provides product context for the reveal." },
+  { id: "ig-362170-c6", label: "Instagram trail carousel 6", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c6.jpg`, tags: ["instagram", "video"], shotType: "Video frame", trendFit: "Beat cut", matchReason: "Can be used as a quick motion-feeling cutaway." },
+  { id: "ig-362170-c7", label: "Instagram trail carousel 7", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621700839024233212_62956806886_c7.jpg`, tags: ["instagram", "outdoor"], shotType: "Outdoor proof", trendFit: "Lifestyle proof", matchReason: "Adds brand environment to the library." },
+  { id: "ig-362119-c1", label: "Instagram fit carousel 1", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c1.jpg`, tags: ["instagram", "fit"], shotType: "Fit proof", trendFit: "Fit check", matchReason: "Shows apparel fit in a concrete frame." },
+  { id: "ig-362119-c2", label: "Instagram fit carousel 2", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c2.jpg`, tags: ["instagram", "fit"], shotType: "Fit proof", trendFit: "Fit check", matchReason: "Supports side-by-side fit comparisons." },
+  { id: "ig-362119-c3", label: "Instagram fit carousel 3", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c3.jpg`, tags: ["instagram", "product"], shotType: "Product proof", trendFit: "Product proof", matchReason: "Useful for product reveal beats." },
+  { id: "ig-362119-c4", label: "Instagram fit carousel 4", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c4.jpg`, tags: ["instagram", "detail"], shotType: "Detail proof", trendFit: "Product detail", matchReason: "Adds detail coverage for a proof sequence." },
+  { id: "ig-362119-c5", label: "Instagram fit carousel 5", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c5.jpg`, tags: ["instagram", "detail"], shotType: "Detail proof", trendFit: "Product detail", matchReason: "Works as a fast insert shot." },
+  { id: "ig-362119-c6", label: "Instagram fit carousel 6", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c6.jpg`, tags: ["instagram", "movement"], shotType: "Movement proof", trendFit: "Movement proof", matchReason: "Shows usable product movement." },
+  { id: "ig-362119-c7", label: "Instagram fit carousel 7", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3621199603320666959_62956806886_c7.jpg`, tags: ["instagram", "outdoor"], shotType: "Outdoor proof", trendFit: "Lifestyle proof", matchReason: "Rounds out the product context." },
+  { id: "ig-387689", label: "Instagram reel frame 1", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3876890228661225271_62956806886_single.jpg`, tags: ["instagram", "video"], shotType: "Video frame", trendFit: "Hook candidate", matchReason: "Can open a short-form sequence." },
+  { id: "ig-382738", label: "Instagram reel frame 2", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3827388859479708485_62956806886_single.jpg`, tags: ["instagram", "video"], shotType: "Video frame", trendFit: "Beat cut", matchReason: "Adds social-native motion coverage." },
+  { id: "ig-380992", label: "Instagram reel frame 3", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3809920584114240530_62956806886_single.jpg`, tags: ["instagram", "video"], shotType: "Video frame", trendFit: "Beat cut", matchReason: "Works as a compact transition shot." },
+  { id: "ig-379341", label: "Instagram product frame 1", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3793415981490573009_62956806886_single.jpg`, tags: ["instagram", "product"], shotType: "Product proof", trendFit: "Product proof", matchReason: "Shows product in a clean proof frame." },
+  { id: "ig-379119", label: "Instagram reel frame 4", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3791190147396942284_62956806886_single.jpg`, tags: ["instagram", "video"], shotType: "Video frame", trendFit: "Beat cut", matchReason: "Adds another social-native frame." },
+  { id: "ig-378762", label: "Instagram reel frame 5", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3787626772691501305_62956806886_single.jpg`, tags: ["instagram", "video"], shotType: "Video frame", trendFit: "Hook candidate", matchReason: "Can support a creator-style opening." },
+  { id: "ig-378107-c1", label: "Instagram product carousel 1", thumbnail: `${petiteOutdoorsInstagramAssetBase}/3781072889660049916_62956806886_c1.jpg`, tags: ["instagram", "product"], shotType: "Product proof", trendFit: "Product detail", matchReason: "Useful as a product insert." },
+];
+
+export const libraryMediaAssets: MediaAsset[] = [
+  ...brandContext.card.visualProof.map((item): MediaAsset => ({
+    id: `proof-${item.id}`,
+    label: item.label,
+    thumbnail: item.imageUrl ?? "",
+    tags: ["brand proof", item.scoreLabel],
+    shotType: item.tag,
+    trendFit: item.tag,
+    matchReason: `Already identified in Brand Context with ${item.score}% ${item.scoreLabel} fit.`,
+  })),
+  ...petiteOutdoorsInstagramAssets,
+];
+
 export const trendRecipes: TrendRecipe[] = [
   {
     id: "tr-1",
@@ -492,6 +531,14 @@ export const reframeDemoNodes: CanvasNode[] = [
     size: { width: 1000, height: 700 },
   },
   {
+    id: "library",
+    kind: "media",
+    title: "Library",
+    body: "AI-organized product photos and clip thumbnails matched to reusable trend moments.",
+    position: { x: 0, y: 732 },
+    size: { width: 1000, height: 420 },
+  },
+  {
     id: "recipe-1",
     kind: "video",
     title: trendVideos[0].title,
@@ -500,6 +547,12 @@ export const reframeDemoNodes: CanvasNode[] = [
       src: trendVideos[0].src,
       label: trendVideos[0].label,
       meta: trendVideos[0].meta,
+      detailsImage: {
+        src: `${trendingTimelineAssetBase}/founder_confessional.png`,
+        alt: "Detailed breakdown of the Founder Confessional video trend",
+        width: 1405,
+        height: 951,
+      },
     },
     position: { x: 1096, y: 0 },
     size: { width: 220, height: 391 },

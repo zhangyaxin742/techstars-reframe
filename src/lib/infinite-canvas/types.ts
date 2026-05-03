@@ -33,6 +33,12 @@ export interface CanvasVideoData {
   src: string;
   label?: "trend" | "explore" | "media";
   meta?: string;
+  detailsImage?: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  };
 }
 
 export interface CanvasPromptBoxData {
@@ -82,6 +88,7 @@ export interface CanvasViewportFocus {
   id: string;
   nodeIds: string[];
   padding?: number | CanvasViewportPadding;
+  boundsInset?: number | CanvasViewportPadding;
   minZoom?: number;
   maxZoom?: number;
   delayMs?: number;

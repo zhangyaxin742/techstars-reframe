@@ -1,8 +1,8 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { CanvasNodeView } from "./canvas-node-view";
 import type { CanvasNode } from "../../lib/infinite-canvas/types";
-import { timelineSegments } from "../../data/reframe-demo";
+import { libraryMediaAssets, timelineSegments } from "../../data/reframe-demo";
 
 const noopPointerDown = vi.fn();
 const noopClick = vi.fn();
@@ -25,6 +25,7 @@ describe("CanvasNodeView", () => {
   afterEach(() => {
     vi.clearAllMocks();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it("reveals trend recipe cards as separate animated content sections", () => {
@@ -86,6 +87,7 @@ describe("CanvasNodeView", () => {
     expect(video.playsInline).toBe(true);
     expect(plusButton).toHaveClass("top-full");
     expect(plusButton).toHaveClass("mt-3");
+    expect(screen.queryByRole("button", { name: /more details/i })).not.toBeInTheDocument();
     expect(
       within(screen.getByTestId("canvas-node-card-recipe-1")).queryByTestId(
         "canvas-node-create-timeline-recipe-1"
@@ -106,6 +108,101 @@ describe("CanvasNodeView", () => {
 
     fireEvent.click(plusButton);
     expect(onCreateTimelineFromTrend).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens and closes a trend breakdown dialog from the founder confessional video", () => {
+    vi.useFakeTimers();
+    const onCreateTimelineFromTrend = vi.fn();
+
+    renderNode(
+      {
+        id: "recipe-1",
+        kind: "video",
+        title: "Founder confessional",
+        body: "\"This is why regular hiking pants never worked for me.\"",
+        video: {
+          src: "/videos/trend1.mp4",
+          label: "trend",
+          meta: "Hook refresh",
+          detailsImage: {
+            src: "/assets/trending%20demo%20timeline/founder_confessional.png",
+            alt: "Detailed breakdown of the Founder Confessional video trend",
+            width: 1405,
+            height: 951,
+          },
+        },
+        position: { x: 0, y: 0 },
+        size: { width: 220, height: 391 },
+      },
+      { onCreateTimelineFromTrend }
+    );
+
+    const videoCard = screen.getByTestId("canvas-node-card-recipe-1");
+    const moreDetailsButton = screen.getByRole("button", { name: /more details/i });
+
+    expect(within(videoCard).queryByRole("button", { name: /more details/i })).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(moreDetailsButton);
+    fireEvent.click(moreDetailsButton);
+
+    expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
+    const closeButton = screen.getByRole("button", { name: /close trend breakdown/i });
+    expect(closeButton).toHaveClass("top-0");
+    expect(screen.getByRole("button", { name: /close trend breakdown/i })).toHaveClass("right-0");
+    const breakdownImage = screen.getByAltText("Detailed breakdown of the Founder Confessional video trend");
+    expect(breakdownImage).toHaveAttribute("src", "/assets/trending%20demo%20timeline/founder_confessional.png");
+    expect(breakdownImage).toHaveAttribute("width", "1405");
+    expect(breakdownImage).toHaveAttribute("height", "951");
+    expect(onCreateTimelineFromTrend).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(closeButton);
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByRole("dialog", { name: /founder confessional trend breakdown/i })).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(moreDetailsButton);
+    fireEvent.click(moreDetailsButton);
+
+    expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
+
+    fireEvent.pointerDown(screen.getByTestId("trend-details-overlay-recipe-1"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByRole("dialog", { name: /founder confessional trend breakdown/i })).not.toBeInTheDocument();
+  });
+
+  it("renders media nodes as a compact Library photo grid", () => {
+    renderNode({
+      id: "library",
+      kind: "media",
+      title: "Library",
+      body: "AI-organized product photos and clip thumbnails matched to reusable trend moments.",
+      position: { x: 0, y: 0 },
+      size: { width: 1000, height: 420 },
+    });
+
+    const libraryCard = screen.getByTestId("library-card-library");
+    const libraryGrid = within(libraryCard).getByTestId("library-grid-library");
+    const libraryImages = within(libraryGrid).getAllByRole("img");
+
+    expect(screen.getByTestId("canvas-node-card-library")).toBeInTheDocument();
+    expect(within(libraryCard).getByTestId("library-card-title-library")).toHaveTextContent("Library");
+    expect(within(libraryCard).getByText("30")).toHaveClass("tabular-nums");
+    expect(libraryImages).toHaveLength(30);
+    expect(within(libraryGrid).getByAltText(libraryMediaAssets[0].label)).toHaveAttribute(
+      "src",
+      libraryMediaAssets[0].thumbnail
+    );
+    expect(within(libraryGrid).getByAltText(libraryMediaAssets[9].label)).toHaveAttribute(
+      "src",
+      libraryMediaAssets[9].thumbnail
+    );
+    expect(within(libraryGrid).getByTestId(`library-asset-${libraryMediaAssets[29].id}`)).toBeInTheDocument();
+    expect(within(libraryGrid).getAllByText(libraryMediaAssets[0].tags[0]).length).toBeGreaterThan(0);
   });
 
   it("renders the timeline node as a compact non-editable visual preview", () => {

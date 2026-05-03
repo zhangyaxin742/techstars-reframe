@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { App } from "./App";
-import { brandContext } from "./data/reframe-demo";
+import { brandContext, libraryMediaAssets } from "./data/reframe-demo";
 
 describe("App", () => {
   beforeEach(() => {
@@ -22,6 +22,10 @@ describe("App", () => {
     act(() => {
       vi.advanceTimersByTime(5000);
     });
+  }
+
+  function openTimelineDrawer() {
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
   }
 
   function mockCanvasBounds(width = 900, height = 600) {
@@ -62,6 +66,7 @@ describe("App", () => {
     );
     expect(screen.queryByText("Preparing your creative canvas")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.queryByTestId("canvas-node-library")).not.toBeInTheDocument();
     expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
     expect(screen.queryByText("1. Paste Brand Sources")).not.toBeInTheDocument();
     expect(screen.queryByText("2. Connect Media")).not.toBeInTheDocument();
@@ -80,18 +85,36 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(12500);
-    });
-    act(() => {
-      vi.advanceTimersByTime(1200);
+      vi.advanceTimersByTime(10600);
     });
 
-    expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-library")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "brand-context-library"
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "brand-ctx library"
+    );
     expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("trend-video-skeleton-recipe-1")).not.toBeInTheDocument();
     expect(screen.getByTestId("simulated-tool-tool-build-brand-context")).toHaveAttribute(
       "data-tool-state",
       "completed"
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-library")).toBeInTheDocument();
+    expect(screen.getByTestId("trend-video-skeleton-recipe-1")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "trend-recipes"
     );
   });
 
@@ -106,13 +129,39 @@ describe("App", () => {
     });
   });
 
+  it("renders a separate generated Library card from seeded media assets", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    act(() => {
+      vi.advanceTimersByTime(10600);
+    });
+
+    const libraryNode = screen.getByTestId("canvas-node-library");
+    const libraryGrid = within(libraryNode).getByTestId("library-grid-library");
+    const libraryImages = within(libraryGrid).getAllByRole("img");
+
+    expect(within(libraryNode).getByTestId("library-card-title-library")).toHaveTextContent("Library");
+    expect(libraryImages).toHaveLength(30);
+    expect(within(libraryGrid).getByAltText(brandContext.card.visualProof[0].label)).toHaveAttribute(
+      "src",
+      brandContext.card.visualProof[0].imageUrl
+    );
+    expect(within(libraryGrid).getByAltText(libraryMediaAssets[9].label)).toHaveAttribute(
+      "src",
+      libraryMediaAssets[9].thumbnail
+    );
+    expect(within(libraryNode).getByTestId(`library-asset-${libraryMediaAssets[29].id}`)).toBeInTheDocument();
+    expect(libraryMediaAssets[9].thumbnail).toContain("/assets/instagram/petiteoutdoors/");
+  });
+
   it("shows trend video skeletons during search before revealing hover-play videos", () => {
     vi.useFakeTimers();
     mockCanvasBounds();
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(10600);
+      vi.advanceTimersByTime(12400);
     });
 
     expect(screen.getByTestId("simulated-tool-tool-search-web")).toHaveAttribute(
@@ -312,6 +361,13 @@ describe("App", () => {
     fireEvent.click(screen.getByTestId("canvas-node-preview-1"));
     fireEvent.click(screen.getByLabelText("Post to Instagram"));
 
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-publish-status-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
     const publishStatus = screen.getByTestId("preview-publish-status");
     expect(publishStatus).toHaveTextContent("Publishing to Instagram");
     expect(publishStatus).toHaveTextContent("18%");
@@ -370,7 +426,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-background-overlay")).toHaveClass("bg-foreground/20");
@@ -396,7 +452,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
     fireEvent.click(screen.getByLabelText("Close timeline drawer"));
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
@@ -419,7 +475,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
     fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
     expect(screen.getByTestId("missing-shot-actions")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
@@ -438,12 +494,110 @@ describe("App", () => {
     expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("0 gaps");
   });
 
+  it("pans to the preview after closing the drawer once following AI shot generation", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-close-handoff-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
+  });
+
+  it("lets publish focus override the preview close handoff state", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-close-handoff-/
+    );
+
+    fireEvent.click(screen.getByTestId("canvas-node-preview-1"));
+    fireEvent.click(screen.getByLabelText("Post to Instagram"));
+
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-publish-status-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
+  });
+
+  it("does not retrigger the close handoff on later drawer closes without a new AI generate", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    const firstFocusId = screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id");
+    expect(firstFocusId).toMatch(/^preview-close-handoff-/);
+
+    openTimelineDrawer();
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      firstFocusId ?? ""
+    );
+  });
+
   it("updates the drawer timeline when swapping final 4", () => {
     vi.useFakeTimers();
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
     fireEvent.click(screen.getByTestId("timeline-segment-ts-5"));
     fireEvent.click(screen.getByTestId("alternate-final-4-alt-1"));
 
@@ -457,7 +611,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
 
     fireEvent.pointerDown(screen.getByLabelText("Choose caption for Hook text"), {
       button: 0,
