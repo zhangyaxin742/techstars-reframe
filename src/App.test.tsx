@@ -285,6 +285,7 @@ describe("App", () => {
     const publishStatus = screen.getByTestId("preview-publish-status");
     expect(publishStatus).toHaveTextContent("Publishing to Instagram");
     expect(publishStatus).toHaveTextContent("18%");
+    expect(screen.getByTestId("preview-publish-progress")).toBeInTheDocument();
     expect(within(publishStatus).queryByText("views")).not.toBeInTheDocument();
 
     act(() => {
@@ -298,6 +299,7 @@ describe("App", () => {
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("Published");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("48 views");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9 likes");
+    expect(screen.queryByTestId("preview-publish-progress")).not.toBeInTheDocument();
     expect(screen.getByTestId("preview-publish-views-count")).toHaveClass("t-digit-group");
     expect(screen.getByTestId("preview-publish-views-count")).toHaveClass("is-animating");
     expect(screen.getByTestId("preview-publish-views-count").children[1]).toHaveAttribute(

@@ -209,15 +209,17 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
         </span>
       </div>
 
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-        <motion.div
-          data-testid="preview-publish-progress"
-          className="h-full rounded-full bg-accent"
-          initial={false}
-          animate={{ width: `${isPublished ? 100 : progress}%` }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        />
-      </div>
+      {!isPublished ? (
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+          <motion.div
+            data-testid="preview-publish-progress"
+            className="h-full rounded-full bg-accent"
+            initial={false}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          />
+        </div>
+      ) : null}
 
       {isPublished ? (
         <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] font-medium text-muted-foreground">
