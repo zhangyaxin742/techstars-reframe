@@ -51,8 +51,8 @@ interface BrandContextCardProps {
   animateIn?: boolean;
 }
 
-function makePlaceholderSvg(color: string): string {
-  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100'%3E%3Crect width='160' height='100' fill='${encodeURIComponent(color)}'/%3E%3C/svg%3E`;
+function makePlaceholderSvg(_color: string): string {
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100'%3E%3Crect width='160' height='100' fill='%231f1f29'/%3E%3C/svg%3E`;
 }
 
 function levelColor(level: SignalLevel) {

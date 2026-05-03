@@ -34,7 +34,8 @@ export function drawBackground(
   const startX = -((viewport.offset.x * viewport.zoom) % spacing);
   const startY = -((viewport.offset.y * viewport.zoom) % spacing);
 
-  context.fillStyle = "rgba(15, 23, 42, 0.16)";
+  // Steel Gray dot grid — #dee2de at low opacity for a refined, near-invisible guide
+  context.fillStyle = "rgba(180, 184, 180, 0.55)";
   for (let x = startX; x < size.width; x += spacing) {
     for (let y = startY; y < size.height; y += spacing) {
       context.beginPath();
@@ -62,8 +63,9 @@ export function drawConnections({
   context.save();
   context.translate(-viewport.offset.x * viewport.zoom, -viewport.offset.y * viewport.zoom);
   context.scale(viewport.zoom, viewport.zoom);
-  context.lineWidth = 2 / viewport.zoom;
-  context.strokeStyle = "rgba(71, 85, 105, 0.42)";
+  // Steel Gray connector lines — #dee2de at moderate opacity
+  context.lineWidth = 1.5 / viewport.zoom;
+  context.strokeStyle = "rgba(180, 184, 180, 0.75)";
 
   connections.forEach((connection) => {
     const source = nodeMap.get(connection.sourceNodeId);

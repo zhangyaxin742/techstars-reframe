@@ -168,7 +168,7 @@ export function ChatHistoryPanel({
         aria-hidden={!open}
         inert={open ? undefined : true}
         className={cn(
-          "flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]",
+          "paper flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]",
           open ? "pointer-events-auto" : "pointer-events-none select-none"
         )}
         style={{ maxHeight: "calc(100dvh - 5rem)" }}

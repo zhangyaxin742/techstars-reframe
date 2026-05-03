@@ -34,7 +34,7 @@ export function ExportHandoffPanel({
       )}
       data-testid="export-handoff-panel"
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-2xl">
+      <div className="paper relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-[rgba(0,0,0,0.12)_0px_8px_32px_0px]">
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div>
             <h2 className="text-sm font-semibold">Export Timeline</h2>
@@ -63,8 +63,8 @@ export function ExportHandoffPanel({
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition",
                   isExported
-                    ? "border-green-500/50 bg-green-50 dark:bg-green-950/20"
-                    : "hover:border-primary hover:shadow-sm"
+                    ? "border-accent/50 bg-accent/5"
+                    : "hover:border-accent hover:shadow-sm"
                 )}
               >
                 <EditorLogo targetId={target.id} className="size-6 rounded-md object-contain" />
@@ -73,7 +73,7 @@ export function ExportHandoffPanel({
                   <p className="text-xs text-muted-foreground">{target.description}</p>
                 </div>
                 {isExported ? (
-                  <CheckCircle className="size-5 text-green-600" weight="fill" />
+                  <CheckCircle className="size-5 text-accent" weight="fill" />
                 ) : (
                   <ArrowSquareOut className="size-4 text-muted-foreground" />
                 )}

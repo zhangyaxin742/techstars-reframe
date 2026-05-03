@@ -44,12 +44,6 @@ function RailItem({ label, active, onClick, children }: RailItemProps) {
           onClick={onClick}
           className={cn(railItemClass, active && "text-foreground")}
         >
-          {active ? (
-            <span
-              className="pointer-events-none absolute -left-1 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-accent"
-              aria-hidden="true"
-            />
-          ) : null}
           {children}
         </button>
       </TooltipTrigger>
@@ -184,7 +178,7 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
             }}
           >
             <div
-              className="pointer-events-auto flex w-12 flex-col items-center rounded-full border border-border bg-card px-1 py-2 shadow-[rgba(0,0,0,0.15)_0px_2px_6px_0px]"
+              className="paper pointer-events-auto relative flex w-12 flex-col items-center rounded-full border border-border bg-card px-1 py-2 shadow-[rgba(0,0,0,0.15)_0px_2px_6px_0px]"
               onClick={stopCanvas}
               onMouseDown={stopCanvas}
               onPointerDown={stopCanvas}
@@ -242,7 +236,7 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -16 }}
             transition={transition}
-            className="pointer-events-auto absolute bottom-4 top-14 z-20 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]"
+            className="paper pointer-events-auto absolute bottom-4 top-14 z-20 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]"
             style={{ left: "max(1rem, env(safe-area-inset-left))", width: 256 }}
             onClick={stopCanvas}
             onMouseDown={stopCanvas}

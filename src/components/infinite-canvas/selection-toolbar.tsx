@@ -58,7 +58,7 @@ export function SelectionToolbar({
     <TooltipProvider delayDuration={120}>
       <div
         data-testid="selection-toolbar"
-        className="absolute z-30 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+        className="absolute z-30 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]"
         style={{ left, top }}
         onPointerDown={(event) => event.stopPropagation()}
       >
