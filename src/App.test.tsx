@@ -8,11 +8,15 @@ describe("App", () => {
   });
 
   it("renders the AI chat sidebar and canvas without the navigation menu", () => {
+    vi.useFakeTimers();
     render(<App />);
 
     expect(screen.getByText("Chat History")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
     expect(screen.getByText("Preparing your creative canvas")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
     expect(screen.getByTestId("simulated-tool-tool-read-sources")).toHaveAttribute(
       "data-tool-state",
       "running"
@@ -27,7 +31,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(2100);
+      vi.advanceTimersByTime(6000);
     });
 
     expect(screen.getByTestId("simulated-tool-tool-build-recipes")).toHaveAttribute(
@@ -43,7 +47,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(2100);
+      vi.advanceTimersByTime(6000);
     });
     fireEvent.click(screen.getByTestId("canvas-node-recipe-1"));
 
@@ -54,7 +58,7 @@ describe("App", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1900);
     });
 
     expect(screen.getByTestId("timeline-assembly")).toBeInTheDocument();
@@ -66,7 +70,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(2100);
+      vi.advanceTimersByTime(6000);
     });
 
     fireEvent.change(screen.getByPlaceholderText("Ask Reframe to build, edit, or remix..."), {

@@ -250,7 +250,7 @@ export const initialAiToolCalls: SimulatedToolCall[] = [
     state: "running",
     input: { sources: brandContext.sources.slice(0, 3).map((source) => source.label) },
     output: "Found Petite Outdoors, product positioning, social proof, and preorder goal.",
-    durationMs: 500,
+    durationMs: 1200,
   },
   {
     id: "tool-sync-media",
@@ -259,7 +259,7 @@ export const initialAiToolCalls: SimulatedToolCall[] = [
     state: "pending",
     input: { connectors: mediaImportOptions.map((option) => option.label) },
     output: "Indexed 24 seeded clips across product, fit proof, trail movement, and detail shots.",
-    durationMs: 500,
+    durationMs: 1400,
   },
   {
     id: "tool-detect-moments",
@@ -267,7 +267,7 @@ export const initialAiToolCalls: SimulatedToolCall[] = [
     label: "Detecting reusable moments",
     state: "pending",
     output: "Tagged fit proof, uphill movement, product detail, and closing beauty shots.",
-    durationMs: 500,
+    durationMs: 1300,
   },
   {
     id: "tool-build-recipes",
@@ -275,7 +275,7 @@ export const initialAiToolCalls: SimulatedToolCall[] = [
     label: "Building brand context and recipes",
     state: "pending",
     output: "Created three trend recipes matched to Petite Outdoors.",
-    durationMs: 500,
+    durationMs: 1200,
   },
 ];
 
@@ -287,7 +287,7 @@ export const recipeAiToolCalls: SimulatedToolCall[] = [
     state: "running",
     input: { recipe: trendRecipes[0].title },
     output: "Matched opening frame, mirror check, trail proof, and CTA beats.",
-    durationMs: 450,
+    durationMs: 900,
   },
   {
     id: "tool-assemble-timeline",
@@ -296,7 +296,7 @@ export const recipeAiToolCalls: SimulatedToolCall[] = [
     state: "pending",
     input: { duration: "18s", tracks: ["video", "text", "audio"] },
     output: "Built an editable timeline with one missing-shot prompt.",
-    durationMs: 450,
+    durationMs: 900,
   },
 ];
 
@@ -307,7 +307,7 @@ export const promptAiToolCalls: SimulatedToolCall[] = [
     label: "Reading current canvas context",
     state: "running",
     output: "Used the selected recipe, media matches, and timeline gaps.",
-    durationMs: 400,
+    durationMs: 800,
   },
   {
     id: "tool-suggest-next-step",
@@ -315,7 +315,7 @@ export const promptAiToolCalls: SimulatedToolCall[] = [
     label: "Preparing next edit options",
     state: "pending",
     output: "Suggested alternates, missing-shot direction, and export handoff.",
-    durationMs: 400,
+    durationMs: 800,
   },
 ];
 
@@ -376,6 +376,7 @@ export const reframeDemoNodes: CanvasNode[] = [
     kind: "preview",
     title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
+    imageUrl: mediaAssets[0].thumbnail,
     position: { x: 1360, y: 20 },
     size: { width: 260, height: 180 },
   },

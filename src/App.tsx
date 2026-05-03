@@ -21,7 +21,6 @@ import {
   recipeAiToolCalls,
   reframeDemoConnections,
   reframeDemoNodes,
-  reframePromptSourceImage,
   timelineSegments,
   trendRecipes,
 } from "./data/reframe-demo";
@@ -61,7 +60,7 @@ export function App() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [bottomPrompt, setBottomPrompt] = useState("");
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
-  const [messages, setMessages] = useState<ChatMessage[]>(chatHistory);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => chatHistory.slice(0, 4));
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [timeline, setTimeline] = useState(timelineSegments);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
@@ -138,16 +137,29 @@ export function App() {
   useEffect(() => {
     if (initialSequenceStartedRef.current) return;
     initialSequenceStartedRef.current = true;
-    startToolSequence({
-      messageId: "auto-analysis",
-      content: "Analyzing your brand sources and connected media.",
-      thinkingText: "Building your Reframe workspace",
-      step: "analysis",
-      toolCalls: initialAiToolCalls,
-      doneContent: "Brand context and trend recipes are ready. Pick one recipe to auto-fill the timeline.",
-      onDone: () => setFlowStep("recipes-ready"),
-    });
-  }, [startToolSequence]);
+    queueTimeout(() => {
+      startToolSequence({
+        messageId: "auto-analysis",
+        content: "Analyzing your brand sources and connected media.",
+        thinkingText: "Building your Reframe workspace",
+        step: "analysis",
+        toolCalls: initialAiToolCalls,
+        doneContent: "Brand context and trend recipes are ready. Pick one recipe to auto-fill the timeline.",
+        onDone: () => {
+          setFlowStep("recipes-ready");
+          queueTimeout(() => {
+            setMessages((currentMessages) => [
+              ...currentMessages,
+              ...chatHistory.slice(5, 7).map((message) => ({
+                ...message,
+                timestamp: Date.now() + message.timestamp,
+              })),
+            ]);
+          }, 650);
+        },
+      });
+    }, 600);
+  }, [queueTimeout, startToolSequence]);
 
   const visibleNodes = useMemo(() => {
     if (flowStep === "analysis" || flowStep === "media-connect" || flowStep === "source-intake") {
@@ -171,6 +183,13 @@ export function App() {
   const isAiBusy = messages.some((message) =>
     message.toolCalls?.some((toolCall) => toolCall.state === "running")
   );
+
+  const bottomPromptSourceImageUrl = useMemo(() => {
+    if (selectedNodeIds.size !== 1) return undefined;
+    const selectedId = selectedNodeIds.values().next().value as string | undefined;
+    const node = selectedId ? nodes.find((candidate) => candidate.id === selectedId) : undefined;
+    return node?.imageUrl?.trim() ? node.imageUrl : undefined;
+  }, [nodes, selectedNodeIds]);
 
   const handleNodeMove = useCallback((updates: NodeMoveUpdate[]) => {
     const updateMap = new Map(updates.map((update) => [update.nodeId, update.position]));
@@ -312,10 +331,8 @@ export function App() {
             placeholder: "Ask Reframe to build, edit, or remix...",
             actionLabel: "Generate",
             busyLabel: "Building",
-            sourceImageUrl: reframePromptSourceImage,
+            sourceImageUrl: bottomPromptSourceImageUrl,
             sourceAlt: "",
-            badges: ["Petite Outdoors", "Preorder Hype"],
-            count: 1,
             disabled: isAiBusy,
             busy: isAiBusy,
           }}
