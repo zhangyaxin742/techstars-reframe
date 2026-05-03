@@ -10,6 +10,7 @@ import { brandContext } from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
+export type TimelinePhase = "hidden" | "skeleton" | "revealing";
 
 interface CanvasNodeViewProps {
   node: CanvasNode;
@@ -18,6 +19,7 @@ interface CanvasNodeViewProps {
   selected: boolean;
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
+  timelinePhase?: TimelinePhase;
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   onPointerDown: (event: React.PointerEvent, node: CanvasNode) => void;
   onClick: (event: React.MouseEvent, node: CanvasNode) => void;
@@ -58,17 +60,27 @@ function TrendRecipeCardSkeleton() {
   );
 }
 
-function TimelineGhostSkeleton() {
+function TimelineNodeSkeleton() {
   return (
-    <div className="h-36 w-60 rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-3 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="h-2 w-20 rounded bg-muted/80" />
-        <div className="h-2 w-10 rounded bg-muted/70" />
+    <div
+      className="flex h-full w-full animate-pulse flex-col justify-between rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-4 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]"
+      aria-label="Loading timeline"
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="h-2.5 w-36 rounded bg-muted" />
+          <div className="h-2.5 w-16 rounded bg-muted" />
+        </div>
+        <div className="space-y-2.5">
+          <div className="h-10 rounded bg-muted" />
+          <div className="h-10 rounded bg-muted" />
+          <div className="h-10 rounded bg-muted" />
+        </div>
       </div>
-      <div className="space-y-2">
-        <div className="h-6 rounded bg-muted/70" />
-        <div className="h-6 rounded bg-muted/60" />
-        <div className="h-6 rounded bg-muted/50" />
+      <div className="flex items-center gap-2">
+        <div className="h-5 w-16 rounded-full bg-muted" />
+        <div className="h-5 w-24 rounded-full bg-muted" />
+        <div className="h-5 w-20 rounded-full bg-muted" />
       </div>
     </div>
   );
@@ -85,14 +97,14 @@ function TimelineGhostPreview({
     <div
       data-testid={`canvas-node-timeline-ghost-${nodeId}`}
       className={cn(
-        "pointer-events-none absolute left-full top-1/2 z-10 ml-14 -translate-y-1/2 origin-left",
+        "pointer-events-none absolute left-full top-1/2 z-10 ml-20 h-[280px] w-[480px] -translate-y-1/2 origin-left",
         "transition-[opacity,transform] duration-200",
         persistent
           ? "scale-100 opacity-100"
           : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
       )}
     >
-      <TimelineGhostSkeleton />
+      <TimelineNodeSkeleton />
     </div>
   );
 }
@@ -104,6 +116,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   selected,
   brandCtxPhase,
   trendRecipePhase = "revealing",
+  timelinePhase = "revealing",
   resolveImageUrl,
   onPointerDown,
   onClick,
@@ -179,18 +192,9 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           <span aria-hidden="true" className="text-base leading-none">+</span>
         </button>
       ) : null}
-      {isTrendRecipe ? (
+      {isTrendRecipe && !isTimelineSource ? (
         <>
-          {isTimelineSource ? (
-            <motion.div
-              data-testid={`canvas-node-connector-${node.id}`}
-              className="pointer-events-none absolute right-0 top-1/2 z-10 h-px -translate-y-1/2 translate-x-full bg-accent"
-              initial={{ width: 0, opacity: 0.7 }}
-              animate={{ width: 56, opacity: 1 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-            />
-          ) : null}
-          <TimelineGhostPreview nodeId={node.id} persistent={isTimelineSource} />
+          <TimelineGhostPreview nodeId={node.id} persistent={false} />
         </>
       ) : null}
 
@@ -303,6 +307,36 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               </motion.div>
             )}
           </>
+        ) : node.kind === "timeline" ? (
+          <AnimatePresence>
+            {timelinePhase === "skeleton" ? (
+              <motion.div
+                key="timeline-skeleton"
+                data-testid={`timeline-node-skeleton-${node.id}`}
+                className="h-full w-full"
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.55, ease: "easeOut" }}
+              >
+                <TimelineNodeSkeleton />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="timeline-card"
+                className="space-y-1 p-3"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+              >
+                <div className="truncate text-sm font-semibold">{node.title}</div>
+                {node.body ? (
+                  <p className="line-clamp-5 whitespace-pre-line text-pretty text-xs leading-5 text-muted-foreground">
+                    {node.body}
+                  </p>
+                ) : null}
+              </motion.div>
+            )}
+          </AnimatePresence>
         ) : (
           <div className="space-y-1 p-3">
             <div className="truncate text-sm font-semibold">{node.title}</div>

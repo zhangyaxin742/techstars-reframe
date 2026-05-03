@@ -59,6 +59,7 @@ export function App() {
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
   const [brandCtxPhase, setBrandCtxPhase] = useState<"skeleton" | "revealing">("skeleton");
   const [trendRecipePhase, setTrendRecipePhase] = useState<"hidden" | "skeleton" | "revealing">("hidden");
+  const [timelinePhase, setTimelinePhase] = useState<"hidden" | "skeleton" | "revealing">("hidden");
   const [messages, setMessages] = useState<ChatMessage[]>(() => [chatHistory[1]]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [timelineSourceNodeId, setTimelineSourceNodeId] = useState<string | null>(null);
@@ -235,8 +236,17 @@ export function App() {
       return nodes.filter((node) => node.kind === "brand-context");
     }
 
-    if (flowStep === "trend-search" || flowStep === "recipes-ready" || flowStep === "recipe-selected") {
+    if (flowStep === "trend-search" || flowStep === "recipes-ready") {
       return nodes.filter((node) => node.kind === "brand-context" || node.kind === "trend-recipe");
+    }
+
+    if (flowStep === "recipe-selected") {
+      return nodes.filter(
+        (node) =>
+          node.kind === "brand-context" ||
+          node.kind === "trend-recipe" ||
+          node.kind === "timeline"
+      );
     }
 
     return nodes;
@@ -314,10 +324,30 @@ export function App() {
 
       const recipeNodeId = recipeNode.id;
       const connectionId = recipeNodeId === "recipe-1" ? "r1-tl" : `${recipeNodeId}-tl`;
+      const timelineWidth = 480;
+      const timelineHeight = 280;
       setSelectedNodeIds(new Set([recipeNodeId]));
       setTimelineSourceNodeId(recipeNodeId);
       setRecipeSequenceStarted(true);
       setFlowStep("recipe-selected");
+      setTimelinePhase("skeleton");
+      setNodes((currentNodes) =>
+        currentNodes.map((node) =>
+          node.id === "timeline-1"
+            ? {
+                ...node,
+                position: {
+                  x: recipeNode.position.x + recipeNode.size.width + 80,
+                  y: recipeNode.position.y + (recipeNode.size.height - timelineHeight) / 2,
+                },
+                size: {
+                  width: timelineWidth,
+                  height: timelineHeight,
+                },
+              }
+            : node
+        )
+      );
       setConnections((currentConnections) => upsertTimelineConnection(currentConnections, recipeNodeId));
       setAnimatedConnectionIds(new Set([connectionId]));
       queueTimeout(() => setAnimatedConnectionIds(new Set()), 550);
@@ -340,6 +370,7 @@ export function App() {
         doneContent:
           "Timeline is filled. I left one missing uphill-movement shot and found alternate clips for swaps.",
         onDone: () => {
+          setTimelinePhase("revealing");
           setFlowStep("timeline-ready");
         },
       });
@@ -405,6 +436,7 @@ export function App() {
           animatedConnectionIds={animatedConnectionIds}
           brandCtxPhase={brandCtxPhase}
           trendRecipePhase={trendRecipePhase}
+          timelinePhase={timelinePhase}
         />
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28"

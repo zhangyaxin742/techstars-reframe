@@ -21,7 +21,12 @@ import type {
 import { cn } from "../../lib/utils";
 import { Canvas2DLayer } from "./canvas-2d-layer";
 import { CanvasNavigationRail } from "./canvas-navigation-rail";
-import { CanvasNodeView, type BrandCtxPhase, type TrendRecipePhase } from "./canvas-node-view";
+import {
+  CanvasNodeView,
+  type BrandCtxPhase,
+  type TimelinePhase,
+  type TrendRecipePhase,
+} from "./canvas-node-view";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { MarqueeOverlay } from "./marquee-overlay";
 import { SelectionToolbar } from "./selection-toolbar";
@@ -45,6 +50,7 @@ interface InfiniteCanvasProps {
   resolveImageUrl?: (node: CanvasNode) => string | undefined;
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
+  timelinePhase?: TimelinePhase;
   className?: string;
 }
 
@@ -81,6 +87,7 @@ export function InfiniteCanvas({
   resolveImageUrl,
   brandCtxPhase,
   trendRecipePhase,
+  timelinePhase,
   className,
 }: InfiniteCanvasProps) {
   const { containerRef, viewport, setViewport, panByScreenDelta, wheelPan, zoomAtPoint } =
@@ -505,6 +512,7 @@ export function InfiniteCanvas({
             selected={selection.has(node.id)}
             brandCtxPhase={brandCtxPhase}
             trendRecipePhase={trendRecipePhase}
+            timelinePhase={timelinePhase}
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
