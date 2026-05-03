@@ -1,4 +1,4 @@
-import { ArrowsClockwise, SpeakerHigh, TextT, Warning } from "@phosphor-icons/react";
+import { ArrowsClockwise, Eye, FilmSlate, SpeakerHigh, TextT } from "@phosphor-icons/react";
 import React, { useCallback } from "react";
 import type { MediaAsset, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
@@ -13,10 +13,14 @@ interface TimelineAssemblyProps {
 }
 
 function formatMs(ms: number): string {
-  const secs = Math.floor(ms / 1000);
-  const frac = Math.floor((ms % 1000) / 100);
-  return `${secs}.${frac}s`;
+  const totalSecs = Math.floor(ms / 1000);
+  const mins = Math.floor(totalSecs / 60);
+  const secs = totalSecs % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
 }
+
+const WAVE_HEIGHTS = [20, 42, 74, 56, 30, 88, 64, 36, 52, 76, 44, 68, 25, 90, 58, 38];
+const DRAWER_TIMELINE_TAIL_MS = 3000;
 
 function getClipTransitionMarkers(segments: TimelineSegment[], totalMs: number): number[] {
   const markers = new Set<number>();
@@ -73,7 +77,7 @@ export function TimelineAssembly({
               key={alt.id}
               type="button"
               onClick={() => onSwapClip?.(selectedSegmentId, alt)}
-              className="group overflow-hidden rounded-md border bg-background text-left transition hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group overflow-hidden rounded-md border border-border bg-background text-left transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               data-testid={`alternate-${alt.id}`}
             >
               <img
@@ -88,7 +92,7 @@ export function TimelineAssembly({
                   {alt.matchReason}
                 </p>
               </div>
-              <div className="flex items-center justify-center border-t py-1.5 text-[10px] text-primary opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
+              <div className="flex items-center justify-center border-t py-1.5 text-[10px] text-accent opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
                 <ArrowsClockwise className="mr-1 size-3" />
                 Swap
               </div>
@@ -100,46 +104,58 @@ export function TimelineAssembly({
   };
 
   if (variant === "drawer") {
-    const rulerMarks = [0, totalMs / 4, totalMs / 2, (totalMs * 3) / 4, totalMs];
+    const rulerStep = 3000;
+    const drawerTimelineMs = totalMs + DRAWER_TIMELINE_TAIL_MS;
+    const rulerMarks: number[] = [];
+    for (let t = 0; t <= drawerTimelineMs; t += rulerStep) rulerMarks.push(t);
+    if (rulerMarks[rulerMarks.length - 1] < drawerTimelineMs) rulerMarks.push(drawerTimelineMs);
     const trackWidth = 1120;
 
     return (
       <div className={cn("space-y-4", className)} data-testid="timeline-assembly">
-        <div className="overflow-hidden rounded-lg border bg-secondary/40">
-          <div className="flex min-h-80">
-            <div className="w-36 shrink-0 border-r bg-card">
-              <div className="h-12 border-b" />
-              {["Video", "Text", "Audio"].map((track) => (
-                <div
-                  key={track}
-                  className="flex h-20 items-center justify-between border-b px-4"
-                >
-                  <span className="text-xs font-medium text-foreground">{track}</span>
-                  <span className="text-[10px] uppercase text-muted-foreground">
-                    {track === "Video" ? "V1" : track === "Text" ? "T1" : "A1"}
-                  </span>
-                </div>
-              ))}
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <div className="flex">
+            {/* Track label column */}
+            <div className="w-28 shrink-0 border-r border-border bg-secondary/30">
+              <div className="h-8 border-b border-border" />
+              <div className="flex h-[72px] items-center gap-2 border-b border-border px-3">
+                <Eye className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">Video Track</span>
+              </div>
+              <div className="flex h-14 items-center gap-2 border-b border-border px-3">
+                <TextT className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">Text Overlay</span>
+              </div>
+              <div className="flex h-14 items-center gap-2 px-3">
+                <SpeakerHigh className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">Audio (Beat)</span>
+              </div>
             </div>
+
+            {/* Scrollable track area */}
             <div className="scrollbar-hover-visible min-w-0 flex-1 overflow-x-auto">
               <div className="relative" style={{ width: trackWidth }}>
-                <div className="relative h-12 border-b bg-card">
+
+                {/* Timecode ruler */}
+                <div className="relative h-8 border-b border-border bg-secondary/20">
                   {rulerMarks.map((mark) => (
                     <div
                       key={mark}
-                      className="absolute inset-y-0 border-l"
-                      style={{ left: `${(mark / totalMs) * 100}%` }}
+                      className="absolute inset-y-0 border-l border-border/50"
+                      style={{ left: `${(mark / drawerTimelineMs) * 100}%` }}
                     >
-                      <span className="absolute left-2 top-2 text-[10px] tabular-nums text-muted-foreground">
+                      <span className="absolute left-1.5 top-1.5 text-[10px] tabular-nums text-muted-foreground">
                         {formatMs(mark)}
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="relative h-20 border-b">
+
+                {/* Video track */}
+                <div className="relative h-[72px] border-b border-border bg-secondary/20">
                   {clipSegments.map((seg) => {
-                    const widthPct = ((seg.endMs - seg.startMs) / totalMs) * 100;
-                    const leftPct = (seg.startMs / totalMs) * 100;
+                    const widthPct = ((seg.endMs - seg.startMs) / drawerTimelineMs) * 100;
+                    const leftPct = (seg.startMs / drawerTimelineMs) * 100;
                     const isSelected = seg.id === selectedSegmentId;
                     const segmentLabel = seg.selectedAssetLabel ?? seg.label;
                     return (
@@ -149,39 +165,49 @@ export function TimelineAssembly({
                         onClick={() => handleSegmentClick(seg.id)}
                         data-testid={`timeline-segment-${seg.id}`}
                         className={cn(
-                          "absolute top-3 h-14 overflow-hidden rounded-md border text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          "absolute inset-y-2 overflow-hidden rounded text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           seg.kind === "missing"
-                            ? "border-dashed border-yellow-600/60 bg-foreground"
-                            : "border-border bg-card hover:border-primary",
-                          isSelected && "border-primary ring-2 ring-ring"
+                            ? "border border-dashed border-yellow-500/50 bg-[#1f1f29]"
+                            : cn(
+                                "border border-transparent shadow-[rgba(0,0,0,0.06)_0px_1px_2px_0px]",
+                                !isSelected && "hover:border-accent/50"
+                              ),
+                          isSelected && "border border-accent ring-2 ring-ring"
                         )}
                         style={{ left: `${leftPct}%`, width: `${widthPct}%`, minWidth: 80 }}
                       >
                         {seg.kind === "clip" && seg.thumbnail ? (
-                          <img
-                            src={seg.thumbnail}
-                            alt={segmentLabel}
-                            className="h-full w-full object-cover"
-                            draggable={false}
-                          />
+                          <>
+                            <img
+                              src={seg.thumbnail}
+                              alt={segmentLabel}
+                              className="h-full w-full object-cover"
+                              draggable={false}
+                            />
+                            <span className="sr-only">{segmentLabel}</span>
+                          </>
                         ) : (
-                          <div className="flex h-full items-center justify-center">
-                            <Warning className="size-4 text-yellow-500" />
+                          <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2">
+                            <FilmSlate className="size-5 shrink-0 text-white/40" weight="thin" />
+                            <p className="text-center text-[9px] font-medium leading-tight text-white/60">
+                              film missing shot
+                            </p>
+                            <p className="text-center text-[8px] leading-tight text-white/35">
+                              Drop media here
+                            </p>
                           </div>
                         )}
-                        <div className="absolute inset-x-0 bottom-0 bg-foreground/75 px-2 py-1">
-                          <p className="truncate text-[10px] text-background">
-                            {segmentLabel}
-                          </p>
-                        </div>
                       </button>
                     );
                   })}
                 </div>
-                <div className="relative h-20 border-b">
+
+                {/* Text overlay track */}
+                <div className="relative h-14 border-b border-border bg-secondary/20">
                   {overlaySegments.map((seg) => {
-                    const widthPct = ((seg.endMs - seg.startMs) / totalMs) * 100;
-                    const leftPct = (seg.startMs / totalMs) * 100;
+                    const widthPct = ((seg.endMs - seg.startMs) / drawerTimelineMs) * 100;
+                    const leftPct = (seg.startMs / drawerTimelineMs) * 100;
+                    const isCta = seg.label.toLowerCase().includes("cta");
                     return (
                       <button
                         key={seg.id}
@@ -189,20 +215,22 @@ export function TimelineAssembly({
                         onClick={() => handleSegmentClick(seg.id)}
                         data-testid={`timeline-segment-${seg.id}`}
                         className={cn(
-                          "absolute top-4 flex h-12 items-center gap-2 rounded-md border bg-card px-3 text-left transition hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          seg.id === selectedSegmentId && "border-primary ring-2 ring-ring"
+                          "absolute top-3 flex h-8 items-center truncate rounded border px-3 text-left text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          isCta
+                            ? "border-accent/20 bg-accent text-accent-foreground hover:bg-accent/90"
+                            : "border-border bg-card text-foreground/80 hover:border-accent/60",
+                          seg.id === selectedSegmentId && "border-accent ring-2 ring-ring"
                         )}
                         style={{ left: `${leftPct}%`, width: `${widthPct}%`, minWidth: 120 }}
                       >
-                        <TextT className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="truncate text-xs text-foreground/80">
-                          {seg.overlayText}
-                        </span>
+                        <span className="truncate">{seg.overlayText}</span>
                       </button>
                     );
                   })}
                 </div>
-                <div className="relative h-20">
+
+                {/* Audio track */}
+                <div className="relative h-14 bg-secondary/20">
                   {audioSegments.map((seg) => (
                     <button
                       key={seg.id}
@@ -210,34 +238,36 @@ export function TimelineAssembly({
                       onClick={() => handleSegmentClick(seg.id)}
                       data-testid={`timeline-segment-${seg.id}`}
                       className={cn(
-                        "absolute left-0 right-0 top-4 flex h-12 items-center gap-3 rounded-md border bg-card px-3 text-left transition hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        seg.id === selectedSegmentId && "border-primary ring-2 ring-ring"
+                        "absolute inset-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                        seg.id === selectedSegmentId && "ring-2 ring-inset ring-ring"
                       )}
                     >
-                      <SpeakerHigh className="size-4 shrink-0 text-primary" />
-                      <div className="flex h-6 w-40 shrink-0 items-center gap-0.5 opacity-70">
-                        {[20, 42, 74, 56, 30, 88, 64, 36, 52, 76, 44, 68].map((height, index) => (
-                          <span
-                            key={`${height}-${index}`}
-                            className="w-1 rounded-full bg-muted-foreground"
-                            style={{ height: `${height}%` }}
+                      <div className="relative flex h-full items-center px-2">
+                        {/* Waveform bars */}
+                        <div className="flex h-8 w-full items-center gap-[1.5px]">
+                          {Array.from({ length: 120 }, (_, i) => (
+                            <span
+                              key={i}
+                              className="flex-1 rounded-full bg-accent/45"
+                              style={{ height: `${WAVE_HEIGHTS[i % WAVE_HEIGHTS.length]}%` }}
+                            />
+                          ))}
+                        </div>
+                        {/* Beat markers align to clip transition boundaries where possible. */}
+                        {clipTransitionMarkers.map((markerMs) => (
+                          <div
+                            key={markerMs}
+                            data-testid={`audio-beat-marker-${markerMs}`}
+                            className="absolute top-1/2 size-1.5 -translate-y-1/2 rotate-45 bg-accent"
+                            style={{ left: `${(markerMs / drawerTimelineMs) * 100}%` }}
                           />
                         ))}
                       </div>
-                      <span className="min-w-0 truncate text-xs text-foreground/80">
-                        {seg.audioNote}
-                      </span>
-                      {clipTransitionMarkers.map((markerMs) => (
-                        <div
-                          key={markerMs}
-                          data-testid={`audio-beat-marker-${markerMs}`}
-                          className="absolute top-1/2 size-1.5 -translate-y-1/2 rotate-45 bg-primary"
-                          style={{ left: `${(markerMs / totalMs) * 100}%` }}
-                        />
-                      ))}
+                      <span className="sr-only">{seg.audioNote}</span>
                     </button>
                   ))}
                 </div>
+
               </div>
             </div>
           </div>
@@ -270,11 +300,11 @@ export function TimelineAssembly({
                 onClick={() => handleSegmentClick(seg.id)}
                 data-testid={`timeline-segment-${seg.id}`}
                 className={cn(
-                  "relative flex-shrink-0 overflow-hidden border-2 transition",
+                  "relative flex-shrink-0 overflow-hidden rounded border-2 transition",
                   seg.kind === "missing"
-                    ? "border-dashed border-yellow-500/50 bg-neutral-900"
-                    : "border-transparent bg-neutral-200",
-                  isSelected && "border-primary ring-1 ring-primary"
+                    ? "border-dashed border-border bg-[#1f1f29]"
+                    : "border-transparent bg-secondary",
+                  isSelected && "border-accent ring-1 ring-ring"
                 )}
                 style={{ width: `${widthPct}%`, minWidth: 40 }}
               >
@@ -287,7 +317,7 @@ export function TimelineAssembly({
                   />
                 ) : (
                   <div className="flex h-12 items-center justify-center">
-                    <Warning className="size-4 text-yellow-500" />
+                    <FilmSlate className="size-4 text-white/40" weight="thin" />
                   </div>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5">
@@ -331,9 +361,9 @@ export function TimelineAssembly({
           {audioSegments.map((seg) => (
             <div
               key={seg.id}
-              className="flex items-center gap-1.5 rounded border bg-purple-50/50 px-2 py-1.5 dark:bg-purple-950/20"
+              className="flex items-center gap-1.5 rounded border border-border bg-secondary px-2 py-1.5"
             >
-              <SpeakerHigh className="size-3 shrink-0 text-purple-600" />
+              <SpeakerHigh className="size-3 shrink-0 text-accent" />
               <p className="min-w-0 text-[10px] text-foreground/80">{seg.audioNote}</p>
             </div>
           ))}

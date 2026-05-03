@@ -74,6 +74,9 @@ describe("TimelineAssembly", () => {
     expect(screen.getByText("Video Track")).toBeInTheDocument();
     expect(screen.getByText("Text Overlay")).toBeInTheDocument();
     expect(screen.getByText("Audio (Beat)")).toBeInTheDocument();
+    expect(screen.getByText("0:18")).toBeInTheDocument();
+    expect(screen.getByText("0:21")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-segment-ts-4")).toHaveClass("border-yellow-500/50");
     expect(screen.getByTestId("timeline-segment-ts-9")).toHaveTextContent("Upbeat acoustic");
   });
 
@@ -88,7 +91,7 @@ describe("TimelineAssembly", () => {
     );
 
     expect(screen.getByTestId("audio-beat-marker-3200")).toHaveStyle({
-      left: `${(3200 / 18000) * 100}%`,
+      left: `${(3200 / 21000) * 100}%`,
     });
     expect(screen.getByTestId("audio-beat-marker-6000")).toBeInTheDocument();
     expect(screen.getByTestId("audio-beat-marker-8000")).toBeInTheDocument();
