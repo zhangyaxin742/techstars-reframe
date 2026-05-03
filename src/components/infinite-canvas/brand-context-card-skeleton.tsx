@@ -1,12 +1,22 @@
 import React from "react";
+import { Skeleton } from "../ui/skeleton";
 
-function SkeletonRect({ className }: { className: string }) {
-  return <div className={`rounded bg-muted ${className}`} />;
+function SkeletonRect({
+  className,
+  style,
+}: {
+  className: string;
+  style?: React.CSSProperties;
+}) {
+  return <Skeleton className={className} style={style} />;
 }
 
 export function BrandContextCardSkeleton() {
+  const sourceLineWidths = [48, 40, 40, 52];
+  const footerWidths = ["w-24", "w-20", "w-28", "w-32"];
+
   return (
-    <div className="flex w-full animate-pulse text-[11px] leading-4">
+    <div className="flex w-full text-[11px] leading-4">
       {/* Left column */}
       <div className="flex w-[210px] shrink-0 flex-col gap-3 border-r p-4">
         <SkeletonRect className="h-2 w-20" />
@@ -14,12 +24,12 @@ export function BrandContextCardSkeleton() {
         <SkeletonRect className="h-3 w-36" />
 
         <div className="mt-1 space-y-3">
-          {[48, 40, 40, 52].map((w, i) => (
+          {sourceLineWidths.map((w, i) => (
             <div key={i} className="flex items-start gap-2">
               <SkeletonRect className="mt-0.5 size-3 shrink-0" />
               <div className="flex-1 space-y-1.5">
                 <SkeletonRect className="h-2.5 w-14" />
-                <SkeletonRect className={`h-2 w-[${w}%]`} />
+                <SkeletonRect className="h-2" style={{ width: `${w}%` }} />
               </div>
             </div>
           ))}
@@ -56,8 +66,8 @@ export function BrandContextCardSkeleton() {
         </div>
 
         <div className="flex items-center gap-4 border-t px-3 py-2">
-          {[24, 20, 28, 32].map((w, i) => (
-            <SkeletonRect key={i} className={`h-2 w-${w}`} />
+          {footerWidths.map((widthClass, i) => (
+            <SkeletonRect key={i} className={`h-2 ${widthClass}`} />
           ))}
         </div>
       </div>

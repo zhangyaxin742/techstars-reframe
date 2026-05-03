@@ -6,6 +6,7 @@ import type { CanvasNode, CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { BrandContextCardSkeleton } from "./brand-context-card-skeleton";
+import { Skeleton } from "../ui/skeleton";
 import { brandContext } from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
@@ -39,22 +40,22 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
 
 function TrendRecipeCardSkeleton() {
   return (
-    <div className="flex h-full animate-pulse flex-col justify-between p-3 text-[11px] leading-4" aria-label="Loading trend recipe">
+    <div className="flex h-full flex-col justify-between p-3 text-[11px] leading-4" aria-label="Loading trend recipe">
       <div className="space-y-3">
-        <div className="h-2.5 w-24 rounded bg-muted" />
+        <Skeleton className="h-2.5 w-24" />
         <div className="space-y-1.5">
-          <div className="h-2.5 w-full rounded bg-muted" />
-          <div className="h-2.5 w-5/6 rounded bg-muted" />
-          <div className="h-2.5 w-3/4 rounded bg-muted" />
+          <Skeleton className="h-2.5 w-full" />
+          <Skeleton className="h-2.5 w-5/6" />
+          <Skeleton className="h-2.5 w-3/4" />
         </div>
         <div className="space-y-1.5 border-t pt-2">
-          <div className="h-2.5 w-full rounded bg-muted" />
-          <div className="h-2.5 w-2/3 rounded bg-muted" />
+          <Skeleton className="h-2.5 w-full" />
+          <Skeleton className="h-2.5 w-2/3" />
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-5 w-14 rounded-full bg-muted" />
-        <div className="h-5 w-20 rounded-full bg-muted" />
+        <Skeleton className="h-5 w-14 rounded-full" />
+        <Skeleton className="h-5 w-20 rounded-full" />
       </div>
     </div>
   );
@@ -63,24 +64,24 @@ function TrendRecipeCardSkeleton() {
 function TimelineNodeSkeleton() {
   return (
     <div
-      className="flex h-full w-full animate-pulse flex-col justify-between rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-4 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]"
+      className="flex h-full w-full flex-col justify-between rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-4 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]"
       aria-label="Loading timeline"
     >
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="h-2.5 w-36 rounded bg-muted" />
-          <div className="h-2.5 w-16 rounded bg-muted" />
+          <Skeleton className="h-2.5 w-36" />
+          <Skeleton className="h-2.5 w-16" />
         </div>
         <div className="space-y-2.5">
-          <div className="h-10 rounded bg-muted" />
-          <div className="h-10 rounded bg-muted" />
-          <div className="h-10 rounded bg-muted" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-5 w-16 rounded-full bg-muted" />
-        <div className="h-5 w-24 rounded-full bg-muted" />
-        <div className="h-5 w-20 rounded-full bg-muted" />
+        <Skeleton className="h-5 w-16 rounded-full" />
+        <Skeleton className="h-5 w-24 rounded-full" />
+        <Skeleton className="h-5 w-20 rounded-full" />
       </div>
     </div>
   );

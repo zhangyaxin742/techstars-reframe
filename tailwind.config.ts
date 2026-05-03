@@ -42,6 +42,15 @@ const config: Config = {
       boxShadow: {
         phone: "0 40px 80px rgba(26, 22, 14, 0.6)",
       },
+      keyframes: {
+        "skeleton-shimmer": {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+      },
+      animation: {
+        "skeleton-shimmer": "skeleton-shimmer 2s infinite",
+      },
       letterSpacing: {
         eyebrow: "0.22em",
         wordmark: "0.18em",
