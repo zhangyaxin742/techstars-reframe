@@ -216,6 +216,10 @@ describe("App", () => {
     fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-floating-preview")).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("timeline-floating-preview")).getByTestId("mock-video-preview")
+    ).toHaveAttribute("data-preview-variant", "floating");
     expect(screen.getByText("Opening frame: hem problem")).toBeInTheDocument();
     expect(screen.getByText(/Upbeat acoustic/)).toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toHaveAttribute("data-chrome-hidden", "true");
@@ -239,6 +243,7 @@ describe("App", () => {
     });
 
     expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("timeline-floating-preview")).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toBeInTheDocument();
     expect(screen.getByTestId("chat-history-panel")).toHaveAttribute("data-chrome-hidden", "false");
     expect(screen.getByRole("navigation", { name: "Canvas navigation" })).toBeInTheDocument();

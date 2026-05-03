@@ -6,7 +6,8 @@ import { cn } from "../../lib/utils";
 interface MockVideoPreviewProps {
   segments: TimelineSegment[];
   open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
+  variant?: "modal" | "floating";
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export function MockVideoPreview({
   segments,
   open,
   onClose,
+  variant = "modal",
   className,
 }: MockVideoPreviewProps) {
   const [playing, setPlaying] = useState(false);
@@ -51,16 +53,20 @@ export function MockVideoPreview({
   if (!open) return null;
 
   const progressPct = (currentMs / totalMs) * 100;
+  const isFloating = variant === "floating";
 
-  return (
+  const player = (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm",
+        "relative w-full overflow-hidden bg-neutral-950 shadow-2xl",
+        isFloating ? "rounded-2xl border border-white/10" : "max-w-sm rounded-2xl",
         className
       )}
       data-testid="mock-video-preview"
+      data-preview-variant={variant}
+      aria-label={isFloating ? "Timeline video preview" : undefined}
     >
-      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-neutral-950 shadow-2xl">
+      {onClose && !isFloating ? (
         <button
           type="button"
           onClick={onClose}
@@ -69,67 +75,88 @@ export function MockVideoPreview({
         >
           <X className="size-4" />
         </button>
+      ) : null}
 
-        {/* 9:16 aspect ratio preview */}
-        <div className="relative aspect-[9/16] w-full overflow-hidden bg-neutral-900">
-          {currentClip?.thumbnail ? (
-            <img
-              src={currentClip.thumbnail}
-              alt={currentClip.label}
-              className="absolute inset-0 size-full object-cover"
-              draggable={false}
-            />
-          ) : (
-            <div className="flex size-full items-center justify-center text-neutral-600">
-              <span className="text-sm">No clip</span>
-            </div>
-          )}
+      {/* 9:16 aspect ratio preview */}
+      <div className="relative aspect-[9/16] w-full overflow-hidden bg-neutral-900">
+        {currentClip?.thumbnail ? (
+          <img
+            src={currentClip.thumbnail}
+            alt={currentClip.label}
+            className="absolute inset-0 size-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center text-neutral-600">
+            <span className="text-sm">No clip</span>
+          </div>
+        )}
 
-          {currentOverlay && (
-            <div className="absolute inset-x-0 bottom-16 flex justify-center px-4">
-              <p className="rounded-lg bg-black/60 px-4 py-2 text-center text-sm font-semibold text-white backdrop-blur-sm">
-                {currentOverlay.overlayText}
-              </p>
-            </div>
-          )}
+        {currentOverlay && (
+          <div className="absolute inset-x-0 bottom-16 flex justify-center px-4">
+            <p className="rounded-lg bg-black/60 px-4 py-2 text-center text-sm font-semibold text-white backdrop-blur-sm">
+              {currentOverlay.overlayText}
+            </p>
+          </div>
+        )}
 
-          {currentClip?.kind === "missing" && (
-            <div className="absolute inset-0 flex items-center justify-center bg-yellow-900/30">
-              <span className="rounded bg-yellow-500/80 px-2 py-1 text-xs font-bold text-black">
-                MISSING SHOT
-              </span>
-            </div>
-          )}
+        {currentClip?.kind === "missing" && (
+          <div className="absolute inset-0 flex items-center justify-center bg-yellow-900/30">
+            <span className="rounded bg-yellow-500/80 px-2 py-1 text-xs font-bold text-black">
+              MISSING SHOT
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Controls */}
+      <div className={cn("bg-neutral-950", isFloating ? "px-3 py-2" : "px-4 py-3")}>
+        {/* Progress bar */}
+        <div className={cn("overflow-hidden rounded-full bg-neutral-800", isFloating ? "mb-2 h-0.5" : "mb-3 h-1")}>
+          <div
+            className="h-full rounded-full bg-white transition-[width] duration-100"
+            style={{ width: `${progressPct}%` }}
+          />
         </div>
 
-        {/* Controls */}
-        <div className="bg-neutral-950 px-4 py-3">
-          {/* Progress bar */}
-          <div className="mb-3 h-1 overflow-hidden rounded-full bg-neutral-800">
-            <div
-              className="h-full rounded-full bg-white transition-[width] duration-100"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={togglePlay}
-              className="flex size-10 items-center justify-center rounded-full bg-white text-black transition hover:bg-neutral-200"
-              aria-label={playing ? "Pause" : "Play"}
-            >
-              {playing ? <Pause className="size-5" weight="fill" /> : <Play className="size-5" weight="fill" />}
-            </button>
-            <span className="text-xs tabular-nums text-neutral-400">
-              {(currentMs / 1000).toFixed(1)}s / {(totalMs / 1000).toFixed(1)}s
-            </span>
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={togglePlay}
+            className={cn(
+              "flex items-center justify-center rounded-full bg-white text-black transition hover:bg-neutral-200",
+              isFloating ? "size-8" : "size-10"
+            )}
+            aria-label={playing ? "Pause" : "Play"}
+          >
+            {playing ? (
+              <Pause className={cn(isFloating ? "size-4" : "size-5")} weight="fill" />
+            ) : (
+              <Play className={cn(isFloating ? "size-4" : "size-5")} weight="fill" />
+            )}
+          </button>
+          <span className="text-xs tabular-nums text-neutral-400">
+            {(currentMs / 1000).toFixed(1)}s / {(totalMs / 1000).toFixed(1)}s
+          </span>
+          {!isFloating ? (
             <span className="text-xs text-neutral-500">
               {currentClip?.label ?? "—"}
             </span>
-          </div>
+          ) : null}
         </div>
       </div>
+    </div>
+  );
+
+  if (isFloating) {
+    return player;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    >
+      {player}
     </div>
   );
 }

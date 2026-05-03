@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { MediaAsset, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
+import { MockVideoPreview } from "../preview/mock-video-preview";
 import { TimelineAssembly } from "./timeline-assembly";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -86,7 +87,7 @@ export function TimelineBottomDrawer({
             <motion.section
               data-testid="timeline-bottom-drawer"
               className={cn(
-                "fixed inset-x-0 bottom-0 z-50 max-h-dvh overflow-hidden rounded-t-lg border bg-card text-card-foreground shadow-2xl",
+                "fixed inset-x-0 bottom-0 z-50 max-h-dvh overflow-visible rounded-t-lg border bg-card text-card-foreground shadow-2xl",
                 className
               )}
               initial={{ y: 24, opacity: 0 }}
@@ -94,7 +95,20 @@ export function TimelineBottomDrawer({
               transition={transition}
               style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
             >
-              <div className="flex h-full max-h-dvh flex-col">
+              <motion.div
+                data-testid="timeline-floating-preview"
+                className="pointer-events-auto absolute bottom-full left-1/2 mb-4 w-44 -translate-x-1/2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={exiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+                transition={transition}
+              >
+                <MockVideoPreview
+                  segments={segments}
+                  open
+                  variant="floating"
+                />
+              </motion.div>
+              <div className="flex h-full max-h-dvh flex-col overflow-hidden rounded-t-lg">
                 <div className="flex items-center justify-between border-b px-5 py-3">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-secondary text-muted-foreground">
