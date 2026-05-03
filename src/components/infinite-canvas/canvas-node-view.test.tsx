@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { CanvasNodeView } from "./canvas-node-view";
 import type { CanvasNode } from "../../lib/infinite-canvas/types";
@@ -25,6 +25,7 @@ describe("CanvasNodeView", () => {
   afterEach(() => {
     vi.clearAllMocks();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it("reveals trend recipe cards as separate animated content sections", () => {
@@ -109,7 +110,8 @@ describe("CanvasNodeView", () => {
     expect(onCreateTimelineFromTrend).toHaveBeenCalledTimes(1);
   });
 
-  it("opens a trend breakdown dialog from the founder confessional video", () => {
+  it("opens and closes a trend breakdown dialog from the founder confessional video", () => {
+    vi.useFakeTimers();
     const onCreateTimelineFromTrend = vi.fn();
 
     renderNode(
@@ -139,13 +141,21 @@ describe("CanvasNodeView", () => {
     fireEvent.click(moreInfoButton);
 
     expect(screen.getByRole("dialog", { name: /founder confessional trend breakdown/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /close trend breakdown/i })).toHaveClass("-top-12");
+    const closeButton = screen.getByRole("button", { name: /close trend breakdown/i });
+    expect(closeButton).toHaveClass("top-0");
     expect(screen.getByRole("button", { name: /close trend breakdown/i })).toHaveClass("right-0");
     expect(screen.getByAltText("Detailed breakdown of the Founder Confessional video trend")).toHaveAttribute(
       "src",
       "/assets/trending%20demo%20timeline/founder_confessional.png"
     );
     expect(onCreateTimelineFromTrend).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(closeButton);
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByRole("dialog", { name: /founder confessional trend breakdown/i })).not.toBeInTheDocument();
   });
 
   it("renders the timeline node as a compact non-editable visual preview", () => {

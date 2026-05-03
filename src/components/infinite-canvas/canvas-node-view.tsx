@@ -403,8 +403,8 @@ function TrendDetailsDialog({
           <DialogPrimitive.Content asChild>
             <motion.section
               className={cn(
-                "paper fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl overflow-visible rounded-xl border bg-card p-3 text-card-foreground shadow-2xl sm:p-4",
-                "max-h-[calc(100dvh-5rem)] focus-visible:outline-none"
+                "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl overflow-visible pt-12 text-card-foreground",
+                "max-h-[calc(100dvh-2rem)] focus-visible:outline-none"
               )}
               initial={{ opacity: 0, x: "-50%", y: "calc(-50% + 10px)", scale: 0.985 }}
               animate={
@@ -420,21 +420,27 @@ function TrendDetailsDialog({
               </DialogPrimitive.Description>
               <button
                 type="button"
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                  requestClose();
+                }}
                 onClick={requestClose}
-                className="absolute -top-12 right-0 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="absolute right-0 top-0 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 aria-label="Close trend breakdown"
               >
                 <X className="size-4" />
               </button>
-              <motion.img
-                src={detailsImage.src}
-                alt={detailsImage.alt}
-                className="h-auto max-h-[calc(100dvh-7rem)] w-full rounded-lg border border-border object-contain"
-                draggable={false}
-                initial={{ opacity: 0, y: 8, scale: 1.01 }}
-                animate={exiting ? { opacity: 0, y: 8, scale: 1.01 } : { opacity: 1, y: 0, scale: 1 }}
-                transition={{ ...dialogMotionTransition, delay: exiting ? 0 : 0.04 }}
-              />
+              <div className="paper overflow-hidden rounded-xl border bg-card p-3 shadow-2xl sm:p-4">
+                <motion.img
+                  src={detailsImage.src}
+                  alt={detailsImage.alt}
+                  className="h-auto max-h-[calc(100dvh-7rem)] w-full rounded-lg border border-border object-contain"
+                  draggable={false}
+                  initial={{ opacity: 0, y: 8, scale: 1.01 }}
+                  animate={exiting ? { opacity: 0, y: 8, scale: 1.01 } : { opacity: 1, y: 0, scale: 1 }}
+                  transition={{ ...dialogMotionTransition, delay: exiting ? 0 : 0.04 }}
+                />
+              </div>
             </motion.section>
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
