@@ -24,6 +24,10 @@ describe("App", () => {
     });
   }
 
+  function openTimelineDrawer() {
+    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+  }
+
   function mockCanvasBounds(width = 900, height = 600) {
     return vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
       x: 0,
@@ -357,6 +361,13 @@ describe("App", () => {
     fireEvent.click(screen.getByTestId("canvas-node-preview-1"));
     fireEvent.click(screen.getByLabelText("Post to Instagram"));
 
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-publish-status-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
     const publishStatus = screen.getByTestId("preview-publish-status");
     expect(publishStatus).toHaveTextContent("Publishing to Instagram");
     expect(publishStatus).toHaveTextContent("18%");
@@ -415,7 +426,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-background-overlay")).toHaveClass("bg-foreground/20");
@@ -441,7 +452,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
     fireEvent.click(screen.getByLabelText("Close timeline drawer"));
 
     expect(screen.getByTestId("timeline-bottom-drawer")).toBeInTheDocument();
@@ -464,7 +475,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
     fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
     expect(screen.getByTestId("missing-shot-actions")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
@@ -483,12 +494,110 @@ describe("App", () => {
     expect(screen.getByTestId("timeline-gap-pill-timeline-1")).toHaveTextContent("0 gaps");
   });
 
+  it("pans to the preview after closing the drawer once following AI shot generation", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByTestId("timeline-bottom-drawer")).not.toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-close-handoff-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
+  });
+
+  it("lets publish focus override the preview close handoff state", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-close-handoff-/
+    );
+
+    fireEvent.click(screen.getByTestId("canvas-node-preview-1"));
+    fireEvent.click(screen.getByLabelText("Post to Instagram"));
+
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-publish-status-/
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "preview-1"
+    );
+  });
+
+  it("does not retrigger the close handoff on later drawer closes without a new AI generate", () => {
+    vi.useFakeTimers();
+    mockCanvasBounds();
+    render(<App />);
+
+    revealTimeline();
+    openTimelineDrawer();
+    fireEvent.click(screen.getByTestId("timeline-segment-ts-4"));
+    fireEvent.click(screen.getByTestId("missing-shot-generate-ai"));
+
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    const firstFocusId = screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id");
+    expect(firstFocusId).toMatch(/^preview-close-handoff-/);
+
+    openTimelineDrawer();
+    fireEvent.click(screen.getByLabelText("Close timeline drawer"));
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      firstFocusId ?? ""
+    );
+  });
+
   it("updates the drawer timeline when swapping final 4", () => {
     vi.useFakeTimers();
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
     fireEvent.click(screen.getByTestId("timeline-segment-ts-5"));
     fireEvent.click(screen.getByTestId("alternate-final-4-alt-1"));
 
@@ -502,7 +611,7 @@ describe("App", () => {
     render(<App />);
 
     revealTimeline();
-    fireEvent.click(screen.getByTestId("canvas-node-timeline-1"));
+    openTimelineDrawer();
 
     fireEvent.pointerDown(screen.getByLabelText("Choose caption for Hook text"), {
       button: 0,

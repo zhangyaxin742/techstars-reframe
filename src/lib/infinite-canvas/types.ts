@@ -88,6 +88,7 @@ export interface CanvasViewportFocus {
   id: string;
   nodeIds: string[];
   padding?: number | CanvasViewportPadding;
+  boundsInset?: number | CanvasViewportPadding;
   minZoom?: number;
   maxZoom?: number;
   delayMs?: number;

@@ -1,5 +1,6 @@
 import {
   calculateSelectionBounds,
+  expandBounds,
   fitBoundsToViewport,
   getNodesInRect,
   normalizeRect,
@@ -129,5 +130,30 @@ describe("infinite canvas geometry", () => {
     expect(viewport.zoom).toBeLessThan(0.5);
     expect(leftEdge).toBeGreaterThanOrEqual(72);
     expect(rightEdge).toBeLessThanOrEqual(viewportWidth - rightOverlayPadding);
+  });
+
+  it("expands bounds to include overlay content outside the focused node", () => {
+    const previewNode: CanvasNode = {
+      id: "preview-1",
+      kind: "preview",
+      title: "Preview",
+      position: { x: 1640, y: 533 },
+      size: { width: 210, height: 380 },
+    };
+    const bounds = calculateSelectionBounds([previewNode], new Set(["preview-1"]));
+    const expandedBounds = expandBounds(bounds!, { bottom: 112 });
+    const viewport = fitBoundsToViewport(
+      expandedBounds,
+      { width: 900, height: 600 },
+      { top: 80, right: 120, bottom: 120, left: 120 },
+      0.25,
+      0.72
+    );
+    const previewTop = worldToScreen({ x: 1745, y: 533 }, viewport).y;
+    const statusCardBottom = worldToScreen({ x: 1745, y: 1025 }, viewport).y;
+
+    expect(previewTop).toBeGreaterThanOrEqual(80);
+    expect(statusCardBottom).toBeLessThanOrEqual(480);
+    expect(viewport.zoom).toBeLessThanOrEqual(0.72);
   });
 });

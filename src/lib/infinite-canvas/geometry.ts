@@ -103,6 +103,28 @@ export function calculateSelectionBounds(
   };
 }
 
+export function expandBounds(
+  bounds: CanvasRect,
+  inset: number | CanvasViewportPadding = 0
+): CanvasRect {
+  const normalizedInset =
+    typeof inset === "number"
+      ? { top: inset, right: inset, bottom: inset, left: inset }
+      : {
+          top: inset.top ?? 0,
+          right: inset.right ?? 0,
+          bottom: inset.bottom ?? 0,
+          left: inset.left ?? 0,
+        };
+
+  return {
+    x: bounds.x - normalizedInset.left,
+    y: bounds.y - normalizedInset.top,
+    width: bounds.width + normalizedInset.left + normalizedInset.right,
+    height: bounds.height + normalizedInset.top + normalizedInset.bottom,
+  };
+}
+
 export function fitBoundsToViewport(
   bounds: CanvasRect,
   viewportSize: CanvasSize,

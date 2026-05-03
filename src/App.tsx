@@ -36,6 +36,13 @@ type ToolSequenceConfig = {
   onDone?: () => void;
 };
 
+type PreviewCameraIntentKind = "preview-close-handoff" | "preview-publish-status";
+
+type PreviewCameraIntent = {
+  kind: PreviewCameraIntentKind;
+  sequence: number;
+};
+
 const BRAND_CONTEXT_HANDOFF_PAUSE_MS = 4200;
 
 function toolCallsThroughIndex(
@@ -83,9 +90,12 @@ export function App() {
   );
   const [aiGeneratingSegmentId, setAiGeneratingSegmentId] = useState<string | null>(null);
   const [aiGeneratedSegmentIds, setAiGeneratedSegmentIds] = useState<Set<string>>(new Set());
+  const [pendingPreviewCloseHandoff, setPendingPreviewCloseHandoff] = useState(false);
+  const [previewCameraIntent, setPreviewCameraIntent] = useState<PreviewCameraIntent | null>(null);
   const timeoutIdsRef = useRef<number[]>([]);
   const initialSequenceStartedRef = useRef(false);
   const previewPublishRunRef = useRef(0);
+  const previewCameraIntentSequenceRef = useRef(0);
 
   const upsertMessageById = useCallback(
     (currentMessages: ChatMessage[], nextMessage: ChatMessage) => {
@@ -114,6 +124,14 @@ export function App() {
   const queueTimeout = useCallback((callback: () => void, delay: number) => {
     const timeoutId = window.setTimeout(callback, delay);
     timeoutIdsRef.current.push(timeoutId);
+  }, []);
+
+  const triggerPreviewCameraIntent = useCallback((kind: PreviewCameraIntentKind) => {
+    previewCameraIntentSequenceRef.current += 1;
+    setPreviewCameraIntent({
+      kind,
+      sequence: previewCameraIntentSequenceRef.current,
+    });
   }, []);
 
   const startToolSequence = useCallback(
@@ -286,6 +304,30 @@ export function App() {
   }, [connections, visibleNodes]);
 
   const viewportFocus = useMemo<CanvasViewportFocus>(() => {
+    if (previewCameraIntent?.kind === "preview-publish-status") {
+      return {
+        id: `preview-publish-status-${previewCameraIntent.sequence}`,
+        nodeIds: ["preview-1"],
+        boundsInset: { bottom: 112 },
+        padding: { top: 80, right: 384, bottom: 120, left: 96 },
+        maxZoom: 0.78,
+        delayMs: 140,
+        durationMs: 980,
+      };
+    }
+
+    if (previewCameraIntent?.kind === "preview-close-handoff") {
+      return {
+        id: `preview-close-handoff-${previewCameraIntent.sequence}`,
+        nodeIds: ["preview-1"],
+        padding: { top: 72, right: 384, bottom: 72, left: 96 },
+        minZoom: 0.55,
+        maxZoom: 1.12,
+        delayMs: 180,
+        durationMs: 1050,
+      };
+    }
+
     if (timelinePhase !== "hidden") {
       const timelineFocusNodeIds =
         timelinePhase === "revealing" ? ["timeline-1", "preview-1"] : ["timeline-1"];
@@ -321,7 +363,7 @@ export function App() {
       delayMs: 180,
       durationMs: 950,
     };
-  }, [flowStep, timelinePhase, timelineSourceNodeId, trendRecipePhase]);
+  }, [flowStep, previewCameraIntent, timelinePhase, timelineSourceNodeId, trendRecipePhase]);
 
   const isAiBusy = messages.some((message) =>
     Boolean(message.thinkingText) ||
@@ -425,7 +467,9 @@ export function App() {
         likes: 58,
       }));
     }, 5300);
-  }, [queueTimeout]);
+    setPendingPreviewCloseHandoff(false);
+    triggerPreviewCameraIntent("preview-publish-status");
+  }, [queueTimeout, triggerPreviewCameraIntent]);
 
   const handleSelectionChange = useCallback((nodeIds: Set<string>) => {
     setSelectedNodeIds(nodeIds);
@@ -495,9 +539,21 @@ export function App() {
           return nextSegmentIds;
         });
         setAiGeneratingSegmentId(null);
+        setPendingPreviewCloseHandoff(true);
       }, 650);
     },
     [aiGeneratingSegmentId, applyTimelineClipSwap, queueTimeout]
+  );
+
+  const handleTimelineDrawerOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      setTimelineDrawerOpen(nextOpen);
+      if (!nextOpen && pendingPreviewCloseHandoff) {
+        setPendingPreviewCloseHandoff(false);
+        triggerPreviewCameraIntent("preview-close-handoff");
+      }
+    },
+    [pendingPreviewCloseHandoff, triggerPreviewCameraIntent]
   );
 
   const upsertTimelineConnection = useCallback((currentConnections: CanvasConnection[], recipeId: string) => {
@@ -540,6 +596,8 @@ export function App() {
       setTimelineSourceNodeId(recipeNodeId);
       setAiGeneratingSegmentId(null);
       setAiGeneratedSegmentIds(new Set());
+      setPendingPreviewCloseHandoff(false);
+      setPreviewCameraIntent(null);
       setRecipeSequenceStarted(true);
       setFlowStep("recipe-selected");
       setTimelinePhase("skeleton");
@@ -690,7 +748,7 @@ export function App() {
         open={timelineDrawerOpen}
         segments={timelineDraftSegments}
         selectedSegmentId={selectedTimelineSegmentId}
-        onOpenChange={setTimelineDrawerOpen}
+        onOpenChange={handleTimelineDrawerOpenChange}
         onSelectSegment={setSelectedTimelineSegmentId}
         onSwapClip={handleSwapTimelineClip}
         onSelectCaption={handleSelectTimelineCaption}
