@@ -126,7 +126,6 @@ export function MockVideoPreview({
           src={videoSrc}
           className="absolute inset-0 size-full object-cover"
           playsInline
-          muted
           preload="metadata"
           aria-label="Timeline preview video"
           onLoadedMetadata={handleLoadedMetadata}

@@ -414,6 +414,7 @@ describe("InfiniteCanvas", () => {
 
   it("opens a compact trending video drawer from the navigation rail", async () => {
     const user = userEvent.setup();
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
     renderCanvas();
 
     await user.click(screen.getByLabelText("Trends"));
@@ -436,6 +437,19 @@ describe("InfiniteCanvas", () => {
       expect(video.autoplay).toBe(true);
       expect(video.playsInline).toBe(true);
     }
+
+    const firstVideoTitle = videos[0].getAttribute("aria-label") ?? "";
+    await user.click(screen.getByLabelText(`Play sound for ${firstVideoTitle}`));
+
+    await waitFor(() => {
+      expect(videos[0].muted).toBe(false);
+      expect(videos[0].volume).toBe(1);
+      expect(videos[1].muted).toBe(true);
+    });
+    expect(screen.getByLabelText(`Mute ${firstVideoTitle}`)).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
 
     await user.click(screen.getByLabelText("Back"));
 

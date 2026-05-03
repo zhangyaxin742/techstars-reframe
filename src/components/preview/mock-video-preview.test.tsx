@@ -24,6 +24,7 @@ describe("MockVideoPreview", () => {
       "src",
       "/videos/final.mp4"
     );
+    expect(screen.getByLabelText("Timeline preview video")).not.toHaveAttribute("muted");
   });
 
   it("does not render timeline text over the preview video", () => {
@@ -44,6 +45,7 @@ describe("MockVideoPreview", () => {
       "src",
       "/videos/final.mp4"
     );
+    expect(screen.getByLabelText("Timeline preview video")).not.toHaveAttribute("muted");
   });
 
   it("seeks the preview video when a timeline scrub time is provided", async () => {

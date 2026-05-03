@@ -7,11 +7,13 @@ import {
   FolderSimple,
   MagnifyingGlass,
   Plus,
+  SpeakerHigh,
+  SpeakerSlash,
   Star,
   TrendUp,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { trendingPageVideos, type TrendingVideo } from "../../data/trending-videos";
 import { cn } from "../../lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -67,7 +69,30 @@ const LIBRARY_FOLDERS = [
 
 type ActivePanel = "library" | "trending" | null;
 
-function TrendingRailVideo({ video }: { video: TrendingVideo }) {
+function attemptPlay(video: HTMLVideoElement) {
+  let playPromise: Promise<void> | undefined;
+  try {
+    playPromise = video.play();
+  } catch {
+    return;
+  }
+
+  if (playPromise) {
+    playPromise.catch(() => {});
+  }
+}
+
+function TrendingRailVideo({
+  isAudible,
+  onToggleAudio,
+  registerVideo,
+  video,
+}: {
+  isAudible: boolean;
+  onToggleAudio: (id: string) => void;
+  registerVideo: (id: string) => (node: HTMLVideoElement | null) => void;
+  video: TrendingVideo;
+}) {
   return (
     <article className="group overflow-hidden rounded-lg border bg-background shadow-sm transition-colors hover:border-primary/60">
       <div className="relative aspect-[4/5] bg-secondary">
@@ -75,20 +100,36 @@ function TrendingRailVideo({ video }: { video: TrendingVideo }) {
           data-testid="trending-rail-video"
           aria-label={video.title}
           src={video.src}
+          ref={registerVideo(video.id)}
           loop
-          muted
+          muted={!isAudible}
           autoPlay
           playsInline
           preload="metadata"
           className="size-full object-cover"
         />
+        <button
+          type="button"
+          aria-label={isAudible ? `Mute ${video.title}` : `Play sound for ${video.title}`}
+          aria-pressed={isAudible}
+          onClick={() => onToggleAudio(video.id)}
+          className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm ring-1 ring-border transition hover:bg-background"
+        >
+          {isAudible ? (
+            <SpeakerHigh className="size-3.5" weight="fill" />
+          ) : (
+            <SpeakerSlash className="size-3.5" weight="fill" />
+          )}
+        </button>
       </div>
       <div className="space-y-1 p-2">
         <div className="flex items-center justify-between gap-2">
           <span className="truncate text-[9px] font-medium uppercase text-muted-foreground">
             {video.label}
           </span>
-          <span className="shrink-0 text-[9px] text-muted-foreground">Looping</span>
+          <span className="shrink-0 text-[9px] text-muted-foreground">
+            {isAudible ? "Sound on" : "Looping"}
+          </span>
         </div>
         <h3 className="truncate text-xs font-medium text-foreground">{video.title}</h3>
         <p className="truncate text-[10px] text-muted-foreground">{video.meta}</p>
@@ -100,8 +141,29 @@ function TrendingRailVideo({ video }: { video: TrendingVideo }) {
 export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [activeTab, setActiveTab] = useState<"private" | "team">("private");
+  const [audibleVideoId, setAudibleVideoId] = useState<string | null>(null);
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
   const stopCanvas = (e: React.SyntheticEvent) => e.stopPropagation();
+  const registerVideo = (id: string) => (node: HTMLVideoElement | null) => {
+    videoRefs.current[id] = node;
+  };
+  const toggleAudio = (id: string) => {
+    setAudibleVideoId((current) => (current === id ? null : id));
+  };
+
+  useEffect(() => {
+    for (const [videoId, video] of Object.entries(videoRefs.current)) {
+      if (!video) {
+        continue;
+      }
+
+      const isAudible = videoId === audibleVideoId;
+      video.muted = !isAudible;
+      video.volume = isAudible ? 1 : 0;
+      attemptPlay(video);
+    }
+  }, [audibleVideoId]);
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -292,7 +354,13 @@ export const CanvasNavigationRail = memo(function CanvasNavigationRail() {
             <div className="min-h-0 flex-1 overflow-y-auto p-3">
               <div data-testid="trending-rail-grid" className="grid grid-cols-2 gap-2">
                 {trendingPageVideos.map((video) => (
-                  <TrendingRailVideo key={video.id} video={video} />
+                  <TrendingRailVideo
+                    key={video.id}
+                    isAudible={audibleVideoId === video.id}
+                    onToggleAudio={toggleAudio}
+                    registerVideo={registerVideo}
+                    video={video}
+                  />
                 ))}
               </div>
             </div>
