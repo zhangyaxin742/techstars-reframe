@@ -37,22 +37,22 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
 
 function TrendRecipeCardSkeleton() {
   return (
-    <div className="flex h-full animate-pulse flex-col justify-between p-3 text-xs" aria-label="Loading trend recipe">
+    <div className="flex h-full animate-pulse flex-col justify-between p-3 text-[11px] leading-4" aria-label="Loading trend recipe">
       <div className="space-y-3">
-        <div className="h-3 w-2/3 rounded bg-muted/80" />
-        <div className="space-y-2">
-          <div className="h-2.5 w-full rounded bg-muted/70" />
-          <div className="h-2.5 w-5/6 rounded bg-muted/70" />
-          <div className="h-2.5 w-4/6 rounded bg-muted/70" />
+        <div className="h-2.5 w-24 rounded bg-muted" />
+        <div className="space-y-1.5">
+          <div className="h-2.5 w-full rounded bg-muted" />
+          <div className="h-2.5 w-5/6 rounded bg-muted" />
+          <div className="h-2.5 w-3/4 rounded bg-muted" />
         </div>
-        <div className="space-y-2 pt-2">
-          <div className="h-2 w-full rounded bg-muted/60" />
-          <div className="h-2 w-3/4 rounded bg-muted/60" />
+        <div className="space-y-1.5 border-t pt-2">
+          <div className="h-2.5 w-full rounded bg-muted" />
+          <div className="h-2.5 w-2/3 rounded bg-muted" />
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-5 w-12 rounded-full bg-muted/70" />
-        <div className="h-5 w-16 rounded-full bg-muted/60" />
+        <div className="h-5 w-14 rounded-full bg-muted" />
+        <div className="h-5 w-20 rounded-full bg-muted" />
       </div>
     </div>
   );
