@@ -80,18 +80,30 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(12500);
-    });
-    act(() => {
-      vi.advanceTimersByTime(1200);
+      vi.advanceTimersByTime(10600);
     });
 
-    expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "brand-context"
+    );
     expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("trend-video-skeleton-recipe-1")).not.toBeInTheDocument();
     expect(screen.getByTestId("simulated-tool-tool-build-brand-context")).toHaveAttribute(
       "data-tool-state",
       "completed"
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
+    expect(screen.getByTestId("trend-video-skeleton-recipe-1")).toBeInTheDocument();
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-id",
+      "trend-recipes"
     );
   });
 
@@ -112,7 +124,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(10600);
+      vi.advanceTimersByTime(12400);
     });
 
     expect(screen.getByTestId("simulated-tool-tool-search-web")).toHaveAttribute(

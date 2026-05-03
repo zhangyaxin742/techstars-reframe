@@ -36,6 +36,8 @@ type ToolSequenceConfig = {
   onDone?: () => void;
 };
 
+const BRAND_CONTEXT_HANDOFF_PAUSE_MS = 4200;
+
 function toolCallsThroughIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
@@ -230,7 +232,7 @@ export function App() {
               setTrendRecipePhase("revealing");
             },
           });
-        }, 2400);
+        }, BRAND_CONTEXT_HANDOFF_PAUSE_MS);
       },
     });
 
