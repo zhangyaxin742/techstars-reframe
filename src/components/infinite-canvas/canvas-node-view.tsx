@@ -40,13 +40,19 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
 function NodeLoadingSkeleton({
   label,
   className,
+  shimmer,
+  variant,
 }: {
   label: string;
   className?: string;
+  shimmer?: boolean;
+  variant?: React.ComponentProps<typeof Skeleton>["variant"];
 }) {
   return (
     <Skeleton
       aria-label={label}
+      shimmer={shimmer}
+      variant={variant}
       className={cn("h-full w-full rounded-none", className)}
     />
   );
@@ -57,15 +63,18 @@ function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
     return (
       <NodeLoadingSkeleton
         label="Loading timeline"
+        variant="darker"
         className="rounded-xl border border-dashed border-muted-foreground/45"
       />
     );
   }
 
   return (
-    <div
-      aria-label="Timeline preview"
-      className="h-full w-full rounded-xl border border-dashed border-muted-foreground/45 bg-muted-foreground/25"
+    <NodeLoadingSkeleton
+      label="Timeline preview"
+      shimmer={false}
+      variant="darker"
+      className="rounded-xl border border-dashed border-muted-foreground/45"
     />
   );
 }

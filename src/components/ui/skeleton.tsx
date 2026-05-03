@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 interface SkeletonProps extends React.ComponentProps<"div"> {
   duration?: number;
   spread?: number;
+  shimmer?: boolean;
   variant?: "default" | "darker";
 }
 
@@ -11,6 +12,7 @@ export function Skeleton({
   className,
   duration = 3.25,
   spread = 15,
+  shimmer = true,
   variant = "default",
   style,
   ...props
@@ -28,13 +30,15 @@ export function Skeleton({
   return (
     <div
       data-slot="skeleton"
-      className={cn("animate-skeleton-shimmer rounded-md", className)}
+      className={cn(shimmer && "animate-skeleton-shimmer", "rounded-md", className)}
       style={{
         backgroundColor,
-        backgroundImage: `linear-gradient(to right, transparent ${50 - dynamicSpread}%, ${highlightColor} 50%, transparent ${50 + dynamicSpread}%)`,
-        backgroundSize: "200% auto",
-        animationDuration: `${duration}s`,
-        animationTimingFunction: "ease-in-out",
+        backgroundImage: shimmer
+          ? `linear-gradient(to right, transparent ${50 - dynamicSpread}%, ${highlightColor} 50%, transparent ${50 + dynamicSpread}%)`
+          : "none",
+        backgroundSize: shimmer ? "200% auto" : undefined,
+        animationDuration: shimmer ? `${duration}s` : undefined,
+        animationTimingFunction: shimmer ? "ease-in-out" : undefined,
         ...style,
       }}
       {...props}

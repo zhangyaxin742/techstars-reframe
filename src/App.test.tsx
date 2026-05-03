@@ -92,6 +92,12 @@ describe("App", () => {
       "data-preview-mode",
       "preview"
     );
+    const timelinePreview = within(
+      screen.getByTestId("canvas-node-timeline-ghost-recipe-1")
+    ).getByLabelText("Timeline preview");
+    expect(timelinePreview).toHaveAttribute("data-slot", "skeleton");
+    expect(timelinePreview).not.toHaveClass("animate-skeleton-shimmer");
+    expect(timelinePreview).toHaveStyle("background-image: none");
     expect(
       within(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).queryByLabelText(
         "Loading timeline"
@@ -118,6 +124,7 @@ describe("App", () => {
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-node-skeleton-timeline-1")).toBeInTheDocument();
     expect(screen.getByLabelText("Loading timeline")).toBeInTheDocument();
+    expect(screen.getByLabelText("Loading timeline")).toHaveClass("animate-skeleton-shimmer");
     expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1492px, 0px)");
     expect(screen.getByTestId("simulated-tool-tool-match-clips")).toHaveAttribute(
       "data-tool-state",
