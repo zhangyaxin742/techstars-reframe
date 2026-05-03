@@ -267,11 +267,10 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
               </span>
               Views
             </div>
-            <div className="mt-1 flex items-end justify-between gap-3">
+            <div className="mt-1">
               <div className="text-lg font-semibold leading-none text-foreground">
                 <AnimatedMetricNumber value={state.views} testId="preview-publish-views-count" />
               </div>
-              <span className="text-[10px] font-medium text-muted-foreground">Top-line performance</span>
             </div>
           </div>
 
