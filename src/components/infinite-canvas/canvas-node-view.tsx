@@ -318,7 +318,7 @@ function TimelineRevealCard({
                 className={cn(
                   "relative min-w-10 overflow-hidden",
                   segment.kind === "missing"
-                    ? "border border-dashed border-border bg-background"
+                    ? "border border-dashed border-yellow-500/50 bg-black"
                     : "bg-secondary"
                 )}
                 style={{ width: getSegmentWidth(segment, totalMs) }}
@@ -333,10 +333,13 @@ function TimelineRevealCard({
                     draggable={false}
                   />
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-1 px-2 text-center">
-                    <FilmSlate className="size-5 text-muted-foreground" weight="thin" />
-                    <span className="text-[9px] font-medium leading-tight text-muted-foreground">
-                      Missing shot
+                  <div className="flex h-full flex-col items-center justify-center gap-0.5 px-2 text-center">
+                    <FilmSlate className="size-5 text-white/40" weight="thin" />
+                    <span className="text-[9px] font-medium leading-tight text-white/60">
+                      film missing shot
+                    </span>
+                    <span className="text-[8px] leading-tight text-white/35">
+                      Drop media here
                     </span>
                   </div>
                 )}

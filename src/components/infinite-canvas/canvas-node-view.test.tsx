@@ -71,7 +71,9 @@ describe("CanvasNodeView", () => {
     expect(screen.getByTestId("timeline-node-clip-ts-1")).toContainElement(
       screen.getByAltText(timelineSegments[0].label)
     );
-    expect(screen.getByTestId("timeline-node-clip-ts-4")).toHaveTextContent("Missing shot");
+    expect(screen.getByTestId("timeline-node-clip-ts-4")).toHaveClass("bg-black");
+    expect(screen.getByTestId("timeline-node-clip-ts-4")).toHaveTextContent("film missing shot");
+    expect(screen.getByTestId("timeline-node-clip-ts-4")).toHaveTextContent("Drop media here");
     expect(screen.getByTestId("timeline-overlay-row-timeline-1")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-node-overlay-ts-2")).toHaveTextContent(
       timelineSegments[1].overlayText ?? ""
