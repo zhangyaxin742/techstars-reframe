@@ -2,6 +2,9 @@ import {
   CaretDoubleLeft,
   CaretDoubleRight,
   ChatCircleDots,
+  CheckCircle,
+  CircleDashed,
+  DeviceMobileCamera,
   Globe,
   InstagramLogo,
   Robot,
@@ -13,6 +16,13 @@ import {
 import React, { useState } from "react";
 import type { ChatMessage, SourcePlatform } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
+import {
+  ChatContainerContent,
+  ChatContainerRoot,
+  ChatContainerScrollAnchor,
+} from "../prompt-kit/chat-container";
+import { SimulatedToolCall } from "../prompt-kit/simulated-tool-call";
+import { ThinkingBar } from "../prompt-kit/thinking-bar";
 
 const platformIcon: Record<SourcePlatform, React.ElementType> = {
   website: Globe,
@@ -21,7 +31,18 @@ const platformIcon: Record<SourcePlatform, React.ElementType> = {
   youtube: YoutubeLogo,
   shopify: ShoppingBag,
   "google-drive": Globe,
+  "phone-camera": DeviceMobileCamera,
   upload: Globe,
+};
+
+const stepLabel: Record<NonNullable<ChatMessage["step"]>, string> = {
+  "source-intake": "1. Paste Brand Sources",
+  "media-connect": "2. Connect Media",
+  analysis: "3. Analyze Brand",
+  "recipes-ready": "3. Brand Context + Recipes",
+  "recipe-selected": "4. Pick a Trend Recipe",
+  "timeline-ready": "5. Timeline Auto-Fills",
+  "export-ready": "6. Swap, Preview, Export",
 };
 
 interface ChatHistoryPanelProps {
@@ -66,10 +87,20 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
       </div>
 
       {!collapsed && (
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-          <div className="space-y-3">
+        <ChatContainerRoot className="min-h-0 flex-1 px-3 py-3">
+          <ChatContainerContent className="space-y-3">
             {messages.map((message) => (
               <div key={message.id} className="space-y-1.5">
+                {message.step ? (
+                  <div className="ml-7 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+                    {message.toolCalls?.some((toolCall) => toolCall.state === "running") ? (
+                      <CircleDashed className="size-3 animate-spin text-accent" />
+                    ) : (
+                      <CheckCircle className="size-3 text-green-600" weight="fill" />
+                    )}
+                    <span>{stepLabel[message.step]}</span>
+                  </div>
+                ) : null}
                 <div className="flex items-start gap-2">
                   <div
                     className={cn(
@@ -91,6 +122,18 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
                     {message.content}
                   </p>
                 </div>
+                {message.thinkingText ? (
+                  <div className="ml-7 rounded-md border bg-secondary/40 px-2.5 py-2">
+                    <ThinkingBar text={message.thinkingText} />
+                  </div>
+                ) : null}
+                {message.toolCalls && message.toolCalls.length > 0 ? (
+                  <div className="ml-7 space-y-1.5">
+                    {message.toolCalls.map((toolCall) => (
+                      <SimulatedToolCall key={toolCall.id} toolCall={toolCall} />
+                    ))}
+                  </div>
+                ) : null}
                 {message.badges && message.badges.length > 0 && (
                   <div className="ml-7 flex flex-wrap gap-1">
                     {message.badges.map((badge) => {
@@ -109,8 +152,9 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
                 )}
               </div>
             ))}
-          </div>
-        </div>
+            <ChatContainerScrollAnchor />
+          </ChatContainerContent>
+        </ChatContainerRoot>
       )}
     </aside>
   );

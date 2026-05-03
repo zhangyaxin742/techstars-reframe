@@ -6,6 +6,7 @@ import {
   Globe,
   GoogleDriveLogo,
   InstagramLogo,
+  DeviceMobileCamera,
   ShoppingBag,
   TiktokLogo,
   YoutubeLogo,
@@ -22,6 +23,7 @@ const platformIcons: Record<SourcePlatform, React.ElementType> = {
   youtube: YoutubeLogo,
   shopify: ShoppingBag,
   "google-drive": GoogleDriveLogo,
+  "phone-camera": DeviceMobileCamera,
   upload: CloudArrowUp,
 };
 
@@ -32,6 +34,7 @@ const platformColors: Record<SourcePlatform, string> = {
   youtube: "bg-red-500/10 text-red-300 border-red-500/20",
   shopify: "bg-green-500/10 text-green-300 border-green-500/20",
   "google-drive": "bg-yellow-500/10 text-yellow-300 border-yellow-500/20",
+  "phone-camera": "bg-sky-500/10 text-sky-300 border-sky-500/20",
   upload: "bg-white/10 text-cream border-white/20",
 };
 

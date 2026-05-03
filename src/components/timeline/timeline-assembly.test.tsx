@@ -14,8 +14,8 @@ describe("TimelineAssembly", () => {
       />
     );
     expect(screen.getByTestId("timeline-assembly")).toBeInTheDocument();
-    expect(screen.getByText("Hook – Trail energy")).toBeInTheDocument();
-    expect(screen.getByText("Product reveal")).toBeInTheDocument();
+    expect(screen.getByText("Opening frame: hem problem")).toBeInTheDocument();
+    expect(screen.getByText("Mirror fit check")).toBeInTheDocument();
   });
 
   it("selects a segment on click", async () => {
@@ -42,7 +42,7 @@ describe("TimelineAssembly", () => {
       />
     );
     expect(screen.getByTestId("alternate-clips")).toBeInTheDocument();
-    expect(screen.getByText("Alternate trail angle")).toBeInTheDocument();
+    expect(screen.getByText("Product macro detail")).toBeInTheDocument();
   });
 
   it("calls onSwapClip when an alternate is clicked", async () => {
@@ -56,8 +56,8 @@ describe("TimelineAssembly", () => {
         onSwapClip={onSwapClip}
       />
     );
-    await user.click(screen.getByTestId("alternate-alt-1"));
+    await user.click(screen.getByTestId("alternate-alt-2"));
     expect(onSwapClip).toHaveBeenCalledTimes(1);
-    expect(onSwapClip).toHaveBeenCalledWith("ts-1", expect.objectContaining({ id: "alt-1" }));
+    expect(onSwapClip).toHaveBeenCalledWith("ts-1", expect.objectContaining({ id: "alt-2" }));
   });
 });

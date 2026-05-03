@@ -11,6 +11,7 @@ export type SourcePlatform =
   | "youtube"
   | "shopify"
   | "google-drive"
+  | "phone-camera"
   | "upload";
 
 export interface SourceBadge {
@@ -34,12 +35,34 @@ export interface MediaImportOption {
 
 export type ChatRole = "user" | "assistant" | "system";
 
+export type AiFlowStep =
+  | "source-intake"
+  | "media-connect"
+  | "analysis"
+  | "recipes-ready"
+  | "recipe-selected"
+  | "timeline-ready"
+  | "export-ready";
+
+export interface SimulatedToolCall {
+  id: string;
+  name: string;
+  label: string;
+  state: "pending" | "running" | "completed" | "error";
+  input?: Record<string, unknown>;
+  output?: string;
+  durationMs?: number;
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatRole;
   content: string;
   timestamp: number;
   badges?: SourceBadge[];
+  step?: AiFlowStep;
+  toolCalls?: SimulatedToolCall[];
+  thinkingText?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -121,10 +144,10 @@ export interface BrandContext {
 
 export const brandContext: BrandContext = {
   name: "Petite Outdoors",
-  tagline: "Adventure gear sized for kids who move.",
-  category: "Kids outdoor gear / DTC ecommerce",
-  audience: "Parents of kids 3-10 who camp, hike, and explore",
-  tone: ["Warm", "Playful", "Trustworthy"],
+  tagline: "Technical outdoor apparel engineered for women 5'4\" and under.",
+  category: "Petite women's outdoor apparel / DTC ecommerce",
+  audience: "Women 5'4\" and under who want technical gear that actually fits",
+  tone: ["Confident", "Functional", "Adventure-ready"],
   colors: ["#3B6B4A", "#F4A261", "#264653", "#E9C46A"],
   sources: [
     { id: "src-web", platform: "website", label: "petiteoutdoors.com", url: "https://petiteoutdoors.com" },
@@ -136,9 +159,10 @@ export const brandContext: BrandContext = {
 };
 
 export const mediaImportOptions: MediaImportOption[] = [
-  { id: "imp-upload", platform: "upload", label: "Upload Files", description: "Photos, videos, logos", icon: "upload" },
+  { id: "imp-upload", platform: "upload", label: "Upload Folder", description: "Photos, videos, logos", icon: "upload" },
+  { id: "imp-phone", platform: "phone-camera", label: "Phone Camera Roll", description: "Founder-shot clips", icon: "phone-camera" },
   { id: "imp-gdrive", platform: "google-drive", label: "Google Drive", description: "Connect your Drive folder", icon: "google-drive" },
-  { id: "imp-shopify", platform: "shopify", label: "Shopify / Website", description: "Pull product images", icon: "shopify" },
+  { id: "imp-shopify", platform: "shopify", label: "Shopify", description: "Pull product images", icon: "shopify" },
   { id: "imp-ig", platform: "instagram", label: "Instagram", description: "Import posts & reels", icon: "instagram" },
   { id: "imp-tt", platform: "tiktok", label: "TikTok", description: "Import existing videos", icon: "tiktok" },
   { id: "imp-yt", platform: "youtube", label: "YouTube", description: "Import shorts & clips", icon: "youtube" },
@@ -150,71 +174,149 @@ function makeThumbnail(color: string, label: string): string {
 }
 
 export const mediaAssets: MediaAsset[] = [
-  { id: "ma-1", label: "Kids hiking trail", thumbnail: makeThumbnail("#3B6B4A", "Trail Hike"), tags: ["outdoors", "hiking", "kids"], shotType: "Wide establishing", trendFit: "Hook visual", matchReason: "High-energy opening shot", duration: 3200 },
-  { id: "ma-2", label: "Backpack product close-up", thumbnail: makeThumbnail("#264653", "Backpack"), tags: ["product", "backpack", "detail"], shotType: "Close-up", trendFit: "Product reveal", matchReason: "Hero product detail at 0:03", duration: 2800 },
-  { id: "ma-3", label: "Family campsite setup", thumbnail: makeThumbnail("#E9C46A", "Campsite"), tags: ["camping", "family", "lifestyle"], shotType: "Medium wide", trendFit: "Lifestyle context", matchReason: "Relatable family moment", duration: 4100 },
-  { id: "ma-4", label: "Kid opening backpack", thumbnail: makeThumbnail("#F4A261", "Unboxing"), tags: ["unboxing", "product", "reaction"], shotType: "Medium close", trendFit: "Social proof", matchReason: "Authentic kid reaction", duration: 3500 },
+  { id: "ma-1", label: "Uphill trail movement", thumbnail: makeThumbnail("#3B6B4A", "Trail Movement"), tags: ["outdoors", "hiking", "fit"], shotType: "Trail movement", trendFit: "Opening frame", matchReason: "Shows petite fit in motion immediately", duration: 3200 },
+  { id: "ma-2", label: "Hem fit close-up", thumbnail: makeThumbnail("#264653", "Hem Detail"), tags: ["product", "fit", "detail"], shotType: "Close-up", trendFit: "Fit proof", matchReason: "Makes the sizing problem visible in under two seconds", duration: 2800 },
+  { id: "ma-3", label: "Mirror fit check", thumbnail: makeThumbnail("#E9C46A", "Mirror Fit"), tags: ["comparison", "founder", "fit"], shotType: "Medium wide", trendFit: "Before vs after", matchReason: "Clear side-by-side proof for the recipe", duration: 4100 },
+  { id: "ma-4", label: "Backpack stride test", thumbnail: makeThumbnail("#F4A261", "Stride Test"), tags: ["movement", "backpack", "trail"], shotType: "Medium close", trendFit: "Movement proof", matchReason: "Confirms the product works on the trail, not just in a mirror", duration: 3500 },
   { id: "ma-5", label: "Sunset mountain view", thumbnail: makeThumbnail("#264653", "Sunset"), tags: ["nature", "scenic", "sunset"], shotType: "Wide", trendFit: "Closing beauty", matchReason: "Aspirational closer", duration: 2200 },
-  { id: "ma-6", label: "Water bottle in stream", thumbnail: makeThumbnail("#3B6B4A", "Water Bottle"), tags: ["product", "nature", "detail"], shotType: "Close-up", trendFit: "B-roll filler", matchReason: "Product in context", duration: 2000 },
-  { id: "ma-7", label: "Kids running through meadow", thumbnail: makeThumbnail("#E9C46A", "Meadow Run"), tags: ["kids", "play", "energy"], shotType: "Tracking", trendFit: "Energy burst", matchReason: "High-energy transition", duration: 2600 },
-  { id: "ma-8", label: "Parent helping with gear", thumbnail: makeThumbnail("#F4A261", "Gear Prep"), tags: ["family", "gear", "prep"], shotType: "Medium", trendFit: "Trust builder", matchReason: "Parental endorsement", duration: 3000 },
+  { id: "ma-6", label: "Zipper product detail", thumbnail: makeThumbnail("#3B6B4A", "Zipper Detail"), tags: ["product", "construction", "detail"], shotType: "Close-up", trendFit: "B-roll filler", matchReason: "Supports engineering credibility", duration: 2000 },
+  { id: "ma-7", label: "Open trail pace", thumbnail: makeThumbnail("#E9C46A", "Open Trail"), tags: ["trail", "movement", "energy"], shotType: "Tracking", trendFit: "Energy burst", matchReason: "Good alternate movement beat", duration: 2600 },
+  { id: "ma-8", label: "Pack adjustment detail", thumbnail: makeThumbnail("#F4A261", "Pack Fit"), tags: ["gear", "fit", "prep"], shotType: "Medium", trendFit: "Trust builder", matchReason: "Shows fit and usability before CTA", duration: 3000 },
 ];
 
 export const trendRecipes: TrendRecipe[] = [
   {
     id: "tr-1",
-    title: "Preorder Hype Drop",
-    hook: "\"We made the one thing that didn't exist for kids who actually go outside.\"",
-    format: "Hook → Problem → Product reveal → Social proof → CTA",
+    title: "Side-by-Side Fit Failure Demo",
+    hook: "\"This is why regular hiking pants never worked for me.\"",
+    format: "Visible fit issue → Mirror check → Trail movement → Product proof → CTA",
     estimatedLength: "15-30s",
-    tags: ["preorder", "launch", "DTC"],
+    tags: ["fit proof", "preorder", "DTC"],
     matchScore: 94,
   },
   {
     id: "tr-2",
-    title: "Day-in-the-Life Adventure",
-    hook: "\"5am wake-up for our first family summit attempt...\"",
-    format: "Morning routine → Adventure → Product in action → Sunset close",
+    title: "POV Trail Transformation",
+    hook: "\"POV: you stopped tailoring every pair of hiking pants.\"",
+    format: "First-person frustration → Trail transition → Movement proof → CTA",
     estimatedLength: "30-60s",
-    tags: ["lifestyle", "family", "adventure"],
+    tags: ["POV", "movement", "adventure"],
     matchScore: 87,
   },
   {
     id: "tr-3",
-    title: "Before/After Gear Comparison",
-    hook: "\"What we packed vs. what our kid actually used.\"",
-    format: "Before setup → Struggle moment → Product swap → Happy kid → CTA",
+    title: "Before vs After On The Trail",
+    hook: "\"Most outdoor brands vs. gear made for your actual frame.\"",
+    format: "Before fit issue → Product swap → Trail proof → Preorder CTA",
     estimatedLength: "15-20s",
-    tags: ["comparison", "product", "humor"],
+    tags: ["comparison", "hook formula", "product"],
     matchScore: 81,
   },
 ];
 
 const alternateClips: MediaAsset[] = [
-  { id: "alt-1", label: "Alternate trail angle", thumbnail: makeThumbnail("#3B6B4A", "Alt Trail"), tags: ["outdoors"], shotType: "Wide", trendFit: "Hook visual", matchReason: "Different angle, same energy" },
-  { id: "alt-2", label: "Kid smiling with pack", thumbnail: makeThumbnail("#F4A261", "Alt Smile"), tags: ["kid", "product"], shotType: "Close-up", trendFit: "Social proof", matchReason: "Warmer expression" },
-  { id: "alt-3", label: "Overhead campsite", thumbnail: makeThumbnail("#264653", "Alt Overhead"), tags: ["camping"], shotType: "Drone overhead", trendFit: "Lifestyle context", matchReason: "Cinematic perspective" },
+  { id: "alt-1", label: "Alternate trail angle", thumbnail: makeThumbnail("#3B6B4A", "Alt Trail"), tags: ["outdoors"], shotType: "Wide", trendFit: "Hook visual", matchReason: "Uphill movement, same trail, similar energy" },
+  { id: "alt-2", label: "Product macro detail", thumbnail: makeThumbnail("#F4A261", "Alt Macro"), tags: ["product", "detail"], shotType: "Close-up", trendFit: "Product proof", matchReason: "Sharper detail for fit and construction" },
+  { id: "alt-3", label: "Wooded trail stride", thumbnail: makeThumbnail("#264653", "Alt Stride"), tags: ["trail", "movement"], shotType: "Tracking", trendFit: "Movement proof", matchReason: "Good match: similar pace, different trail" },
 ];
 
 export const timelineSegments: TimelineSegment[] = [
-  { id: "ts-1", kind: "clip", label: "Hook – Trail energy", startMs: 0, endMs: 3200, mediaAssetId: "ma-1", thumbnail: mediaAssets[0].thumbnail, alternates: [alternateClips[0], mediaAssets[6]] },
-  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "\"We made the one thing that didn't exist for kids who actually go outside.\"" },
-  { id: "ts-3", kind: "clip", label: "Product reveal", startMs: 3200, endMs: 6000, mediaAssetId: "ma-2", thumbnail: mediaAssets[1].thumbnail, alternates: [alternateClips[1], mediaAssets[5]] },
-  { id: "ts-4", kind: "missing", label: "⚠ Close-up needed: zipper detail", startMs: 6000, endMs: 8000 },
-  { id: "ts-5", kind: "clip", label: "Family context", startMs: 8000, endMs: 12100, mediaAssetId: "ma-3", thumbnail: mediaAssets[2].thumbnail, alternates: [alternateClips[2], mediaAssets[7]] },
-  { id: "ts-6", kind: "clip", label: "Kid reaction", startMs: 12100, endMs: 15600, mediaAssetId: "ma-4", thumbnail: mediaAssets[3].thumbnail, alternates: [mediaAssets[6], mediaAssets[7]] },
-  { id: "ts-7", kind: "text-overlay", label: "CTA overlay", startMs: 15600, endMs: 18000, overlayText: "Preorder now → petiteoutdoors.com" },
+  { id: "ts-1", kind: "clip", label: "Opening frame: hem problem", startMs: 0, endMs: 3200, mediaAssetId: "ma-2", thumbnail: mediaAssets[1].thumbnail, alternates: [alternateClips[1], mediaAssets[5]] },
+  { id: "ts-2", kind: "text-overlay", label: "Hook text", startMs: 0, endMs: 3200, overlayText: "POV: You vs. most outdoor brands" },
+  { id: "ts-3", kind: "clip", label: "Mirror fit check", startMs: 3200, endMs: 6000, mediaAssetId: "ma-3", thumbnail: mediaAssets[2].thumbnail, alternates: [alternateClips[2], mediaAssets[7]] },
+  { id: "ts-4", kind: "missing", label: "Missing shot: uphill movement", startMs: 6000, endMs: 8000 },
+  { id: "ts-5", kind: "clip", label: "Trail movement proof", startMs: 8000, endMs: 12100, mediaAssetId: "ma-1", thumbnail: mediaAssets[0].thumbnail, alternates: [alternateClips[0], mediaAssets[6]] },
+  { id: "ts-6", kind: "clip", label: "Pack adjustment proof", startMs: 12100, endMs: 15600, mediaAssetId: "ma-4", thumbnail: mediaAssets[3].thumbnail, alternates: [mediaAssets[6], mediaAssets[7]] },
+  { id: "ts-7", kind: "text-overlay", label: "CTA overlay", startMs: 15600, endMs: 18000, overlayText: "Petite gear. Big adventures." },
   { id: "ts-8", kind: "clip", label: "Closing beauty", startMs: 15600, endMs: 18000, mediaAssetId: "ma-5", thumbnail: mediaAssets[4].thumbnail, alternates: [alternateClips[0]] },
   { id: "ts-9", kind: "audio", label: "Beat sync", startMs: 0, endMs: 18000, audioNote: "Upbeat acoustic – drop at 3.2s, build at 8s, resolve at 15.6s" },
 ];
 
 export const chatHistory: ChatMessage[] = [
-  { id: "msg-1", role: "assistant", content: "Welcome to Reframe! Let's get to know your brand. Paste your website or social links to get started.", timestamp: 1 },
-  { id: "msg-2", role: "user", content: "Here's our site and socials:", timestamp: 2, badges: brandContext.sources.slice(0, 3) },
-  { id: "msg-3", role: "assistant", content: "Got it — I found Petite Outdoors. Kids outdoor gear, DTC ecommerce. I can see product listings, lifestyle photos, and some existing short-form content. Let me pull in your media.", timestamp: 3 },
-  { id: "msg-4", role: "system", content: "Imported 24 media assets from website, Instagram, and TikTok.", timestamp: 4 },
-  { id: "msg-5", role: "assistant", content: "I've organized your media by shot type, product, and trend fit. I also found 3 video recipe formats that match your brand and preorder goals. Let's build your first video.", timestamp: 5 },
-  { id: "msg-6", role: "assistant", content: "Here's your brand context and trend recipes. Select a recipe to see an editable timeline with your matched media.", timestamp: 6 },
+  { id: "msg-1", role: "assistant", content: "What would you like to create? Paste your brand links and let AI do the rest.", timestamp: 1, step: "source-intake" },
+  { id: "msg-2", role: "user", content: "Here are our brand sources.", timestamp: 2, badges: brandContext.sources.slice(0, 3), step: "source-intake" },
+  { id: "msg-3", role: "assistant", content: "Where should I pull your clips from?", timestamp: 3, step: "media-connect" },
+  { id: "msg-4", role: "system", content: "Connected website, Instagram, TikTok, Shopify, Google Drive, and camera-roll sources.", timestamp: 4, step: "media-connect" },
+  { id: "msg-5", role: "assistant", content: "I've pulled your brand context and built trend recipes for you.", timestamp: 5, step: "recipes-ready" },
+  { id: "msg-6", role: "user", content: "Looks great. Show me more recipes.", timestamp: 6, step: "recipes-ready" },
+  { id: "msg-7", role: "assistant", content: "Here are more that match your brand. Pick one recipe and I'll auto-fill the timeline.", timestamp: 7, step: "recipes-ready" },
+];
+
+export const initialAiToolCalls: SimulatedToolCall[] = [
+  {
+    id: "tool-read-sources",
+    name: "read_brand_sources",
+    label: "Reading website and social links",
+    state: "running",
+    input: { sources: brandContext.sources.slice(0, 3).map((source) => source.label) },
+    output: "Found Petite Outdoors, product positioning, social proof, and preorder goal.",
+    durationMs: 500,
+  },
+  {
+    id: "tool-sync-media",
+    name: "sync_media_sources",
+    label: "Syncing media",
+    state: "pending",
+    input: { connectors: mediaImportOptions.map((option) => option.label) },
+    output: "Indexed 24 seeded clips across product, fit proof, trail movement, and detail shots.",
+    durationMs: 500,
+  },
+  {
+    id: "tool-detect-moments",
+    name: "detect_reusable_moments",
+    label: "Detecting reusable moments",
+    state: "pending",
+    output: "Tagged fit proof, uphill movement, product detail, and closing beauty shots.",
+    durationMs: 500,
+  },
+  {
+    id: "tool-build-recipes",
+    name: "build_trend_recipes",
+    label: "Building brand context and recipes",
+    state: "pending",
+    output: "Created three trend recipes matched to Petite Outdoors.",
+    durationMs: 500,
+  },
+];
+
+export const recipeAiToolCalls: SimulatedToolCall[] = [
+  {
+    id: "tool-match-clips",
+    name: "match_clips_to_recipe",
+    label: "Matching clips to recipe moments",
+    state: "running",
+    input: { recipe: trendRecipes[0].title },
+    output: "Matched opening frame, mirror check, trail proof, and CTA beats.",
+    durationMs: 450,
+  },
+  {
+    id: "tool-assemble-timeline",
+    name: "assemble_timeline",
+    label: "Auto-filling timeline",
+    state: "pending",
+    input: { duration: "18s", tracks: ["video", "text", "audio"] },
+    output: "Built an editable timeline with one missing-shot prompt.",
+    durationMs: 450,
+  },
+];
+
+export const promptAiToolCalls: SimulatedToolCall[] = [
+  {
+    id: "tool-refine-current-canvas",
+    name: "refine_canvas_prompt",
+    label: "Reading current canvas context",
+    state: "running",
+    output: "Used the selected recipe, media matches, and timeline gaps.",
+    durationMs: 400,
+  },
+  {
+    id: "tool-suggest-next-step",
+    name: "suggest_next_action",
+    label: "Preparing next edit options",
+    state: "pending",
+    output: "Suggested alternates, missing-shot direction, and export handoff.",
+    durationMs: 400,
+  },
 ];
 
 export const exportTargets: ExportTarget[] = [
@@ -264,7 +366,7 @@ export const reframeDemoNodes: CanvasNode[] = [
   {
     id: "timeline-1",
     kind: "timeline",
-    title: "Preorder Hype Drop — Timeline",
+    title: "Side-by-Side Fit Failure Demo — Timeline",
     body: "6 clips · 1 missing shot · 2 text overlays · 1 audio track\n18s total",
     position: { x: 800, y: -20 },
     size: { width: 480, height: 280 },
@@ -272,7 +374,7 @@ export const reframeDemoNodes: CanvasNode[] = [
   {
     id: "preview-1",
     kind: "preview",
-    title: "Preview",
+    title: "Petite Gear. Big Adventures.",
     body: "Tap to preview the assembled short-form video with current clips, text, and audio.",
     position: { x: 1360, y: 20 },
     size: { width: 260, height: 180 },

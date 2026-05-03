@@ -17,8 +17,8 @@ describe("MediaLibraryPanel", () => {
       <MediaLibraryPanel assets={mediaAssets} open={true} onClose={vi.fn()} />
     );
     expect(screen.getByTestId("media-library-panel")).toBeInTheDocument();
-    expect(screen.getByText("Kids hiking trail")).toBeInTheDocument();
-    expect(screen.getByText("Backpack product close-up")).toBeInTheDocument();
+    expect(screen.getByText("Uphill trail movement")).toBeInTheDocument();
+    expect(screen.getByText("Hem fit close-up")).toBeInTheDocument();
   });
 
   it("closes when the close button is clicked", async () => {
@@ -36,8 +36,8 @@ describe("MediaLibraryPanel", () => {
     render(
       <MediaLibraryPanel assets={mediaAssets} open={true} onClose={vi.fn()} />
     );
-    await user.type(screen.getByPlaceholderText("Search media..."), "backpack");
-    expect(screen.getByText("Backpack product close-up")).toBeInTheDocument();
-    expect(screen.queryByText("Kids hiking trail")).not.toBeInTheDocument();
+    await user.type(screen.getByPlaceholderText("Search media..."), "hem");
+    expect(screen.getByText("Hem fit close-up")).toBeInTheDocument();
+    expect(screen.queryByText("Uphill trail movement")).not.toBeInTheDocument();
   });
 });
