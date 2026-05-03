@@ -458,6 +458,17 @@ export function App() {
     [applyTimelineClipSwap]
   );
 
+  const handleSelectTimelineCaption = useCallback((segmentId: string, caption: string) => {
+    setTimelineDraftSegments((currentSegments) =>
+      currentSegments.map((segment) =>
+        segment.id === segmentId && segment.kind === "text-overlay"
+          ? { ...segment, overlayText: caption }
+          : segment
+      )
+    );
+    setSelectedTimelineSegmentId(segmentId);
+  }, []);
+
   const handleGenerateMissingShotWithAi = useCallback(
     (segmentId: string, newAsset: MediaAsset) => {
       if (aiGeneratingSegmentId !== null) return;
@@ -669,6 +680,7 @@ export function App() {
         onOpenChange={setTimelineDrawerOpen}
         onSelectSegment={setSelectedTimelineSegmentId}
         onSwapClip={handleSwapTimelineClip}
+        onSelectCaption={handleSelectTimelineCaption}
         onGenerateMissingShotWithAi={handleGenerateMissingShotWithAi}
         aiGeneratingSegmentId={aiGeneratingSegmentId}
         aiGeneratedSegmentIds={aiGeneratedSegmentIds}

@@ -19,6 +19,7 @@ interface TimelineBottomDrawerProps {
   onOpenChange: (open: boolean) => void;
   onSelectSegment: (segmentId: string | null) => void;
   onSwapClip: (segmentId: string, newAsset: MediaAsset) => void;
+  onSelectCaption?: (segmentId: string, caption: string) => void;
   onGenerateMissingShotWithAi?: (segmentId: string, newAsset: MediaAsset) => void;
   aiGeneratingSegmentId?: string | null;
   aiGeneratedSegmentIds?: Set<string>;
@@ -32,6 +33,7 @@ export function TimelineBottomDrawer({
   onOpenChange,
   onSelectSegment,
   onSwapClip,
+  onSelectCaption,
   onGenerateMissingShotWithAi,
   aiGeneratingSegmentId,
   aiGeneratedSegmentIds,
@@ -157,6 +159,7 @@ export function TimelineBottomDrawer({
                     selectedSegmentId={selectedSegmentId}
                     onSelectSegment={onSelectSegment}
                     onSwapClip={onSwapClip}
+                    onSelectCaption={onSelectCaption}
                     onGenerateMissingShotWithAi={onGenerateMissingShotWithAi}
                     aiGeneratingSegmentId={aiGeneratingSegmentId}
                     aiGeneratedSegmentIds={aiGeneratedSegmentIds}
