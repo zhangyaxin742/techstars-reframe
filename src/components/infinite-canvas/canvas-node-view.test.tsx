@@ -98,8 +98,8 @@ describe("CanvasNodeView", () => {
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveClass("bg-secondary");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-0")).toHaveTextContent("18s");
     expect(screen.getByTestId("timeline-node-metric-timeline-1-1")).toHaveTextContent("6 clips");
-    expect(screen.getByTestId("timeline-node-metric-timeline-1-2")).toHaveTextContent("1 gap");
-    expect(screen.getByTestId("timeline-node-metric-timeline-1-3")).toHaveTextContent("2 overlays");
+    expect(screen.getByTestId("timeline-node-metric-timeline-1-2")).toHaveTextContent("2 overlays");
+    expect(screen.queryByTestId("timeline-node-metric-timeline-1-3")).not.toBeInTheDocument();
     expect(within(timelineNode).queryAllByRole("button")).toHaveLength(0);
   });
 });

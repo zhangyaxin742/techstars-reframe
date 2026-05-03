@@ -487,7 +487,6 @@ function TimelineRevealCard({
         {[
           formatTimelineDuration(totalMs),
           `${videoSlotCount} clips`,
-          `${gapCount} ${gapCount === 1 ? "gap" : "gaps"}`,
           `${overlaySegments.length} overlays`,
         ].map((metric, index) => (
           <div
