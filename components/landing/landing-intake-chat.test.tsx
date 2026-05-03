@@ -36,7 +36,7 @@ describe("LandingIntakeChat", () => {
 
     await user.type(screen.getByTestId("intake-input"), "petiteoutdoors.com");
     await user.click(screen.getByRole("button", { name: "Submit" }));
-    await user.click(screen.getByText("Connect media sources →"));
+    await user.click(screen.getByText("Connect media sources ->"));
 
     expect(screen.getByTestId("media-options")).toBeInTheDocument();
     expect(screen.getByText("Upload Files")).toBeInTheDocument();
@@ -49,8 +49,8 @@ describe("LandingIntakeChat", () => {
 
     await user.type(screen.getByTestId("intake-input"), "petiteoutdoors.com");
     await user.click(screen.getByRole("button", { name: "Submit" }));
-    await user.click(screen.getByText("Connect media sources →"));
-    await user.click(screen.getByText("Start building →"));
+    await user.click(screen.getByText("Connect media sources ->"));
+    await user.click(screen.getByText("Start building ->"));
 
     await vi.waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/app");
