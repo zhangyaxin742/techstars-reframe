@@ -1,14 +1,14 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, FilmSlate, Info, InstagramLogo, Play, Target, TrendUp, Warning, X } from "@phosphor-icons/react";
+import { CheckCircle, FilmSlate, ImageSquare, Info, InstagramLogo, Play, Target, TrendUp, Warning, X } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { isTrendSourceNode, type CanvasNode, type CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
 import { MockVideoPreview } from "../preview/mock-video-preview";
-import { brandContext, type TimelineSegment } from "../../data/reframe-demo";
+import { brandContext, mediaAssets, type MediaAsset, type TimelineSegment } from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
@@ -50,6 +50,7 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
   "brand-context": { Icon: Target, label: "Brand Context" },
   "trend-recipe": { Icon: TrendUp, label: "Trend Recipe" },
   timeline: { Icon: FilmSlate, label: "Timeline" },
+  media: { Icon: ImageSquare, label: "Library" },
   video: { Icon: Play, label: "Trend Video" },
   preview: { Icon: Play, label: "Preview" },
 };
@@ -562,6 +563,106 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
   );
 }
 
+function LibraryCard({
+  node,
+  assets = mediaAssets,
+}: {
+  node: CanvasNode;
+  assets?: MediaAsset[];
+}) {
+  const visibleAssets = assets.slice(0, 6);
+  const tagCount = new Set(visibleAssets.flatMap((asset) => asset.tags)).size;
+
+  return (
+    <motion.div
+      key="library-card"
+      className="flex h-full flex-col gap-3 p-4"
+      variants={cardRevealContainer}
+      initial="hidden"
+      animate="visible"
+      data-testid={`library-card-${node.id}`}
+    >
+      <motion.div
+        className="flex items-start justify-between gap-4"
+        variants={cardRevealSection}
+      >
+        <div className="min-w-0">
+          <h3
+            className="truncate text-base font-semibold text-foreground"
+            data-testid={`library-card-title-${node.id}`}
+          >
+            {node.title}
+          </h3>
+          {node.body ? (
+            <p className="mt-1 line-clamp-2 text-pretty text-xs leading-5 text-muted-foreground">
+              {node.body}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground">
+          <ImageSquare className="size-3 text-accent" weight="bold" />
+          <span className="tabular-nums tracking-tight text-foreground">{visibleAssets.length}</span>
+          photos
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="grid min-h-0 flex-1 grid-cols-3 gap-2"
+        variants={cardRevealSoftSection}
+        data-testid={`library-grid-${node.id}`}
+      >
+        {visibleAssets.map((asset) => (
+          <motion.article
+            key={asset.id}
+            className="group/library min-w-0 overflow-hidden rounded-lg border border-border bg-background"
+            variants={cardRevealSoftSection}
+            data-testid={`library-asset-${asset.id}`}
+          >
+            <div className="relative aspect-video overflow-hidden bg-secondary">
+              <img
+                src={asset.thumbnail}
+                alt={asset.label}
+                className="size-full object-cover transition-transform duration-150 group-hover/library:scale-105"
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
+              <span className="absolute left-2 top-2 rounded bg-card/90 px-1.5 py-0.5 text-[9px] font-medium text-foreground shadow-sm">
+                {asset.shotType}
+              </span>
+            </div>
+            <div className="space-y-1.5 p-2">
+              <p className="truncate text-[11px] font-medium text-foreground">{asset.label}</p>
+              <div className="flex min-w-0 items-center gap-1">
+                {asset.tags.slice(0, 2).map((tag) => (
+                  <span
+                    key={tag}
+                    className="truncate rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <p className="truncate text-[10px] text-muted-foreground">{asset.trendFit}</p>
+            </div>
+          </motion.article>
+        ))}
+      </motion.div>
+
+      <motion.div
+        className="flex flex-wrap items-center gap-2 border-t border-border pt-2 text-[10px] font-medium text-muted-foreground"
+        variants={cardRevealSoftSection}
+      >
+        <span>
+          <span className="tabular-nums tracking-tight text-foreground">{tagCount}</span> AI tags
+        </span>
+        <span>Matched to trend moments</span>
+        <span>Ready for timeline swaps</span>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function TimelineRevealCard({
   node,
   segments,
@@ -1009,6 +1110,8 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               <CanvasVideoNodeCard node={node} />
             )}
           </>
+        ) : node.kind === "media" ? (
+          <LibraryCard node={node} />
         ) : node.kind === "timeline" ? (
           <AnimatePresence>
             {timelinePhase === "skeleton" ? (

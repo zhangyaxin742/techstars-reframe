@@ -492,6 +492,14 @@ export const reframeDemoNodes: CanvasNode[] = [
     size: { width: 1000, height: 700 },
   },
   {
+    id: "library",
+    kind: "media",
+    title: "Library",
+    body: "AI-organized product photos and clip thumbnails matched to reusable trend moments.",
+    position: { x: 0, y: 732 },
+    size: { width: 1000, height: 420 },
+  },
+  {
     id: "recipe-1",
     kind: "video",
     title: trendVideos[0].title,

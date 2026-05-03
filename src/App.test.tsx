@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { App } from "./App";
-import { brandContext } from "./data/reframe-demo";
+import { brandContext, mediaAssets } from "./data/reframe-demo";
 
 describe("App", () => {
   beforeEach(() => {
@@ -62,6 +62,7 @@ describe("App", () => {
     );
     expect(screen.queryByText("Preparing your creative canvas")).not.toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.queryByTestId("canvas-node-library")).not.toBeInTheDocument();
     expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
     expect(screen.queryByText("1. Paste Brand Sources")).not.toBeInTheDocument();
     expect(screen.queryByText("2. Connect Media")).not.toBeInTheDocument();
@@ -84,9 +85,14 @@ describe("App", () => {
     });
 
     expect(screen.getByTestId("canvas-node-brand-ctx")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-library")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-id",
-      "brand-context"
+      "brand-context-library"
+    );
+    expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
+      "data-viewport-focus-nodes",
+      "brand-ctx library"
     );
     expect(screen.queryByText("Founder Confessional")).not.toBeInTheDocument();
     expect(screen.queryByTestId("trend-video-skeleton-recipe-1")).not.toBeInTheDocument();
@@ -100,6 +106,7 @@ describe("App", () => {
     });
 
     expect(screen.getByText("Okay, brand context created.")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas-node-library")).toBeInTheDocument();
     expect(screen.getByTestId("trend-video-skeleton-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toHaveAttribute(
       "data-viewport-focus-id",
@@ -116,6 +123,27 @@ describe("App", () => {
       scoreLabel: "fit",
       imageUrl: "/assets/brand-context-images/back%20view.jpg",
     });
+  });
+
+  it("renders a separate generated Library card from seeded media assets", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    act(() => {
+      vi.advanceTimersByTime(10600);
+    });
+
+    const libraryNode = screen.getByTestId("canvas-node-library");
+    const libraryGrid = within(libraryNode).getByTestId("library-grid-library");
+
+    expect(within(libraryNode).getByTestId("library-card-title-library")).toHaveTextContent("Library");
+    expect(within(libraryGrid).getByAltText(mediaAssets[0].label)).toHaveAttribute(
+      "src",
+      mediaAssets[0].thumbnail
+    );
+    expect(within(libraryNode).getByTestId(`library-asset-${mediaAssets[5].id}`)).toBeInTheDocument();
+    expect(mediaAssets[0].thumbnail).not.toBe(brandContext.card.visualProof[0].imageUrl);
+    expect(within(libraryNode).queryByAltText(brandContext.card.visualProof[0].label)).not.toBeInTheDocument();
   });
 
   it("shows trend video skeletons during search before revealing hover-play videos", () => {

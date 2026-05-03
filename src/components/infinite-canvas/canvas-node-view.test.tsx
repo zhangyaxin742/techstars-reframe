@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { CanvasNodeView } from "./canvas-node-view";
 import type { CanvasNode } from "../../lib/infinite-canvas/types";
-import { timelineSegments } from "../../data/reframe-demo";
+import { mediaAssets, timelineSegments } from "../../data/reframe-demo";
 
 const noopPointerDown = vi.fn();
 const noopClick = vi.fn();
@@ -161,6 +161,31 @@ describe("CanvasNodeView", () => {
     });
 
     expect(screen.queryByRole("dialog", { name: /founder confessional trend breakdown/i })).not.toBeInTheDocument();
+  });
+
+  it("renders media nodes as a compact Library photo grid", () => {
+    renderNode({
+      id: "library",
+      kind: "media",
+      title: "Library",
+      body: "AI-organized product photos and clip thumbnails matched to reusable trend moments.",
+      position: { x: 0, y: 0 },
+      size: { width: 1000, height: 420 },
+    });
+
+    const libraryCard = screen.getByTestId("library-card-library");
+    const libraryGrid = within(libraryCard).getByTestId("library-grid-library");
+
+    expect(screen.getByTestId("canvas-node-card-library")).toBeInTheDocument();
+    expect(within(libraryCard).getByTestId("library-card-title-library")).toHaveTextContent("Library");
+    expect(within(libraryCard).getByText("6")).toHaveClass("tabular-nums");
+    expect(within(libraryGrid).getByAltText(mediaAssets[0].label)).toHaveAttribute(
+      "src",
+      mediaAssets[0].thumbnail
+    );
+    expect(within(libraryGrid).getByTestId(`library-asset-${mediaAssets[5].id}`)).toBeInTheDocument();
+    expect(within(libraryGrid).getByText(mediaAssets[0].tags[0])).toBeInTheDocument();
+    expect(within(libraryGrid).getByText(mediaAssets[0].trendFit)).toBeInTheDocument();
   });
 
   it("renders the timeline node as a compact non-editable visual preview", () => {

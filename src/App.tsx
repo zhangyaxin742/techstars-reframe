@@ -248,20 +248,28 @@ export function App() {
     if (
       flowStep === "analysis" ||
       flowStep === "media-connect" ||
-      flowStep === "source-intake" ||
-      flowStep === "brand-context-ready"
+      flowStep === "source-intake"
     ) {
       return nodes.filter((node) => node.kind === "brand-context");
     }
 
+    if (
+      flowStep === "brand-context-ready"
+    ) {
+      return nodes.filter((node) => node.kind === "brand-context" || node.kind === "media");
+    }
+
     if (flowStep === "trend-search" || flowStep === "recipes-ready") {
-      return nodes.filter((node) => node.kind === "brand-context" || isTrendSourceNode(node));
+      return nodes.filter(
+        (node) => node.kind === "brand-context" || node.kind === "media" || isTrendSourceNode(node)
+      );
     }
 
     if (flowStep === "recipe-selected") {
       return nodes.filter(
         (node) =>
           node.kind === "brand-context" ||
+          node.kind === "media" ||
           isTrendSourceNode(node) ||
           node.kind === "timeline"
       );
@@ -302,15 +310,18 @@ export function App() {
       };
     }
 
+    const brandContextNodeIds =
+      flowStep === "brand-context-ready" ? ["brand-ctx", "library"] : ["brand-ctx"];
+
     return {
-      id: "brand-context",
-      nodeIds: ["brand-ctx"],
+      id: flowStep === "brand-context-ready" ? "brand-context-library" : "brand-context",
+      nodeIds: brandContextNodeIds,
       padding: { top: 104, right: 384, bottom: 104, left: 72 },
       maxZoom: 0.72,
       delayMs: 180,
       durationMs: 950,
     };
-  }, [timelinePhase, timelineSourceNodeId, trendRecipePhase]);
+  }, [flowStep, timelinePhase, timelineSourceNodeId, trendRecipePhase]);
 
   const isAiBusy = messages.some((message) =>
     Boolean(message.thinkingText) ||
