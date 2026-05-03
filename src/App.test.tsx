@@ -14,8 +14,9 @@ describe("App", () => {
     expect(screen.getByText("Chat History")).toBeInTheDocument();
     expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
     expect(screen.getByText("Preparing your creative canvas")).toBeInTheDocument();
+    expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
     act(() => {
-      vi.advanceTimersByTime(1850);
+      vi.advanceTimersByTime(7800);
     });
     expect(screen.getByTestId("simulated-tool-tool-read-sources")).toHaveAttribute(
       "data-tool-state",
@@ -31,7 +32,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(7500);
+      vi.advanceTimersByTime(13000);
     });
 
     expect(screen.getByTestId("simulated-tool-tool-build-recipes")).toHaveAttribute(
@@ -47,7 +48,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(7500);
+      vi.advanceTimersByTime(13000);
     });
     fireEvent.click(screen.getByTestId("canvas-node-recipe-1"));
 
@@ -70,7 +71,7 @@ describe("App", () => {
     render(<App />);
 
     act(() => {
-      vi.advanceTimersByTime(7500);
+      vi.advanceTimersByTime(13000);
     });
 
     fireEvent.change(screen.getByPlaceholderText("Ask Reframe to build, edit, or remix..."), {
@@ -89,9 +90,40 @@ describe("App", () => {
     vi.useFakeTimers();
     render(<App />);
 
+    act(() => {
+      vi.advanceTimersByTime(2700);
+    });
+
     const userMessage = screen.getByText("Here are our brand sources.");
     expect(userMessage).toHaveClass("bg-foreground");
     expect(userMessage).toHaveClass("text-background");
     expect(screen.queryByTestId("chat-message-avatar")).not.toBeInTheDocument();
+  });
+
+  it("reveals landing chat turns one-by-one before analysis starts", () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(350);
+    });
+    expect(screen.getByText("Starting Reframe")).toBeInTheDocument();
+    expect(screen.queryByText("Here are our brand sources.")).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(2350);
+    });
+    expect(screen.getByText("Here are our brand sources.")).toBeInTheDocument();
+    expect(screen.queryByTestId("simulated-tool-tool-read-sources")).not.toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(5200);
+    });
+    expect(screen.getByTestId("simulated-tool-tool-read-sources")).toHaveAttribute(
+      "data-tool-state",
+      "running"
+    );
   });
 });

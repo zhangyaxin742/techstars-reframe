@@ -35,6 +35,13 @@ type ToolSequenceConfig = {
   onDone?: () => void;
 };
 
+type TimedAssistantMessageConfig = {
+  message: ChatMessage;
+  startDelay: number;
+  thinkingDelay: number;
+  thinkingText: string;
+};
+
 function toolCallsAtIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
@@ -54,13 +61,19 @@ function completeToolCalls(toolCalls: SimulatedToolCall[]): SimulatedToolCall[] 
   return toolCalls.map((toolCall) => ({ ...toolCall, state: "completed" as const }));
 }
 
+const connectedMediaUserMessage: ChatMessage = {
+  ...chatHistory[3],
+  role: "user",
+  content: "Connect website, Instagram, TikTok, Shopify, Google Drive, and Phone Camera Roll.",
+};
+
 export function App() {
   const [nodes, setNodes] = useState(reframeDemoNodes);
   const [connections, setConnections] = useState(reframeDemoConnections);
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [bottomPrompt, setBottomPrompt] = useState("");
   const [flowStep, setFlowStep] = useState<AiFlowStep>("analysis");
-  const [messages, setMessages] = useState<ChatMessage[]>(() => chatHistory.slice(0, 2));
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [recipeSequenceStarted, setRecipeSequenceStarted] = useState(false);
   const [timeline, setTimeline] = useState(timelineSegments);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
@@ -80,6 +93,49 @@ export function App() {
     const timeoutId = window.setTimeout(callback, delay);
     timeoutIdsRef.current.push(timeoutId);
   }, []);
+
+  const queueMessage = useCallback(
+    (message: ChatMessage, delay: number) => {
+      queueTimeout(() => {
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          { ...message, timestamp: Date.now() },
+        ]);
+      }, delay);
+    },
+    [queueTimeout]
+  );
+
+  const queueAssistantMessage = useCallback(
+    ({ message, startDelay, thinkingDelay, thinkingText }: TimedAssistantMessageConfig) => {
+      queueTimeout(() => {
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          {
+            ...message,
+            content: "",
+            timestamp: Date.now(),
+            thinkingText,
+          },
+        ]);
+      }, startDelay);
+
+      queueTimeout(() => {
+        setMessages((currentMessages) =>
+          currentMessages.map((currentMessage) =>
+            currentMessage.id === message.id
+              ? {
+                  ...currentMessage,
+                  content: message.content,
+                  thinkingText: undefined,
+                }
+              : currentMessage
+          )
+        );
+      }, startDelay + thinkingDelay);
+    },
+    [queueTimeout]
+  );
 
   const startToolSequence = useCallback(
     ({
@@ -137,41 +193,42 @@ export function App() {
   useEffect(() => {
     if (initialSequenceStartedRef.current) return;
     initialSequenceStartedRef.current = true;
-    queueTimeout(() => {
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        { ...chatHistory[2], timestamp: Date.now() },
-      ]);
-    }, 450);
-    queueTimeout(() => {
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        { ...chatHistory[3], timestamp: Date.now() },
-      ]);
-    }, 1150);
+
+    queueAssistantMessage({
+      message: chatHistory[0],
+      startDelay: 300,
+      thinkingDelay: 900,
+      thinkingText: "Starting Reframe",
+    });
+    queueMessage(chatHistory[1], 2600);
+    queueAssistantMessage({
+      message: chatHistory[2],
+      startDelay: 3800,
+      thinkingDelay: 1000,
+      thinkingText: "Checking available connectors",
+    });
+    queueMessage(connectedMediaUserMessage, 6200);
     queueTimeout(() => {
       startToolSequence({
         messageId: "auto-analysis",
-        content: "Analyzing your brand sources and connected media.",
+        content: "I am reading those sources and connected clips now.",
         thinkingText: "Building your Reframe workspace",
         step: "analysis",
         toolCalls: initialAiToolCalls,
         doneContent: "Brand context and trend recipes are ready. Pick one recipe to auto-fill the timeline.",
         onDone: () => {
           setFlowStep("recipes-ready");
-          queueTimeout(() => {
-            setMessages((currentMessages) => [
-              ...currentMessages,
-              ...chatHistory.slice(5, 7).map((message) => ({
-                ...message,
-                timestamp: Date.now() + message.timestamp,
-              })),
-            ]);
-          }, 650);
+          queueMessage(chatHistory[5], 900);
+          queueAssistantMessage({
+            message: chatHistory[6],
+            startDelay: 1800,
+            thinkingDelay: 850,
+            thinkingText: "Choosing recipes that match Petite Outdoors",
+          });
         },
       });
-    }, 1800);
-  }, [queueTimeout, startToolSequence]);
+    }, 7600);
+  }, [queueAssistantMessage, queueMessage, queueTimeout, startToolSequence]);
 
   const visibleNodes = useMemo(() => {
     if (flowStep === "analysis" || flowStep === "media-connect" || flowStep === "source-intake") {
@@ -193,6 +250,7 @@ export function App() {
   }, [connections, visibleNodes]);
 
   const isAiBusy = messages.some((message) =>
+    Boolean(message.thinkingText) ||
     message.toolCalls?.some((toolCall) => toolCall.state === "running")
   );
 

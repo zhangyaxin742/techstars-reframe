@@ -92,7 +92,8 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
               <div key={message.id} className="space-y-1.5">
                 {message.step ? (
                   <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
-                    {message.toolCalls?.some((toolCall) => toolCall.state === "running") ? (
+                    {message.thinkingText ||
+                    message.toolCalls?.some((toolCall) => toolCall.state === "running") ? (
                       <CircleDashed className="size-3 animate-spin text-accent" />
                     ) : (
                       <CheckCircle className="size-3 text-green-600" weight="fill" />
@@ -107,11 +108,13 @@ export function ChatHistoryPanel({ messages, className }: ChatHistoryPanelProps)
                   )}
                 >
                   {message.role === "assistant" ? (
-                    <ResponseStream
-                      key={`${message.id}-${message.content}`}
-                      textStream={message.content}
-                      className="max-w-[92%] text-pretty text-xs leading-relaxed text-foreground/80"
-                    />
+                    message.content ? (
+                      <ResponseStream
+                        key={`${message.id}-${message.content}`}
+                        textStream={message.content}
+                        className="max-w-[92%] text-pretty text-xs leading-relaxed text-foreground/80"
+                      />
+                    ) : null
                   ) : (
                     <p
                       className={cn(

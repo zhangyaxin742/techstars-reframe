@@ -3,6 +3,7 @@
 import { CaretRight } from "@phosphor-icons/react";
 import React from "react";
 import { cn } from "../../lib/utils";
+import { TextShimmer } from "./text-shimmer";
 
 interface ThinkingBarProps {
   className?: string;
@@ -21,7 +22,9 @@ export function ThinkingBar({
 }: ThinkingBarProps) {
   const label = (
     <>
-      <span className="animate-pulse font-medium">{text}</span>
+      <TextShimmer className="font-medium" duration={2.8} spread={12}>
+        {text}
+      </TextShimmer>
       {onClick ? <CaretRight className="size-3.5 text-muted-foreground" weight="bold" /> : null}
     </>
   );

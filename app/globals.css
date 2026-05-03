@@ -114,6 +114,24 @@ a {
   transform-origin: center center;
 }
 
+.prompt-kit-text-shimmer {
+  display: inline-block;
+  color: transparent;
+  background-image: linear-gradient(
+    110deg,
+    var(--color-muted-foreground) 0%,
+    var(--color-muted-foreground) 38%,
+    var(--color-foreground) 50%,
+    var(--color-muted-foreground) 62%,
+    var(--color-muted-foreground) 100%
+  );
+  background-size: var(--text-shimmer-spread, 20rem) 100%;
+  background-position: 100% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: prompt-kit-text-shimmer var(--text-shimmer-duration, 4s) linear infinite;
+}
+
 @keyframes kenburns {
   from {
     transform: scale(1);
@@ -124,10 +142,26 @@ a {
   }
 }
 
+@keyframes prompt-kit-text-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-kenburns {
     animation: none;
     transform: scale(1.04);
+  }
+
+  .prompt-kit-text-shimmer {
+    animation: none;
+    color: var(--color-muted-foreground);
+    background-image: none;
   }
 
   * {
