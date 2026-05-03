@@ -5,7 +5,7 @@ interface SkeletonProps extends React.ComponentProps<"div"> {
   duration?: number;
   spread?: number;
   shimmer?: boolean;
-  variant?: "default" | "darker";
+  variant?: "default" | "darker" | "darker-light";
 }
 
 export function Skeleton({
@@ -21,9 +21,11 @@ export function Skeleton({
   const backgroundColor =
     variant === "darker"
       ? "var(--skeleton-darker-bg, color-mix(in srgb, var(--color-muted) 82%, var(--color-foreground) 18%))"
-      : "var(--skeleton-bg, var(--color-muted))";
+      : variant === "darker-light"
+        ? "var(--skeleton-darker-light-bg, color-mix(in srgb, var(--color-muted) 88%, var(--color-foreground) 12%))"
+        : "var(--skeleton-bg, var(--color-muted))";
   const highlightColor =
-    variant === "darker"
+    variant === "darker" || variant === "darker-light"
       ? "var(--skeleton-darker-highlight, color-mix(in srgb, var(--color-muted) 58%, var(--color-card) 42%))"
       : "var(--skeleton-highlight, color-mix(in srgb, var(--color-card) 72%, transparent))";
 

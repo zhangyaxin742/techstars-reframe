@@ -73,7 +73,7 @@ function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
     <NodeLoadingSkeleton
       label="Timeline preview"
       shimmer={false}
-      variant="darker"
+      variant="darker-light"
       className="rounded-xl border border-dashed border-muted-foreground/45"
     />
   );
