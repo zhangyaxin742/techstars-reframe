@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { App } from "./App";
-import { brandContext, mediaAssets } from "./data/reframe-demo";
+import { brandContext, libraryMediaAssets } from "./data/reframe-demo";
 
 describe("App", () => {
   beforeEach(() => {
@@ -135,15 +135,20 @@ describe("App", () => {
 
     const libraryNode = screen.getByTestId("canvas-node-library");
     const libraryGrid = within(libraryNode).getByTestId("library-grid-library");
+    const libraryImages = within(libraryGrid).getAllByRole("img");
 
     expect(within(libraryNode).getByTestId("library-card-title-library")).toHaveTextContent("Library");
-    expect(within(libraryGrid).getByAltText(mediaAssets[0].label)).toHaveAttribute(
+    expect(libraryImages).toHaveLength(30);
+    expect(within(libraryGrid).getByAltText(brandContext.card.visualProof[0].label)).toHaveAttribute(
       "src",
-      mediaAssets[0].thumbnail
+      brandContext.card.visualProof[0].imageUrl
     );
-    expect(within(libraryNode).getByTestId(`library-asset-${mediaAssets[5].id}`)).toBeInTheDocument();
-    expect(mediaAssets[0].thumbnail).not.toBe(brandContext.card.visualProof[0].imageUrl);
-    expect(within(libraryNode).queryByAltText(brandContext.card.visualProof[0].label)).not.toBeInTheDocument();
+    expect(within(libraryGrid).getByAltText(libraryMediaAssets[9].label)).toHaveAttribute(
+      "src",
+      libraryMediaAssets[9].thumbnail
+    );
+    expect(within(libraryNode).getByTestId(`library-asset-${libraryMediaAssets[29].id}`)).toBeInTheDocument();
+    expect(libraryMediaAssets[9].thumbnail).toContain("/assets/instagram/petiteoutdoors/");
   });
 
   it("shows trend video skeletons during search before revealing hover-play videos", () => {

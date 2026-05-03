@@ -8,7 +8,7 @@ import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
 import { MockVideoPreview } from "../preview/mock-video-preview";
-import { brandContext, mediaAssets, type MediaAsset, type TimelineSegment } from "../../data/reframe-demo";
+import { brandContext, libraryMediaAssets, type MediaAsset, type TimelineSegment } from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
@@ -565,25 +565,25 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
 
 function LibraryCard({
   node,
-  assets = mediaAssets,
+  assets = libraryMediaAssets,
 }: {
   node: CanvasNode;
   assets?: MediaAsset[];
 }) {
-  const visibleAssets = assets.slice(0, 6);
+  const visibleAssets = assets.slice(0, 30);
   const tagCount = new Set(visibleAssets.flatMap((asset) => asset.tags)).size;
 
   return (
     <motion.div
       key="library-card"
-      className="flex h-full flex-col gap-3 p-4"
+      className="flex h-full flex-col gap-2 p-3"
       variants={cardRevealContainer}
       initial="hidden"
       animate="visible"
       data-testid={`library-card-${node.id}`}
     >
       <motion.div
-        className="flex items-start justify-between gap-4"
+        className="flex items-start justify-between gap-3"
         variants={cardRevealSection}
       >
         <div className="min-w-0">
@@ -607,18 +607,19 @@ function LibraryCard({
       </motion.div>
 
       <motion.div
-        className="grid min-h-0 flex-1 grid-cols-3 gap-2"
+        className="grid min-h-0 flex-1 grid-cols-10 gap-1.5"
         variants={cardRevealSoftSection}
         data-testid={`library-grid-${node.id}`}
       >
         {visibleAssets.map((asset) => (
           <motion.article
             key={asset.id}
-            className="group/library min-w-0 overflow-hidden rounded-lg border border-border bg-background"
+            className="group/library relative min-w-0 overflow-hidden rounded-md border border-border bg-background"
             variants={cardRevealSoftSection}
             data-testid={`library-asset-${asset.id}`}
+            title={`${asset.label} - ${asset.trendFit}`}
           >
-            <div className="relative aspect-video overflow-hidden bg-secondary">
+            <div className="relative aspect-square overflow-hidden bg-secondary">
               <img
                 src={asset.thumbnail}
                 alt={asset.label}
@@ -627,23 +628,9 @@ function LibraryCard({
                 decoding="async"
                 draggable={false}
               />
-              <span className="absolute left-2 top-2 rounded bg-card/90 px-1.5 py-0.5 text-[9px] font-medium text-foreground shadow-sm">
-                {asset.shotType}
+              <span className="absolute inset-x-1 bottom-1 truncate rounded bg-card/90 px-1 py-0.5 text-[8px] font-medium text-foreground shadow-sm">
+                {asset.tags[0]}
               </span>
-            </div>
-            <div className="space-y-1.5 p-2">
-              <p className="truncate text-[11px] font-medium text-foreground">{asset.label}</p>
-              <div className="flex min-w-0 items-center gap-1">
-                {asset.tags.slice(0, 2).map((tag) => (
-                  <span
-                    key={tag}
-                    className="truncate rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <p className="truncate text-[10px] text-muted-foreground">{asset.trendFit}</p>
             </div>
           </motion.article>
         ))}
