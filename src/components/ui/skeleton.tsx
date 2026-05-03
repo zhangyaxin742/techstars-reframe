@@ -9,7 +9,7 @@ interface SkeletonProps extends React.ComponentProps<"div"> {
 
 export function Skeleton({
   className,
-  duration = 2,
+  duration = 3.25,
   spread = 15,
   variant = "default",
   style,

@@ -5,7 +5,6 @@ import { cn } from "../../lib/utils";
 import type { CanvasNode, CanvasPoint } from "../../lib/infinite-canvas/types";
 import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
-import { BrandContextCardSkeleton } from "./brand-context-card-skeleton";
 import { Skeleton } from "../ui/skeleton";
 import { brandContext } from "../../data/reframe-demo";
 
@@ -38,52 +37,18 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
   preview: { Icon: Play, label: "Preview" },
 };
 
-function TrendRecipeCardSkeleton() {
+function NodeLoadingSkeleton({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
   return (
-    <div className="flex h-full flex-col justify-between p-3 text-[11px] leading-4" aria-label="Loading trend recipe">
-      <div className="space-y-3">
-        <Skeleton className="h-2.5 w-24" />
-        <div className="space-y-1.5">
-          <Skeleton className="h-2.5 w-full" />
-          <Skeleton className="h-2.5 w-5/6" />
-          <Skeleton className="h-2.5 w-3/4" />
-        </div>
-        <div className="space-y-1.5 border-t pt-2">
-          <Skeleton className="h-2.5 w-full" />
-          <Skeleton className="h-2.5 w-2/3" />
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-5 w-14 rounded-full" />
-        <Skeleton className="h-5 w-20 rounded-full" />
-      </div>
-    </div>
-  );
-}
-
-function TimelineNodeSkeleton() {
-  return (
-    <div
-      className="flex h-full w-full flex-col justify-between rounded-xl border border-dashed border-muted-foreground/45 bg-card/80 p-4 shadow-[rgba(0,0,0,0.06)_0px_4px_8px_0px]"
-      aria-label="Loading timeline"
-    >
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-2.5 w-36" />
-          <Skeleton className="h-2.5 w-16" />
-        </div>
-        <div className="space-y-2.5">
-          <Skeleton className="h-10" />
-          <Skeleton className="h-10" />
-          <Skeleton className="h-10" />
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-5 w-16 rounded-full" />
-        <Skeleton className="h-5 w-24 rounded-full" />
-        <Skeleton className="h-5 w-20 rounded-full" />
-      </div>
-    </div>
+    <Skeleton
+      aria-label={label}
+      className={cn("h-full w-full rounded-none", className)}
+    />
   );
 }
 
@@ -105,7 +70,10 @@ function TimelineGhostPreview({
           : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
       )}
     >
-      <TimelineNodeSkeleton />
+      <NodeLoadingSkeleton
+        label="Loading timeline"
+        className="rounded-xl border border-dashed border-muted-foreground/45"
+      />
     </div>
   );
 }
@@ -249,11 +217,12 @@ export const CanvasNodeView = memo(function CanvasNodeView({
             {brandCtxPhase === "skeleton" ? (
               <motion.div
                 key="skeleton"
+                className="h-full w-full"
                 initial={{ opacity: 1 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.65, ease: "easeOut" }}
               >
-                <BrandContextCardSkeleton />
+                <NodeLoadingSkeleton label="Loading brand context" />
               </motion.div>
             ) : (
               <motion.div
@@ -272,12 +241,13 @@ export const CanvasNodeView = memo(function CanvasNodeView({
               <motion.div
                 key="recipe-skeleton"
                 data-testid={`trend-recipe-skeleton-${node.id}`}
+                className="h-full w-full"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               >
-                <TrendRecipeCardSkeleton />
+                <NodeLoadingSkeleton label="Loading trend recipe" />
               </motion.div>
             ) : (
               <motion.div
@@ -319,7 +289,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               >
-                <TimelineNodeSkeleton />
+                <NodeLoadingSkeleton label="Loading timeline" />
               </motion.div>
             ) : (
               <motion.div

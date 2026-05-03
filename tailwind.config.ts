@@ -49,7 +49,7 @@ const config: Config = {
         },
       },
       animation: {
-        "skeleton-shimmer": "skeleton-shimmer 2s infinite",
+        "skeleton-shimmer": "skeleton-shimmer 3.25s infinite",
       },
       letterSpacing: {
         eyebrow: "0.22em",
