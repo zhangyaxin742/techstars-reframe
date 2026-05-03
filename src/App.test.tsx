@@ -429,6 +429,13 @@ describe("App", () => {
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("9");
     expect(screen.getByTestId("preview-publish-status")).toHaveTextContent("305");
     expect(screen.getByTestId("preview-publish-engagement-rate")).toHaveTextContent("27.5%");
+    expect(screen.getByTestId("infinite-canvas").getAttribute("data-viewport-focus-id")).toMatch(
+      /^preview-publish-status-/
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
 
     const canvas = screen.getByTestId("infinite-canvas");
     expect(canvas.getAttribute("data-viewport-focus-id")).toMatch(/^visible-canvas-overview-/);

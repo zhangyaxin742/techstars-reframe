@@ -48,7 +48,7 @@ type PreviewCameraIntent = {
 
 const BRAND_CONTEXT_HANDOFF_PAUSE_MS = 4200;
 const CONNECTION_DRAW_IN_MS = 550;
-const PREVIEW_PUBLISH_OVERVIEW_DELAY_MS = 2200;
+const PREVIEW_PUBLISH_OVERVIEW_DELAY_MS = 3000;
 function toolCallsThroughIndex(
   toolCalls: SimulatedToolCall[],
   activeIndex: number
