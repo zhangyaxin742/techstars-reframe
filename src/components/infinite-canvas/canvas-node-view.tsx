@@ -37,6 +37,46 @@ const kindMeta: Partial<Record<string, { Icon: React.ElementType; label: string 
   preview: { Icon: Play, label: "Preview" },
 };
 
+const cardRevealContainer = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.56,
+      ease: "easeOut" as const,
+      staggerChildren: 0.085,
+      delayChildren: 0.12,
+    },
+  },
+};
+
+const cardRevealSection = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.48, ease: "easeOut" as const },
+  },
+};
+
+const cardRevealSoftSection = {
+  hidden: { opacity: 0, y: 6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.42, ease: "easeOut" as const },
+  },
+};
+
+function splitNodeBody(body?: string) {
+  if (!body) return [];
+  return body
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 function NodeLoadingSkeleton({
   label,
   className,
@@ -100,6 +140,103 @@ function TimelineGhostPreview({
     >
       <TimelinePreviewSurface mode="preview" />
     </div>
+  );
+}
+
+function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
+  const bodySections = splitNodeBody(node.body);
+  const hook = bodySections[0];
+  const details = bodySections.slice(1);
+
+  return (
+    <motion.div
+      key="recipe-card"
+      className="space-y-2 p-3"
+      variants={cardRevealContainer}
+      initial="hidden"
+      animate="visible"
+      data-testid={`trend-recipe-reveal-${node.id}`}
+    >
+      <motion.div
+        className="truncate text-sm font-semibold"
+        variants={cardRevealSection}
+        data-testid={`trend-recipe-section-${node.id}-title`}
+      >
+        {node.title}
+      </motion.div>
+      {hook ? (
+        <motion.p
+          className="line-clamp-2 text-pretty text-xs leading-5 text-foreground/85"
+          variants={cardRevealSection}
+          data-testid={`trend-recipe-section-${node.id}-hook`}
+        >
+          {hook}
+        </motion.p>
+      ) : null}
+      {details.length > 0 ? (
+        <motion.div
+          className="space-y-1.5 border-t pt-2"
+          variants={cardRevealSoftSection}
+          data-testid={`trend-recipe-section-${node.id}-details`}
+        >
+          {details.map((line, index) => (
+            <motion.div
+              key={line}
+              className="flex min-w-0 items-center justify-between gap-2 text-xs leading-4 text-muted-foreground"
+              variants={cardRevealSoftSection}
+              data-testid={`trend-recipe-detail-${node.id}-${index}`}
+            >
+              {line.includes(":") ? (
+                <>
+                  <span className="shrink-0 font-medium text-foreground/70">
+                    {line.slice(0, line.indexOf(":"))}
+                  </span>
+                  <span className="min-w-0 truncate text-right">{line.slice(line.indexOf(":") + 1).trim()}</span>
+                </>
+              ) : (
+                <span className="min-w-0 truncate">{line}</span>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
+      ) : null}
+    </motion.div>
+  );
+}
+
+function TimelineRevealCard({ node }: { node: CanvasNode }) {
+  const bodySections = splitNodeBody(node.body);
+
+  return (
+    <motion.div
+      key="timeline-card"
+      className="space-y-2 p-3"
+      variants={cardRevealContainer}
+      initial="hidden"
+      animate="visible"
+      data-testid={`timeline-reveal-${node.id}`}
+    >
+      <motion.div
+        className="truncate text-sm font-semibold"
+        variants={cardRevealSection}
+        data-testid={`timeline-section-${node.id}-title`}
+      >
+        {node.title}
+      </motion.div>
+      {bodySections.map((section, index) => (
+        <motion.p
+          key={`${section}-${index}`}
+          className={cn(
+            "text-pretty text-xs leading-5",
+            index === 0 ? "text-foreground/85" : "text-muted-foreground"
+          )}
+          variants={cardRevealSoftSection}
+          data-testid={`timeline-section-${node.id}-${index}`}
+        >
+          {section}
+        </motion.p>
+      ))}
+    </motion.div>
   );
 }
 
@@ -234,7 +371,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
           ─────────────────────────────────────────────────────────────────── */}
       <div
         className={cn(
-          "h-full w-full overflow-hidden rounded-xl border bg-card text-card-foreground",
+          "paper relative h-full w-full overflow-hidden rounded-xl border bg-card text-card-foreground",
           "shadow-[rgba(0,0,0,0.08)_0px_1px_1px_0px,rgba(0,0,0,0.08)_0px_4px_5px_0px]",
           "transition-[border-color,box-shadow] duration-150",
           selected
@@ -289,32 +426,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 <NodeLoadingSkeleton label="Loading trend recipe" />
               </motion.div>
             ) : (
-              <motion.div
-                key="recipe-card"
-                className="space-y-1 p-3"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              >
-                <motion.div
-                  className="truncate text-sm font-semibold"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: 0.1, ease: "easeOut" }}
-                >
-                  {node.title}
-                </motion.div>
-                {node.body ? (
-                  <motion.p
-                    className="line-clamp-5 whitespace-pre-line text-pretty text-xs leading-5 text-muted-foreground"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-                  >
-                    {node.body}
-                  </motion.p>
-                ) : null}
-              </motion.div>
+              <TrendRecipeRevealCard node={node} />
             )}
           </>
         ) : node.kind === "timeline" ? (
@@ -331,20 +443,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 <TimelinePreviewSurface mode="loading" />
               </motion.div>
             ) : (
-              <motion.div
-                key="timeline-card"
-                className="space-y-1 p-3"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-              >
-                <div className="truncate text-sm font-semibold">{node.title}</div>
-                {node.body ? (
-                  <p className="line-clamp-5 whitespace-pre-line text-pretty text-xs leading-5 text-muted-foreground">
-                    {node.body}
-                  </p>
-                ) : null}
-              </motion.div>
+              <TimelineRevealCard node={node} />
             )}
           </AnimatePresence>
         ) : (

@@ -9,7 +9,13 @@ const colVariants = {
   visible: (delay: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.75, delay, ease: "easeOut" as const },
+    transition: {
+      duration: 0.75,
+      delay,
+      ease: "easeOut" as const,
+      staggerChildren: 0.06,
+      delayChildren: 0.06,
+    },
   }),
 };
 
@@ -19,6 +25,24 @@ const itemVariants = {
     opacity: 1,
     y: 0,
     transition: { duration: 0.55, delay, ease: "easeOut" as const },
+  }),
+};
+
+const tileImageVariants = {
+  hidden: { opacity: 0, scale: 1.035 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.7, delay, ease: "easeOut" as const },
+  }),
+};
+
+const statVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.44, delay, ease: "easeOut" as const },
   }),
 };
 
@@ -37,12 +61,23 @@ function levelColor(level: SignalLevel) {
   return "text-muted-foreground";
 }
 
-function ToneBar({ value }: { value: number }) {
+function ToneBar({
+  value,
+  animateIn = false,
+  delay = 0,
+}: {
+  value: number;
+  animateIn?: boolean;
+  delay?: number;
+}) {
   return (
     <div className="flex h-1.5 w-24 overflow-hidden rounded-full bg-muted">
-      <div
+      <motion.div
         className="h-full rounded-full bg-accent"
-        style={{ width: `${value}%` }}
+        style={{ width: `${value}%`, transformOrigin: "left center" }}
+        initial={animateIn ? { scaleX: 0 } : false}
+        animate={animateIn ? { scaleX: 1 } : undefined}
+        transition={{ duration: 0.58, delay, ease: "easeOut" }}
       />
     </div>
   );
@@ -155,15 +190,21 @@ export const BrandContextCard = memo(function BrandContextCard({
         initial={initial}
         animate={animate}
       >
-        <div className="flex items-center justify-between border-b px-3 py-2">
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <motion.div
+          className="flex items-center justify-between border-b px-3 py-2"
+          variants={itemVariants}
+          custom={0.32}
+          initial={initial}
+          animate={animate}
+        >
+          <motion.p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
             Visual Proof Library
-          </p>
-          <div className="flex items-center gap-1 text-[9px] text-accent">
+          </motion.p>
+          <motion.div className="flex items-center gap-1 text-[9px] text-accent">
             <Sparkle size={10} weight="fill" />
             <span>AI-labeled</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         <div className="grid grid-cols-3">
           {data.visualProof.map((item, idx) => (
@@ -175,8 +216,15 @@ export const BrandContextCard = memo(function BrandContextCard({
               initial={initial}
               animate={animate}
             >
-              <div className="relative overflow-hidden" style={{ height: 120 }}>
-                <img
+              <motion.div
+                className="relative overflow-hidden"
+                style={{ height: 120 }}
+                variants={tileImageVariants}
+                custom={0.38 + idx * 0.05}
+                initial={initial}
+                animate={animate}
+              >
+                <motion.img
                   src={item.imageUrl ?? makePlaceholderSvg(item.color)}
                   alt={item.label}
                   className="h-full w-full object-cover"
@@ -184,43 +232,77 @@ export const BrandContextCard = memo(function BrandContextCard({
                   decoding="async"
                   draggable={false}
                 />
-                <span
+                <motion.span
                   className="absolute left-1.5 top-1.5 rounded bg-[#1f1f29]/80 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm"
+                  variants={itemVariants}
+                  custom={0.48 + idx * 0.05}
+                  initial={initial}
+                  animate={animate}
                 >
                   {item.tag}
-                </span>
-              </div>
-              <div className="flex flex-col gap-0.5 bg-card px-2 py-1.5">
-                <p className="truncate text-[10px] text-foreground">{item.label}</p>
-                <span
+                </motion.span>
+              </motion.div>
+              <motion.div
+                className="flex flex-col gap-0.5 bg-card px-2 py-1.5"
+                variants={itemVariants}
+                custom={0.52 + idx * 0.05}
+                initial={initial}
+                animate={animate}
+              >
+                <motion.p className="truncate text-[10px] text-foreground">{item.label}</motion.p>
+                <motion.span
                   className="self-start rounded bg-secondary px-1.5 py-px text-[9px] font-semibold text-foreground"
                 >
                   {item.score} {item.scoreLabel}
-                </span>
-              </div>
+                </motion.span>
+              </motion.div>
             </motion.div>
           ))}
         </div>
 
         <div className="flex items-center gap-4 border-t px-3 py-2 text-[9px] text-muted-foreground">
-          <span className="flex items-center gap-1">
+          <motion.span
+            className="flex items-center gap-1"
+            variants={statVariants}
+            custom={0.9}
+            initial={initial}
+            animate={animate}
+          >
             <VideoCamera size={10} weight="regular" />
             <span className="font-semibold tabular-nums text-foreground">128</span> video clips
-          </span>
-          <span className="flex items-center gap-1">
+          </motion.span>
+          <motion.span
+            className="flex items-center gap-1"
+            variants={statVariants}
+            custom={0.96}
+            initial={initial}
+            animate={animate}
+          >
             <Image size={10} weight="regular" />
             <span className="font-semibold tabular-nums text-foreground">74</span> photos
-          </span>
-          <span className="flex items-center gap-1">
+          </motion.span>
+          <motion.span
+            className="flex items-center gap-1"
+            variants={statVariants}
+            custom={1.02}
+            initial={initial}
+            animate={animate}
+          >
             <Sparkle size={10} weight="fill" className="text-accent" />
             AI-labeled{" "}
             <span className="font-semibold tabular-nums text-accent">100%</span>
-          </span>
-          <span className="flex items-center gap-1">
+          </motion.span>
+          <motion.span
+            className="flex items-center gap-1"
+            variants={statVariants}
+            custom={1.08}
+            initial={initial}
+            animate={animate}
+          >
             <CheckCircle size={10} weight="fill" className="text-foreground/50" />
             Brand fit avg{" "}
             <span className="font-semibold tabular-nums text-foreground">86%</span>
-          </span>
+          </motion.span>
         </div>
       </motion.div>
 
@@ -320,7 +402,7 @@ export const BrandContextCard = memo(function BrandContextCard({
                 animate={animate}
               >
                 <span className="w-16 text-muted-foreground">{t.label}</span>
-                <ToneBar value={t.value} />
+                <ToneBar value={t.value} animateIn={animateIn} delay={1.5 + idx * 0.06} />
               </motion.div>
             ))}
           </div>
