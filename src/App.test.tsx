@@ -155,10 +155,10 @@ describe("App", () => {
       "top-full"
     );
     expect(screen.getByTestId("canvas-node-timeline-ghost-connector-recipe-1")).toHaveClass(
-      "h-24"
+      "h-36"
     );
     expect(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).toHaveClass("top-full");
-    expect(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).toHaveClass("mt-24");
+    expect(screen.getByTestId("canvas-node-timeline-ghost-recipe-1")).toHaveClass("mt-36");
     const timelinePreview = within(
       screen.getByTestId("canvas-node-timeline-ghost-recipe-1")
     ).getByLabelText("Timeline preview");
@@ -217,11 +217,11 @@ describe("App", () => {
     expect(screen.getByTestId("canvas-connection-r1-tl")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toHaveClass("top-full");
-    expect(screen.getByTestId("canvas-node-connector-recipe-1")).toHaveClass("h-24");
+    expect(screen.getByTestId("canvas-node-connector-recipe-1")).toHaveClass("h-36");
     expect(screen.getByTestId("timeline-node-skeleton-timeline-1")).toBeInTheDocument();
     expect(screen.getByLabelText("Loading timeline")).toBeInTheDocument();
     expect(screen.getByLabelText("Loading timeline")).toHaveClass("animate-skeleton-shimmer");
-    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1096px, 487px)");
+    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1096px, 535px)");
     expect(screen.getByTestId("simulated-tool-tool-match-clips")).toHaveAttribute(
       "data-tool-state",
       "running"
@@ -243,8 +243,8 @@ describe("App", () => {
     );
     expect(screen.getByTestId("canvas-node-connector-recipe-1")).toBeInTheDocument();
     expect(screen.getByTestId("canvas-node-connector-timeline-1-preview")).toBeInTheDocument();
-    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1096px, 487px)");
-    expect(screen.getByTestId("canvas-node-preview-1").style.transform).toBe("translate(1640px, 437px)");
+    expect(screen.getByTestId("canvas-node-timeline-1").style.transform).toBe("translate(1096px, 535px)");
+    expect(screen.getByTestId("canvas-node-preview-1").style.transform).toBe("translate(1640px, 485px)");
     expect(
       within(screen.getByTestId("canvas-node-timeline-1")).getByText("Founder Confessional")
     ).toBeInTheDocument();
