@@ -31,6 +31,20 @@ describe("WaitlistModal", () => {
     expect(screen.getByText("Enter your company URL.")).toBeInTheDocument();
   });
 
+  it("prefills the email field from the landing form", () => {
+    render(
+      <WaitlistModal
+        open
+        onOpenChange={onOpenChange}
+        initialEmail="founder@example.com"
+      />,
+    );
+
+    expect(screen.getByPlaceholderText("Email address")).toHaveValue(
+      "founder@example.com",
+    );
+  });
+
   it("submits qualification fields and tracking metadata", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({

@@ -128,6 +128,413 @@ a {
   mix-blend-mode: soft-light;
 }
 
+.landing-hero-content {
+  padding-top: clamp(8.5rem, 23vh, 16rem);
+}
+
+.landing-hero-headline {
+  color: var(--cream);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.72));
+  font-family: var(--font-display), serif;
+  font-weight: 300;
+  line-height: 0.9;
+}
+
+.landing-hero-headline h1 {
+  font-size: clamp(3.25rem, 5.75vw, 5.2rem);
+  font-weight: inherit;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.landing-hero-subtitle {
+  color: rgba(245, 239, 224, 0.72);
+  font-size: clamp(1rem, 1.45vw, 1.45rem);
+  line-height: 1.35;
+  margin-top: 1.35rem;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.72);
+}
+
+.landing-waitlist-form {
+  align-items: center;
+  background: rgba(16, 13, 8, 0.76);
+  border: 1px solid rgba(245, 239, 224, 0.18);
+  border-radius: 1.6rem;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 239, 224, 0.08),
+    0 18px 44px rgba(0, 0, 0, 0.34);
+  display: flex;
+  gap: 1rem;
+  height: 4.8rem;
+  margin-top: 1.15rem;
+  max-width: min(100%, 35rem);
+  padding: 0.75rem 0.75rem 0.75rem 1.45rem;
+  width: 35rem;
+}
+
+.landing-waitlist-form input {
+  background: transparent;
+  border: 0;
+  color: var(--cream);
+  flex: 1;
+  font-size: 1.1rem;
+  min-width: 0;
+  outline: none;
+}
+
+.landing-waitlist-form input::placeholder {
+  color: rgba(245, 239, 224, 0.54);
+}
+
+.landing-waitlist-form button {
+  background: rgba(245, 239, 224, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 1.35rem;
+  color: var(--ink);
+  flex: 0 0 auto;
+  font-size: 1.05rem;
+  font-weight: 500;
+  height: 3.35rem;
+  min-width: 11.8rem;
+  padding: 0 1.45rem;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.landing-waitlist-form button:hover {
+  background: var(--gold);
+  color: var(--cream);
+  transform: translateY(-1px);
+}
+
+.landing-waitlist-form:focus-within {
+  border-color: rgba(245, 239, 224, 0.34);
+}
+
+.landing-waitlist-note {
+  color: rgba(245, 239, 224, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-top: 0.9rem;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.78);
+}
+
+.landing-demo-card {
+  aspect-ratio: 2.18 / 1;
+  background: rgba(18, 15, 10, 0.82);
+  border: 1px solid rgba(245, 239, 224, 0.16);
+  border-radius: 1.55rem;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 239, 224, 0.07),
+    0 28px 72px rgba(0, 0, 0, 0.48);
+  color: var(--cream);
+  margin-top: 2.55rem;
+  max-height: 21rem;
+  max-width: min(calc(100vw - 3rem), 47rem);
+  overflow: hidden;
+  position: relative;
+  width: min(calc(100vw - 3rem), 47rem);
+}
+
+.landing-demo-poster {
+  background: rgba(18, 15, 10, 0.72);
+  box-shadow: inset 22rem 0 16rem rgba(245, 239, 224, 0.06);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.landing-demo-topbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 1.55rem 1.65rem 0;
+}
+
+.landing-demo-brand,
+.landing-demo-profile {
+  align-items: center;
+  display: flex;
+}
+
+.landing-demo-brand {
+  color: rgba(245, 239, 224, 0.74);
+  gap: 0.6rem;
+  font-size: 1rem;
+}
+
+.landing-demo-dot {
+  border: 1px solid rgba(245, 239, 224, 0.44);
+  border-radius: 999px;
+  display: inline-flex;
+  height: 1.15rem;
+  position: relative;
+  width: 1.15rem;
+}
+
+.landing-demo-dot::after {
+  background: var(--gold);
+  border-radius: 999px;
+  content: "";
+  height: 0.34rem;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.34rem;
+}
+
+.landing-demo-profile {
+  gap: 0.75rem;
+}
+
+.landing-demo-profile span {
+  background: rgba(245, 239, 224, 0.06);
+  border-radius: 999px;
+  color: rgba(245, 239, 224, 0.62);
+  font-size: 0.62rem;
+  padding: 0.25rem 0.55rem;
+}
+
+.landing-demo-profile img {
+  border-radius: 999px;
+  height: 1.45rem;
+  object-fit: cover;
+  width: 1.45rem;
+}
+
+.landing-demo-body {
+  align-items: center;
+  display: grid;
+  flex: 1;
+  grid-template-columns: 8.9rem 1fr 3.25rem 14rem;
+  padding: 0 1.65rem 0.9rem;
+}
+
+.landing-demo-sidebar {
+  border-right: 1px solid rgba(245, 239, 224, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  height: 100%;
+  justify-content: center;
+  padding-right: 1.25rem;
+}
+
+.landing-demo-sidebar span {
+  border-radius: 0.55rem;
+  color: rgba(245, 239, 224, 0.48);
+  font-size: 0.72rem;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+}
+
+.landing-demo-sidebar .is-active {
+  background: rgba(245, 239, 224, 0.07);
+  color: rgba(245, 239, 224, 0.82);
+}
+
+.landing-demo-copy {
+  padding-left: 2.6rem;
+  text-align: left;
+}
+
+.landing-demo-copy h2 {
+  color: var(--cream);
+  font-family: var(--font-display), serif;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 0.93;
+  margin: 0;
+}
+
+.landing-demo-copy p {
+  color: rgba(245, 239, 224, 0.66);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 1.6rem 0 0;
+}
+
+.landing-demo-play {
+  align-items: center;
+  align-self: center;
+  background: rgba(245, 239, 224, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  color: var(--ink);
+  display: flex;
+  height: 5.4rem;
+  justify-content: center;
+  position: relative;
+  right: 0.65rem;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+  width: 5.4rem;
+}
+
+.landing-demo-play:hover {
+  background: var(--gold);
+  color: var(--cream);
+  transform: scale(1.03);
+}
+
+.landing-demo-report {
+  border: 1px solid rgba(245, 239, 224, 0.08);
+  border-radius: 0.9rem;
+  padding: 1.7rem 1.5rem 1rem;
+  text-align: left;
+}
+
+.landing-demo-report h3 {
+  color: rgba(245, 239, 224, 0.82);
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.35;
+  margin: 0 0 1rem;
+}
+
+.landing-demo-report div {
+  display: flex;
+  gap: 0.55rem;
+  margin-bottom: 1.9rem;
+}
+
+.landing-demo-report span {
+  background: rgba(245, 239, 224, 0.08);
+  border-radius: 999px;
+  color: rgba(245, 239, 224, 0.62);
+  font-size: 0.62rem;
+  padding: 0.25rem 0.55rem;
+}
+
+.landing-demo-report p {
+  color: rgba(245, 239, 224, 0.58);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.landing-demo-report svg {
+  height: 4.2rem;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.landing-demo-report path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-linecap: round;
+  stroke-width: 2.5;
+}
+
+.landing-demo-controls {
+  align-items: center;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto 1fr auto auto auto;
+  padding: 0 1.65rem 1.55rem;
+}
+
+.landing-demo-controls span {
+  color: rgba(245, 239, 224, 0.76);
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.landing-demo-progress {
+  background: rgba(245, 239, 224, 0.16);
+  border-radius: 999px;
+  height: 0.2rem;
+  position: relative;
+}
+
+.landing-demo-progress span {
+  background: rgba(245, 239, 224, 0.84);
+  border-radius: 999px;
+  display: block;
+  height: 100%;
+  width: 37%;
+}
+
+.landing-demo-progress::after {
+  background: var(--cream);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.16);
+  content: "";
+  height: 0.72rem;
+  left: 37%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.72rem;
+}
+
+.landing-demo-caption {
+  color: rgba(245, 239, 224, 0.68);
+  font-size: clamp(0.9rem, 1.05vw, 1.05rem);
+  line-height: 1.28;
+  margin-top: 0.9rem;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.78);
+}
+
+@media (max-width: 720px) {
+  .landing-hero-content {
+    justify-content: center;
+    padding-bottom: 1.5rem;
+    padding-top: 5.25rem;
+  }
+
+  .landing-hero-headline h1 {
+    font-size: clamp(3.2rem, 15vw, 4.6rem);
+  }
+
+  .landing-waitlist-form {
+    flex-direction: column;
+    gap: 0.75rem;
+    height: auto;
+    margin-top: 1.2rem;
+    padding: 1rem;
+  }
+
+  .landing-waitlist-form input,
+  .landing-waitlist-form button {
+    min-height: 3rem;
+    width: 100%;
+  }
+
+  .landing-demo-card {
+    aspect-ratio: 1.3 / 1;
+    margin-top: 1.2rem;
+  }
+
+  .landing-demo-body {
+    grid-template-columns: 1fr auto;
+    padding: 0 1.1rem;
+  }
+
+  .landing-demo-sidebar,
+  .landing-demo-report {
+    display: none;
+  }
+
+  .landing-demo-copy {
+    padding-left: 0;
+  }
+
+  .landing-demo-play {
+    right: 0;
+  }
+
+  .landing-demo-caption {
+    margin-top: 1rem;
+  }
+}
+
 .animate-landing-background {
   animation: landing-background-zoom 9.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-origin: 50% 26%;
