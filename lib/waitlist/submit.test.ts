@@ -6,9 +6,6 @@ import {
 describe("submitWaitlistEmail", () => {
   const originalFetch = global.fetch;
   const originalEnv = {
-    WAITLIST_PROVIDER: process.env.WAITLIST_PROVIDER,
-    LOOPS_API_KEY: process.env.LOOPS_API_KEY,
-    LOOPS_WAITLIST_LIST_ID: process.env.LOOPS_WAITLIST_LIST_ID,
     SUPABASE_URL: process.env.SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -19,7 +16,6 @@ describe("submitWaitlistEmail", () => {
   };
 
   beforeEach(() => {
-    process.env.WAITLIST_PROVIDER = "supabase-resend";
     process.env.SUPABASE_URL = "https://project.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_URL = "";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "supabase_service_role_key";
@@ -31,9 +27,6 @@ describe("submitWaitlistEmail", () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-    process.env.WAITLIST_PROVIDER = originalEnv.WAITLIST_PROVIDER;
-    process.env.LOOPS_API_KEY = originalEnv.LOOPS_API_KEY;
-    process.env.LOOPS_WAITLIST_LIST_ID = originalEnv.LOOPS_WAITLIST_LIST_ID;
     process.env.SUPABASE_URL = originalEnv.SUPABASE_URL;
     process.env.NEXT_PUBLIC_SUPABASE_URL = originalEnv.NEXT_PUBLIC_SUPABASE_URL;
     process.env.SUPABASE_SERVICE_ROLE_KEY = originalEnv.SUPABASE_SERVICE_ROLE_KEY;

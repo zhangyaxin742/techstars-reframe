@@ -10,7 +10,7 @@
 - Tailwind CSS with shared tokens in `app/globals.css` and `tailwind.config.ts`.
 - Vitest with jsdom and Testing Library for unit/component tests.
 - Radix UI primitives, Phosphor icons, Framer Motion, Sonner, Agentation, `perfect-freehand`, and `rbush`.
-- Waitlist submission is handled by `app/api/waitlist/route.ts` and `lib/waitlist/submit.ts`; Loops env vars are required at runtime.
+- Waitlist submission is handled by `app/api/waitlist/route.ts` and `lib/waitlist/submit.ts`; Supabase and Resend env vars are required at runtime.
 
 ## Commands
 - Typecheck: `npm run typecheck`

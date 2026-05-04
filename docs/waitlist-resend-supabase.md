@@ -6,7 +6,6 @@ This waitlist flow now keeps Supabase as the source of truth and uses Resend onl
 
 Required:
 
-- `WAITLIST_PROVIDER=supabase-resend`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -30,7 +29,7 @@ Optional:
 
 Run [waitlist-resend-supabase.sql](/C:/Users/user/Documents/GitHub/techstars-reframe/docs/waitlist-resend-supabase.sql:1) in the Supabase SQL editor.
 
-The table stores the same signup fields previously sent to Loops:
+The table stores the submitted signup fields:
 
 - `email`
 - `company_url`
