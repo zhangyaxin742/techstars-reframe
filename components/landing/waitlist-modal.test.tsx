@@ -72,8 +72,8 @@ describe("WaitlistModal", () => {
       );
     });
     expect(
-      screen.getByText(/You're in! In the meantime, try our/i),
+      screen.getByText(/You're in. We'll reach out when early access opens./i),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "demo" })).toHaveAttribute("href", "/demo");
+    expect(screen.queryByRole("link", { name: "demo" })).not.toBeInTheDocument();
   });
 });

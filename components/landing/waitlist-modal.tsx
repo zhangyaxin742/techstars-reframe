@@ -8,7 +8,6 @@ type WaitlistModalProps = {
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
-const demoHref = "/demo";
 
 function readTrackingMetadata() {
   if (typeof window === "undefined") {
@@ -147,21 +146,14 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
           Get early access
         </h2>
         <p className="mt-4 max-w-sm text-sm leading-6 text-warm">
-          Reframe is built for founders with a product worth talking about
-          and no time to brute-force distribution.
+          Join the list for product updates, early access, and the first wave of
+          founder onboarding invites.
         </p>
 
         {state === "success" ? (
           <div className="mt-8 rounded-[1.6rem] border border-[rgba(201,168,76,0.28)] bg-[rgba(245,239,224,0.06)] p-5">
             <p className="text-base text-cream">
-              You&apos;re in! In the meantime, try our{" "}
-              <a
-                href={demoHref}
-                className="underline underline-offset-4 transition hover:text-gold"
-              >
-                demo
-              </a>
-              .
+              You&apos;re in. We&apos;ll reach out when early access opens.
             </p>
           </div>
         ) : (
