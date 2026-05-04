@@ -8,6 +8,7 @@ type WaitlistModalProps = {
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
+const demoHref = "https://use-reframe.com/demo";
 
 function readTrackingMetadata() {
   if (typeof window === "undefined") {
@@ -108,7 +109,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
       }
 
       setState("success");
-      setMessage("You're in. We'll be in touch.");
+      setMessage("");
     } catch (error) {
       setState("error");
       setMessage(
@@ -152,7 +153,16 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 
         {state === "success" ? (
           <div className="mt-8 rounded-[1.6rem] border border-[rgba(201,168,76,0.28)] bg-[rgba(245,239,224,0.06)] p-5">
-            <p className="text-base text-cream">{message}</p>
+            <p className="text-base text-cream">
+              You&apos;re in! In the meantime, try our{" "}
+              <a
+                href={demoHref}
+                className="underline underline-offset-4 transition hover:text-gold"
+              >
+                demo
+              </a>
+              .
+            </p>
           </div>
         ) : (
           <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
