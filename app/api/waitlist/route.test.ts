@@ -14,11 +14,13 @@ vi.mock("@/lib/waitlist/submit", async () => {
 });
 
 import { WaitlistProviderNotConfiguredError } from "@/lib/waitlist/submit";
+import { resetWaitlistRateLimiter } from "@/lib/waitlist/rate-limit";
 import { POST } from "./route";
 
 describe("POST /api/waitlist", () => {
   beforeEach(() => {
     submitWaitlistEmail.mockReset();
+    resetWaitlistRateLimiter();
   });
 
   it("rejects a missing company URL", async () => {
@@ -81,6 +83,9 @@ describe("POST /api/waitlist", () => {
         utmCampaign: "launch",
         referrer: "https://x.com/reframe",
       },
+    }, {
+      ipAddress: null,
+      userAgent: null,
     });
   });
 
@@ -107,6 +112,57 @@ describe("POST /api/waitlist", () => {
     await expect(response.json()).resolves.toEqual({
       ok: false,
       error: "Waitlist delivery is not configured yet.",
+    });
+  });
+
+  it("treats filled honeypot fields as a silent success and skips submission", async () => {
+    const request = new Request("https://reframe.ai/api/waitlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: "founder@example.com",
+        companyUrl: "https://acme.com",
+        growthChallenge: "Need more qualified inbound demand.",
+        website: "https://spam.example",
+      }),
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ ok: true });
+    expect(submitWaitlistEmail).not.toHaveBeenCalled();
+  });
+
+  it("rate limits repeated attempts from the same email", async () => {
+    submitWaitlistEmail.mockResolvedValue(undefined);
+
+    const buildRequest = () =>
+      new Request("https://reframe.ai/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "203.0.113.10",
+        },
+        body: JSON.stringify({
+          email: "founder@example.com",
+          companyUrl: "https://acme.com",
+          growthChallenge: "Need more qualified inbound demand.",
+        }),
+      });
+
+    await POST(buildRequest());
+    await POST(buildRequest());
+    await POST(buildRequest());
+    const response = await POST(buildRequest());
+
+    expect(response.status).toBe(429);
+    expect(submitWaitlistEmail).toHaveBeenCalledTimes(3);
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Too many waitlist attempts. Please try again later.",
     });
   });
 });
