@@ -5,7 +5,24 @@ export class WaitlistProviderNotConfiguredError extends Error {
   }
 }
 
-export async function submitWaitlistEmail(email: string) {
+export type WaitlistMetadata = {
+  createdAt: string;
+  source: string;
+  landingPage: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  referrer?: string;
+};
+
+export type WaitlistSubmission = {
+  email: string;
+  companyUrl: string;
+  growthChallenge: string;
+  metadata: WaitlistMetadata;
+};
+
+export async function submitWaitlistEmail(submission: WaitlistSubmission) {
   const provider = process.env.WAITLIST_PROVIDER;
 
   if (!provider) {
@@ -14,7 +31,7 @@ export async function submitWaitlistEmail(email: string) {
 
   switch (provider) {
     case "loops":
-      await submitToLoops(email);
+      await submitToLoops(submission);
       return;
     default:
       throw new WaitlistProviderNotConfiguredError(
@@ -23,7 +40,7 @@ export async function submitWaitlistEmail(email: string) {
   }
 }
 
-async function submitToLoops(email: string) {
+async function submitToLoops(submission: WaitlistSubmission) {
   const apiKey = process.env.LOOPS_API_KEY;
   const listId = process.env.LOOPS_WAITLIST_LIST_ID;
 
@@ -33,18 +50,26 @@ async function submitToLoops(email: string) {
     );
   }
 
-  const response = await fetch("https://app.loops.so/api/v1/contacts/create", {
-    method: "POST",
+  const response = await fetch("https://app.loops.so/api/v1/contacts/update", {
+    method: "PUT",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      email,
+      email: submission.email,
+      companyUrl: submission.companyUrl,
+      growthChallenge: submission.growthChallenge,
+      createdAt: submission.metadata.createdAt,
+      source: submission.metadata.source,
+      landingPage: submission.metadata.landingPage,
+      utmSource: submission.metadata.utmSource,
+      utmMedium: submission.metadata.utmMedium,
+      utmCampaign: submission.metadata.utmCampaign,
+      referrer: submission.metadata.referrer,
       mailingLists: {
         [listId]: true,
       },
-      source: "reframe-landing",
     }),
     cache: "no-store",
   });
