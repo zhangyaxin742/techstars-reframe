@@ -100,7 +100,7 @@ describe("LandingIntakeChat", () => {
     expect(screen.queryByRole("button", { name: /Connect media sources/i })).not.toBeInTheDocument();
   });
 
-  it("navigates to /app on final submit", async () => {
+  it("navigates to /demo on final submit", async () => {
     const user = userEvent.setup();
     render(<LandingIntakeChat />);
 
@@ -109,7 +109,7 @@ describe("LandingIntakeChat", () => {
     await user.click(screen.getByRole("button", { name: /Start building/i }));
 
     await vi.waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/app");
+      expect(mockPush).toHaveBeenCalledWith("/demo");
     }, { timeout: 2000 });
   });
 });

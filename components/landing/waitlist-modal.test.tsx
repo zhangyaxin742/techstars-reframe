@@ -74,9 +74,6 @@ describe("WaitlistModal", () => {
     expect(
       screen.getByText(/You're in! In the meantime, try our/i),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "demo" })).toHaveAttribute(
-      "href",
-      "https://use-reframe.com/demo",
-    );
+    expect(screen.getByRole("link", { name: "demo" })).toHaveAttribute("href", "/demo");
   });
 });

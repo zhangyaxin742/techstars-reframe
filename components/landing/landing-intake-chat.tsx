@@ -190,7 +190,7 @@ export function LandingIntakeChat({ className }: LandingIntakeChatProps) {
   const handleFinalSubmit = useCallback(() => {
     setIsSubmitting(true);
     setTimeout(() => {
-      router.push("/app");
+      router.push("/demo");
     }, 600);
   }, [router]);
 

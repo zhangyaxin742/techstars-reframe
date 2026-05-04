@@ -8,7 +8,7 @@ type WaitlistModalProps = {
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
-const demoHref = "https://use-reframe.com/demo";
+const demoHref = "/demo";
 
 function readTrackingMetadata() {
   if (typeof window === "undefined") {
