@@ -1,13 +1,3 @@
-const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" rx="14" fill="#000"/>
-  <path d="M18 50V14h14.5c3.8 0 6.7 1 8.7 3s3 4.7 3 8c0 2.6-.7 4.8-2 6.5-1.3 1.7-3.2 2.8-5.5 3.3L46 50h-7.8l-8-14h-5.4V50H18zm6.8-19.5h7.4c2.2 0 3.9-.5 5-1.6 1.1-1.1 1.7-2.6 1.7-4.5 0-1.9-.6-3.4-1.7-4.4-1.1-1.1-2.8-1.6-5-1.6h-7.4v12.1z" fill="#fff"/>
-</svg>`;
-
-export function GET() {
-  return new Response(faviconSvg, {
-    headers: {
-      "Cache-Control": "public, max-age=31536000, immutable",
-      "Content-Type": "image/svg+xml",
-    },
-  });
+export function GET(request: Request) {
+  return Response.redirect(new URL("/favicon.svg", request.url), 308);
 }

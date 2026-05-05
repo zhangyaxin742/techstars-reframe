@@ -21,7 +21,12 @@ export const metadata: Metadata = {
   title: "Reframe",
   description: "Your AI CMO for founders who have a product but no audience.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      {
+        url: "/favicon.svg",
+        type: "image/svg+xml",
+      },
+    ],
   },
 };
 
