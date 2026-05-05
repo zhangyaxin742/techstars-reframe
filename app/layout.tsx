@@ -20,6 +20,9 @@ const sans = Instrument_Sans({
 export const metadata: Metadata = {
   title: "Reframe",
   description: "Your AI CMO for founders who have a product but no audience.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
