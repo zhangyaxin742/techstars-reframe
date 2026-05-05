@@ -5,20 +5,78 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
-const backgroundPlaybackRate = 2;
+const backgroundStartPlaybackRate = 2;
+const backgroundEndPlaybackRate = 1;
+const backgroundPlaybackEaseMs = 4_000;
+
+function easeOutCubic(progress: number) {
+  return 1 - Math.pow(1 - progress, 3);
+}
 
 function BackgroundFrame({ priority = false }: { priority?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
+    let animationFrameId: number | undefined;
 
     if (!video) {
       return;
     }
 
-    video.defaultPlaybackRate = backgroundPlaybackRate;
-    video.playbackRate = backgroundPlaybackRate;
+    const cancelPlaybackEase = () => {
+      if (animationFrameId !== undefined) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = undefined;
+      }
+    };
+
+    const finishPlaybackEase = () => {
+      cancelPlaybackEase();
+      video.playbackRate = backgroundEndPlaybackRate;
+    };
+
+    const startPlaybackEase = () => {
+      cancelPlaybackEase();
+      video.defaultPlaybackRate = backgroundStartPlaybackRate;
+      video.playbackRate = backgroundStartPlaybackRate;
+
+      const startedAt = performance.now();
+
+      const tick = (now: number) => {
+        const progress = Math.min((now - startedAt) / backgroundPlaybackEaseMs, 1);
+        const eased = easeOutCubic(progress);
+
+        video.playbackRate =
+          backgroundStartPlaybackRate +
+          (backgroundEndPlaybackRate - backgroundStartPlaybackRate) * eased;
+
+        if (progress < 1 && !video.paused && !video.ended) {
+          animationFrameId = requestAnimationFrame(tick);
+        } else {
+          finishPlaybackEase();
+        }
+      };
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    video.defaultPlaybackRate = backgroundStartPlaybackRate;
+    video.playbackRate = backgroundStartPlaybackRate;
+    video.addEventListener("play", startPlaybackEase);
+    video.addEventListener("pause", cancelPlaybackEase);
+    video.addEventListener("ended", finishPlaybackEase);
+
+    if (!video.paused) {
+      startPlaybackEase();
+    }
+
+    return () => {
+      cancelPlaybackEase();
+      video.removeEventListener("play", startPlaybackEase);
+      video.removeEventListener("pause", cancelPlaybackEase);
+      video.removeEventListener("ended", finishPlaybackEase);
+    };
   }, []);
 
   return (
