@@ -28,6 +28,8 @@ describe("Hero", () => {
     expect(screen.getByTestId("landing-demo-video")).toBeInTheDocument();
     expect(container.querySelector('source[src="/assets/demo-4k-optimized.mp4"]')).toBeInTheDocument();
     expect(container.querySelector('video[poster="/assets/demo-4k-poster.jpg"]')).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Play demo video" })).toBeInTheDocument();
+    expect(screen.queryByText("Play demo")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Join the waitlist" })).toBeInTheDocument();
   });
 });

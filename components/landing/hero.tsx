@@ -129,12 +129,11 @@ function DemoPreview() {
       {!isPlaying ? (
         <button
           type="button"
-          className="absolute left-1/2 top-1/2 z-10 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 rounded-full border border-cream/30 bg-cream/15 px-6 py-4 text-base font-medium text-cream backdrop-blur-xl backdrop-saturate-150 transition hover:bg-cream/25 focus:outline-none focus:ring-2 focus:ring-cream/55 sm:px-7 sm:py-4 sm:text-lg"
+          className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition hover:bg-black/55 focus:outline-none focus:ring-2 focus:ring-cream/60 sm:size-20"
           aria-label="Play demo video"
           onClick={handlePlayClick}
         >
-          <Play className="size-5 sm:size-6" weight="fill" />
-          <span>Play demo</span>
+          <Play className="ml-1 size-7 sm:size-9" weight="fill" aria-hidden="true" />
         </button>
       ) : null}
     </div>
