@@ -204,7 +204,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Email address"
-                className="w-full rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
+                className="w-full rounded-2xl border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
               />
             </label>
 
@@ -220,7 +220,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
                 value={companyUrl}
                 onChange={(event) => setCompanyUrl(event.target.value)}
                 placeholder="https://company.com"
-                className="w-full rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
+                className="w-full rounded-2xl border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
               />
             </label>
 
@@ -233,7 +233,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
                   value={growthChallenge}
                   onChange={(event) => setGrowthChallenge(event.target.value)}
                   required
-                  className="w-full appearance-none rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 pr-12 text-base text-cream outline-none transition focus:border-gold"
+                  className="w-full appearance-none rounded-2xl border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 pr-12 text-base text-cream outline-none transition focus:border-gold"
                 >
                   <option value="">Choose one</option>
                   {growthChallengeOptions.map((option) => (
@@ -261,7 +261,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
                   placeholder="Tell us what is getting in the way."
                   rows={4}
                   required
-                  className="w-full resize-none rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
+                  className="w-full resize-none rounded-2xl border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
                 />
               </label>
             ) : null}
@@ -269,7 +269,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
             <button
               type="submit"
               disabled={state === "submitting"}
-              className="inline-flex w-full items-center justify-center rounded-[0.8rem] bg-cream px-4 py-3.5 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex w-full items-center justify-center rounded-full bg-cream px-4 py-3.5 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream disabled:cursor-not-allowed disabled:opacity-70"
             >
               {state === "submitting" ? "Submitting..." : "Request early access"}
             </button>
