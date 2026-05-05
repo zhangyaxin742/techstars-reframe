@@ -37,7 +37,6 @@ describe("Hero", () => {
     expect(container.querySelector('img[src="/assets/start-frame.png"]')).not.toBeInTheDocument();
     expect(screen.queryByTestId("landing-intake-chat")).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
-    expect(screen.getByText("No spam. Just early access.")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-card")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-video")).toBeInTheDocument();
     expect(container.querySelector('source[src="/assets/demo-4k-optimized.mp4"]')).toBeInTheDocument();

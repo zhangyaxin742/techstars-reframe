@@ -209,9 +209,7 @@ export function Hero() {
                 />
                 <button type="submit">Join the waitlist</button>
               </form>
-
-              <p className="landing-waitlist-note">No spam. Just early access.</p>
-
+              
               <DemoPreview />
 
               <p className="landing-demo-caption">
