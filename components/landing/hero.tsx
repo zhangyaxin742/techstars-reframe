@@ -136,7 +136,7 @@ function DemoPreview() {
       {!isPlaying ? (
         <button
           type="button"
-          className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition hover:bg-black/55 focus:outline-none focus:ring-2 focus:ring-cream/60 sm:size-20"
+          className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition duration-300 ease-out hover:scale-105 hover:border-cream/50 hover:bg-black/55 hover:shadow-[0_22px_64px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-cream/60 active:scale-100 motion-reduce:transition-none sm:size-20"
           aria-label="Play demo video"
           onClick={handlePlayClick}
         >
