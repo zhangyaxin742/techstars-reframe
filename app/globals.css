@@ -352,14 +352,14 @@ a {
 
 .waitlist-modal > button:first-child {
   -webkit-backdrop-filter: blur(18px) saturate(1.15);
-  animation: waitlist-overlay-in 180ms ease-out both;
+  animation: waitlist-overlay-in 110ms ease-out both;
   backdrop-filter: blur(18px) saturate(1.15);
   background: rgba(11, 9, 6, 0.58);
 }
 
 .waitlist-card {
   -webkit-backdrop-filter: blur(30px) saturate(1.22);
-  animation: waitlist-card-in 190ms ease-out both;
+  animation: waitlist-card-in 125ms ease-out both;
   backdrop-filter: blur(30px) saturate(1.22);
   background: rgba(26, 22, 14, 0.72);
   border-color: rgba(245, 239, 224, 0.18);
@@ -410,7 +410,7 @@ a {
 @keyframes waitlist-card-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 0.5rem, 0) scale(0.96);
+    transform: translate3d(0, 0.25rem, 0) scale(0.985);
   }
 
   to {
