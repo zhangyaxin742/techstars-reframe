@@ -1,7 +1,6 @@
 "use client";
 
-import { CornersOut, Play, SpeakerHigh } from "@phosphor-icons/react";
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
@@ -20,99 +19,18 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
 }
 
 function DemoPreview() {
-  const [playing, setPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const handlePlay = () => {
-    setPlaying(true);
-    requestAnimationFrame(() => {
-      void videoRef.current?.play().catch(() => {
-        setPlaying(false);
-      });
-    });
-  };
-
   return (
     <div className="landing-demo-card" data-testid="landing-demo-card">
-      {playing ? (
-        <video
-          ref={videoRef}
-          data-testid="landing-demo-video"
-          className="size-full object-cover"
-          controls
-          playsInline
-          preload="metadata"
-        >
-          <source src="/videos/reframe-demo-final.mp4" type="video/mp4" />
-        </video>
-      ) : (
-        <div className="landing-demo-poster" data-testid="landing-demo-video">
-          <div className="landing-demo-topbar">
-            <div className="landing-demo-brand">
-              <span className="landing-demo-dot" />
-              <span className="font-display tracking-wordmark">reframe.</span>
-            </div>
-            <div className="landing-demo-profile">
-              <span>Pro</span>
-              <img src="/assets/sidebar-avatar.png" alt="" aria-hidden="true" />
-            </div>
-          </div>
-
-          <div className="landing-demo-body">
-            <aside className="landing-demo-sidebar" aria-hidden="true">
-              <span className="is-active">Home</span>
-              <span>Search</span>
-              <span>Notebooks</span>
-              <span>Collections</span>
-              <span>Sources</span>
-            </aside>
-
-            <div className="landing-demo-copy">
-              <h2>
-                A new era
-                <br />
-                of research.
-              </h2>
-              <p>
-                AI that understands depth
-                <br />
-                so you can create with clarity.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="landing-demo-play"
-              onClick={handlePlay}
-              aria-label="Play demo video"
-            >
-              <Play className="size-8" weight="fill" />
-            </button>
-
-            <div className="landing-demo-report" aria-hidden="true">
-              <h3>Emerging Behavior in High-Performing Teams</h3>
-              <div>
-                <span>Report</span>
-                <span>12 sources</span>
-              </div>
-              <p>Teams that document decisions in real time ship 23% faster and revisit context 41% less.</p>
-              <svg viewBox="0 0 220 74" role="presentation">
-                <path d="M4 62 C36 50 58 57 88 43 C119 29 140 42 166 25 C184 13 199 12 216 4" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="landing-demo-controls" aria-hidden="true">
-            <span>1:24</span>
-            <div className="landing-demo-progress">
-              <span />
-            </div>
-            <span>3:47</span>
-            <SpeakerHigh className="size-4" weight="fill" />
-            <CornersOut className="size-4" />
-          </div>
-        </div>
-      )}
+      <video
+        data-testid="landing-demo-video"
+        className="landing-demo-video"
+        controls
+        playsInline
+        preload="metadata"
+        poster="/assets/demo-4k-poster.jpg"
+      >
+        <source src="/assets/demo-4k-optimized.mp4" type="video/mp4" />
+      </video>
     </div>
   );
 }

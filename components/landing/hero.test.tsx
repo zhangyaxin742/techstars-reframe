@@ -24,6 +24,8 @@ describe("Hero", () => {
     expect(screen.getByText("No spam. Just early access.")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-card")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-video")).toBeInTheDocument();
+    expect(container.querySelector('source[src="/assets/demo-4k-optimized.mp4"]')).toBeInTheDocument();
+    expect(container.querySelector('video[poster="/assets/demo-4k-poster.jpg"]')).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Join the waitlist" })).toBeInTheDocument();
   });
 });
