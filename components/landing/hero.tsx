@@ -77,7 +77,7 @@ export function Hero() {
               </div>
 
               <p className="landing-hero-subtitle">
-                Your AI CMO that helps you 10x.
+                Your AI CMO that helps you 10x your content engine.
               </p>
 
               <form className="landing-waitlist-form" onSubmit={handleWaitlistSubmit}>
