@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
@@ -10,18 +10,46 @@ function BackgroundFrame({
 }: {
   priority?: boolean;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    video.defaultPlaybackRate = 2;
+    video.playbackRate = 2;
+  }, []);
+
   return (
-    <picture className="block h-full w-full">
-      <source srcSet="/assets/start-frame.avif" type="image/avif" />
-      <source srcSet="/assets/start-frame.webp" type="image/webp" />
-      <img
-        src="/assets/start-frame.png"
-        alt=""
+    <div className="relative h-full w-full">
+      <picture className="block h-full w-full">
+        <source srcSet="/assets/start-frame.avif" type="image/avif" />
+        <source srcSet="/assets/start-frame.webp" type="image/webp" />
+        <img
+          src="/assets/start-frame.png"
+          alt=""
+          aria-hidden="true"
+          fetchPriority={priority ? "high" : undefined}
+          className="landing-background-image h-full w-full object-cover object-[50%_24%] sepia-[0.2] saturate-[0.85] brightness-[0.7]"
+        />
+      </picture>
+      <video
+        ref={videoRef}
+        data-testid="landing-background-video"
         aria-hidden="true"
-        fetchPriority={priority ? "high" : undefined}
-        className="landing-background-image h-full w-full object-cover object-[50%_24%] sepia-[0.2] saturate-[0.85] brightness-[0.7]"
-      />
-    </picture>
+        className="absolute inset-x-0 top-0 h-1/2 w-full object-cover object-center sepia-[0.2] saturate-[0.85] brightness-[0.7]"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+      >
+        <source src="/assets/landing-video.mp4" type="video/mp4" />
+      </video>
+    </div>
   );
 }
 

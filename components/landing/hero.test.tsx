@@ -13,10 +13,12 @@ describe("Hero", () => {
     mockPush.mockClear();
   });
 
-  it("renders the landing background as a single image and shows the demo video section", () => {
+  it("renders the landing background with a top-half video and shows the demo video section", () => {
     const { container } = render(<Hero />);
 
     expect(screen.getByTestId("landing-background")).toBeInTheDocument();
+    expect(screen.getByTestId("landing-background-video")).toBeInTheDocument();
+    expect(container.querySelector('source[src="/assets/landing-video.mp4"]')).toBeInTheDocument();
     expect(container.querySelector('img[src="/assets/start-frame.png"]')).toBeInTheDocument();
     expect(container.querySelector('img[src="/assets/end-frame.png"]')).not.toBeInTheDocument();
     expect(screen.queryByTestId("landing-intake-chat")).not.toBeInTheDocument();
