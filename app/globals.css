@@ -254,6 +254,14 @@ a {
   text-shadow: 0 3px 14px rgba(0, 0, 0, 0.78);
 }
 
+@media (min-width: 1024px) {
+  .landing-demo-card {
+    max-height: none;
+    max-width: min(calc(100vw - 4rem), 76rem);
+    width: min(calc(100vw - 4rem), 76rem);
+  }
+}
+
 @media (max-width: 720px) {
   .landing-hero-content {
     justify-content: center;
@@ -307,7 +315,6 @@ a {
   }
 
   .landing-demo-card {
-    aspect-ratio: 1920 / 1204;
     margin-top: 1.2rem;
   }
 
