@@ -13,6 +13,9 @@ vi.mock("next/navigation", () => ({
 describe("Hero", () => {
   beforeEach(() => {
     mockPush.mockClear();
+    vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -30,6 +33,7 @@ describe("Hero", () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+    vi.restoreAllMocks();
   });
 
   it("renders the scrollable landing page with video background and demo preview", () => {
