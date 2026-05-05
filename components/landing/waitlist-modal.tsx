@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretDown } from "@phosphor-icons/react";
+import { CaretDown, X } from "@phosphor-icons/react";
 import React, { useEffect, useState } from "react";
 
 type WaitlistModalProps = {
@@ -165,10 +165,11 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
       <div className="waitlist-card relative z-10 w-full max-w-md rounded-[2rem] border border-white/15 bg-[rgba(26,22,14,0.96)] p-6 text-cream shadow-[0_30px_90px_rgba(0,0,0,0.45)] sm:p-8">
         <button
           type="button"
+          aria-label="Close"
           onClick={() => onOpenChange(false)}
-          className="absolute right-5 top-5 text-sm text-cream/60 transition hover:text-cream"
+          className="absolute right-5 top-5 inline-flex size-8 items-center justify-center rounded-full text-cream/60 transition hover:bg-cream/10 hover:text-cream focus:outline-none focus:ring-2 focus:ring-cream/45"
         >
-          Close
+          <X className="size-4" aria-hidden="true" weight="bold" />
         </button>
 
         <p className="text-xs uppercase tracking-eyebrow text-gold">
