@@ -69,7 +69,7 @@ export function Hero() {
           <main className="landing-hero-content relative z-10 flex h-full flex-col items-center px-5 text-center sm:px-8">
             <div className="mx-auto flex w-full max-w-5xl flex-col items-center">
               <div className="landing-hero-headline">
-                <h1>Sync your data.</h1>
+                <h1>Import your brand.</h1>
                 <h1>Get a recipe.</h1>
                 <h1>
                   Go <em className="font-normal italic">viral.</em>
