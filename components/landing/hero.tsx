@@ -5,9 +5,10 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
-const backgroundStartPlaybackRate = 2.6;
-const backgroundEndPlaybackRate = 0.9;
-const backgroundPlaybackEaseMs = 5_500;
+const backgroundStartPlaybackRate = 1.45;
+const backgroundEndPlaybackRate = 0.95;
+const backgroundPlaybackEaseMs = 7_200;
+const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 
 function easeOutCubic(progress: number) {
   return 1 - Math.pow(1 - progress, 3);
@@ -21,6 +22,12 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
     let animationFrameId: number | undefined;
 
     if (!video) {
+      return;
+    }
+
+    if (window.matchMedia(reducedMotionQuery).matches) {
+      video.defaultPlaybackRate = 1;
+      video.playbackRate = 1;
       return;
     }
 
