@@ -53,7 +53,7 @@ const config: Config = {
       },
       letterSpacing: {
         eyebrow: "0.22em",
-        wordmark: "0.18em",
+        wordmark: "0.12em",
       },
       borderRadius: {
         sm: "0.375rem",
