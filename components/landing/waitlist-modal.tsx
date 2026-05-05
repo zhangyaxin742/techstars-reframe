@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 type WaitlistModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialEmail?: string;
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
@@ -25,7 +26,7 @@ function readTrackingMetadata() {
   };
 }
 
-export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
+export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: WaitlistModalProps) {
   const [email, setEmail] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
   const [growthChallenge, setGrowthChallenge] = useState("");
@@ -55,13 +56,13 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 
   useEffect(() => {
     if (open) {
-      setEmail("");
+      setEmail(initialEmail);
       setCompanyUrl("");
       setGrowthChallenge("");
       setState("idle");
       setMessage("");
     }
-  }, [open]);
+  }, [initialEmail, open]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
