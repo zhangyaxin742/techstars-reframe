@@ -1,5 +1,6 @@
 "use client";
 
+import { CaretDown } from "@phosphor-icons/react";
 import React, { useEffect, useState } from "react";
 
 type WaitlistModalProps = {
@@ -226,19 +227,26 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
               <span className="mb-2 block text-xs uppercase tracking-eyebrow text-warm/80">
                 Biggest growth challenge
               </span>
-              <select
-                value={growthChallenge}
-                onChange={(event) => setGrowthChallenge(event.target.value)}
-                required
-                className="w-full rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition focus:border-gold"
-              >
-                <option value="">Choose one</option>
-                {growthChallengeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              <span className="relative block">
+                <select
+                  value={growthChallenge}
+                  onChange={(event) => setGrowthChallenge(event.target.value)}
+                  required
+                  className="w-full appearance-none rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 pr-12 text-base text-cream outline-none transition focus:border-gold"
+                >
+                  <option value="">Choose one</option>
+                  {growthChallengeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <CaretDown
+                  className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-warm/75"
+                  aria-hidden="true"
+                  weight="bold"
+                />
+              </span>
             </label>
 
             {growthChallenge === somethingElseValue ? (
