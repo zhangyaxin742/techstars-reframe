@@ -5,9 +5,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LandingNav } from "./nav";
 import { WaitlistModal } from "./waitlist-modal";
 
-const backgroundStartPlaybackRate = 3.6;
-const backgroundEndPlaybackRate = 1.48;
-const backgroundPlaybackEaseMs = 4_000;
+const backgroundStartPlaybackRate = 5.6;
+const backgroundEndPlaybackRate = 1.25;
+const backgroundPlaybackEaseMs = 3_500;
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 
 function easeOutCubic(progress: number) {
