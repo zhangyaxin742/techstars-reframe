@@ -13,11 +13,13 @@ describe("Hero", () => {
     mockPush.mockClear();
   });
 
-  it("renders the one-screen landing page with inline waitlist and demo preview", () => {
+  it("renders the scrollable landing page with video background and demo preview", () => {
     const { container } = render(<Hero />);
 
     expect(screen.getByTestId("landing-background")).toBeInTheDocument();
-    expect(container.querySelector('img[src="/assets/landing.png"]')).toBeInTheDocument();
+    expect(screen.getByTestId("landing-background-video")).not.toHaveAttribute("loop");
+    expect(container.querySelector('source[src="/assets/landing-video.mp4"]')).toBeInTheDocument();
+    expect(container.querySelector('video[poster="/assets/landing.png"]')).toBeInTheDocument();
     expect(container.querySelector('img[src="/assets/start-frame.png"]')).not.toBeInTheDocument();
     expect(screen.queryByTestId("landing-intake-chat")).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
