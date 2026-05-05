@@ -189,7 +189,7 @@ a {
 .landing-waitlist-form button {
   background: rgba(245, 239, 224, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 1.35rem;
+  border-radius: 0.85rem;
   color: var(--ink);
   flex: 0 0 auto;
   font-size: 1.05rem;
