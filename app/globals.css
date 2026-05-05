@@ -284,6 +284,7 @@ a {
     box-shadow:
       inset 0 1px 0 rgba(245, 239, 224, 0.08),
       0 18px 44px rgba(0, 0, 0, 0.24);
+    height: 3.35rem;
     padding: 0 1.2rem;
   }
 
