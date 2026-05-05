@@ -10,6 +10,16 @@ type WaitlistModalProps = {
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const somethingElseValue = "something else";
+const growthChallengeOptions = [
+  "distribution",
+  "positioning",
+  "content",
+  "conversion",
+  somethingElseValue,
+] as const;
+
 function readTrackingMetadata() {
   if (typeof window === "undefined") {
     return {};
@@ -30,6 +40,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
   const [email, setEmail] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
   const [growthChallenge, setGrowthChallenge] = useState("");
+  const [customGrowthChallenge, setCustomGrowthChallenge] = useState("");
   const [state, setState] = useState<SubmitState>("idle");
   const [message, setMessage] = useState("");
 
@@ -59,6 +70,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
       setEmail(initialEmail);
       setCompanyUrl("");
       setGrowthChallenge("");
+      setCustomGrowthChallenge("");
       setState("idle");
       setMessage("");
     }
@@ -67,9 +79,21 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!email.trim()) {
+    const normalizedEmail = email.trim();
+    const resolvedGrowthChallenge =
+      growthChallenge === somethingElseValue
+        ? customGrowthChallenge.trim()
+        : growthChallenge;
+
+    if (!normalizedEmail) {
       setState("error");
       setMessage("Enter your email address.");
+      return;
+    }
+
+    if (!emailPattern.test(normalizedEmail)) {
+      setState("error");
+      setMessage("Enter a valid email address.");
       return;
     }
 
@@ -81,7 +105,13 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
 
     if (!growthChallenge.trim()) {
       setState("error");
-      setMessage("Tell us your biggest growth challenge.");
+      setMessage("Choose your biggest growth challenge.");
+      return;
+    }
+
+    if (!resolvedGrowthChallenge) {
+      setState("error");
+      setMessage("Tell us what is hardest right now.");
       return;
     }
 
@@ -95,9 +125,9 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           companyUrl,
-          growthChallenge,
+          growthChallenge: resolvedGrowthChallenge,
           metadata: readTrackingMetadata(),
         }),
       });
@@ -147,18 +177,19 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
           Get early access
         </h2>
         <p className="mt-4 max-w-sm text-sm leading-6 text-warm">
-          Join the list for product updates, early access, and the first wave of
-          founder onboarding invites.
+          Tell us where growth is stuck. We&apos;ll use it to prioritize
+          founders who need Reframe most.
         </p>
 
         {state === "success" ? (
           <div className="mt-8 rounded-[1.6rem] border border-[rgba(201,168,76,0.28)] bg-[rgba(245,239,224,0.06)] p-5">
             <p className="text-base text-cream">
-              You&apos;re in. We&apos;ll reach out when early access opens.
+              You&apos;re on the list. We&apos;ll reach out when your early
+              access spot opens.
             </p>
           </div>
         ) : (
-          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+          <form className="mt-8 space-y-4" noValidate onSubmit={handleSubmit}>
             <label className="block">
               <span className="mb-2 block text-xs uppercase tracking-eyebrow text-warm/80">
                 Email
@@ -167,6 +198,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
                 type="email"
                 inputMode="email"
                 autoComplete="email"
+                required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Email address"
@@ -182,6 +214,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
                 type="text"
                 inputMode="url"
                 autoComplete="off"
+                required
                 value={companyUrl}
                 onChange={(event) => setCompanyUrl(event.target.value)}
                 placeholder="https://company.com"
@@ -193,21 +226,43 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
               <span className="mb-2 block text-xs uppercase tracking-eyebrow text-warm/80">
                 Biggest growth challenge
               </span>
-              <textarea
+              <select
                 value={growthChallenge}
                 onChange={(event) => setGrowthChallenge(event.target.value)}
-                placeholder="What is hardest right now: distribution, positioning, content, conversion, or something else?"
-                rows={4}
-                className="w-full resize-none rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
-              />
+                required
+                className="w-full rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition focus:border-gold"
+              >
+                <option value="">Choose one</option>
+                {growthChallengeOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
             </label>
+
+            {growthChallenge === somethingElseValue ? (
+              <label className="block">
+                <span className="mb-2 block text-xs uppercase tracking-eyebrow text-warm/80">
+                  What is hardest right now?
+                </span>
+                <textarea
+                  value={customGrowthChallenge}
+                  onChange={(event) => setCustomGrowthChallenge(event.target.value)}
+                  placeholder="Tell us what is getting in the way."
+                  rows={4}
+                  required
+                  className="w-full resize-none rounded-[1.2rem] border border-white/12 bg-[rgba(245,239,224,0.06)] px-4 py-3.5 text-base text-cream outline-none transition placeholder:text-cream/35 focus:border-gold"
+                />
+              </label>
+            ) : null}
 
             <button
               type="submit"
               disabled={state === "submitting"}
               className="inline-flex w-full items-center justify-center rounded-[0.8rem] bg-cream px-4 py-3.5 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {state === "submitting" ? "Submitting..." : "Join waitlist"}
+              {state === "submitting" ? "Submitting..." : "Request early access"}
             </button>
 
             {message ? (

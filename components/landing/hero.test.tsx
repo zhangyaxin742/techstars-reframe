@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { Hero } from "./hero";
 
@@ -11,6 +12,19 @@ vi.mock("next/navigation", () => ({
 describe("Hero", () => {
   beforeEach(() => {
     mockPush.mockClear();
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
   });
 
   it("renders the scrollable landing page with video background and demo preview", () => {
@@ -31,5 +45,18 @@ describe("Hero", () => {
     expect(screen.getByRole("button", { name: "Play demo video" })).toBeInTheDocument();
     expect(screen.queryByText("Play demo")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Join the waitlist" })).toBeInTheDocument();
+  });
+
+  it("opens the waitlist modal with the entered email", async () => {
+    const user = userEvent.setup();
+
+    render(<Hero />);
+
+    await user.type(screen.getByPlaceholderText("Enter your email"), "founder@example.com");
+    await user.click(screen.getByRole("button", { name: "Join the waitlist" }));
+
+    expect(screen.getByRole("textbox", { name: "Email" })).toHaveValue(
+      "founder@example.com",
+    );
   });
 });

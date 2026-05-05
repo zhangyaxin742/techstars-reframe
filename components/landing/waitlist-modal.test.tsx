@@ -26,9 +26,28 @@ describe("WaitlistModal", () => {
     render(<WaitlistModal open onOpenChange={onOpenChange} />);
 
     await user.type(screen.getByPlaceholderText("Email address"), "founder@example.com");
-    await user.click(screen.getByRole("button", { name: "Join waitlist" }));
+    await user.click(screen.getByRole("button", { name: "Request early access" }));
 
     expect(screen.getByText("Enter your company URL.")).toBeInTheDocument();
+  });
+
+  it("rejects invalid email before submitting", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn();
+    global.fetch = fetchMock as typeof fetch;
+
+    render(<WaitlistModal open onOpenChange={onOpenChange} />);
+
+    await user.type(screen.getByPlaceholderText("Email address"), "founder");
+    await user.type(screen.getByPlaceholderText("https://company.com"), "acme.com");
+    await user.selectOptions(
+      screen.getByLabelText("Biggest growth challenge"),
+      "distribution",
+    );
+    await user.click(screen.getByRole("button", { name: "Request early access" }));
+
+    expect(screen.getByText("Enter a valid email address.")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("prefills the email field from the landing form", () => {
@@ -45,7 +64,7 @@ describe("WaitlistModal", () => {
     );
   });
 
-  it("submits qualification fields and tracking metadata", async () => {
+  it("submits selected growth challenge and tracking metadata", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -57,11 +76,11 @@ describe("WaitlistModal", () => {
 
     await user.type(screen.getByPlaceholderText("Email address"), "founder@example.com");
     await user.type(screen.getByPlaceholderText("https://company.com"), "acme.com");
-    await user.type(
-      screen.getByPlaceholderText(/What is hardest right now/i),
-      "We have product-market fit but no repeatable acquisition motion.",
+    await user.selectOptions(
+      screen.getByLabelText("Biggest growth challenge"),
+      "distribution",
     );
-    await user.click(screen.getByRole("button", { name: "Join waitlist" }));
+    await user.click(screen.getByRole("button", { name: "Request early access" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
@@ -72,8 +91,7 @@ describe("WaitlistModal", () => {
           body: JSON.stringify({
             email: "founder@example.com",
             companyUrl: "acme.com",
-            growthChallenge:
-              "We have product-market fit but no repeatable acquisition motion.",
+            growthChallenge: "distribution",
             metadata: {
               landingPage: "/?utm_source=twitter&utm_medium=social&utm_campaign=launch",
               utmSource: "twitter",
@@ -86,8 +104,52 @@ describe("WaitlistModal", () => {
       );
     });
     expect(
-      screen.getByText(/You're in. We'll reach out when early access opens./i),
+      screen.getByText(/You're on the list. We'll reach out when your early access spot opens./i),
     ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "demo" })).not.toBeInTheDocument();
+  });
+
+  it("shows a detail field for something else and submits the entered challenge", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true }),
+    });
+    global.fetch = fetchMock as typeof fetch;
+
+    render(<WaitlistModal open onOpenChange={onOpenChange} />);
+
+    await user.type(screen.getByPlaceholderText("Email address"), "founder@example.com");
+    await user.type(screen.getByPlaceholderText("https://company.com"), "acme.com");
+    await user.selectOptions(
+      screen.getByLabelText("Biggest growth challenge"),
+      "something else",
+    );
+    await user.type(
+      screen.getByPlaceholderText("Tell us what is getting in the way."),
+      "We need to understand which creator partners can convert.",
+    );
+    await user.click(screen.getByRole("button", { name: "Request early access" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/waitlist",
+        expect.objectContaining({
+          body: JSON.stringify({
+            email: "founder@example.com",
+            companyUrl: "acme.com",
+            growthChallenge:
+              "We need to understand which creator partners can convert.",
+            metadata: {
+              landingPage: "/?utm_source=twitter&utm_medium=social&utm_campaign=launch",
+              utmSource: "twitter",
+              utmMedium: "social",
+              utmCampaign: "launch",
+              referrer: "https://x.com/reframe_launch",
+            },
+          }),
+        }),
+      );
+    });
   });
 });

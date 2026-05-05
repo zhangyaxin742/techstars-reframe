@@ -202,6 +202,7 @@ export function Hero() {
                   type="email"
                   inputMode="email"
                   autoComplete="email"
+                  required
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="Enter your email"
