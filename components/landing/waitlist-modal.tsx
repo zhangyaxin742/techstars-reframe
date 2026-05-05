@@ -271,7 +271,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
               disabled={state === "submitting"}
               className="inline-flex w-full items-center justify-center rounded-full bg-cream px-4 py-3.5 text-sm font-medium text-ink transition hover:bg-gold hover:text-cream disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {state === "submitting" ? "Submitting..." : "Request early access"}
+              {state === "submitting" ? "Submitting..." : "Join the waitlist"}
             </button>
 
             {message ? (

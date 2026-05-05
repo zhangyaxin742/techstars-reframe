@@ -26,7 +26,7 @@ describe("WaitlistModal", () => {
     render(<WaitlistModal open onOpenChange={onOpenChange} />);
 
     await user.type(screen.getByPlaceholderText("Email address"), "founder@example.com");
-    await user.click(screen.getByRole("button", { name: "Request early access" }));
+    await user.click(screen.getByRole("button", { name: "Join the waitlist" }));
 
     expect(screen.getByText("Enter your company URL.")).toBeInTheDocument();
   });
@@ -44,7 +44,7 @@ describe("WaitlistModal", () => {
       screen.getByLabelText("Biggest growth challenge"),
       "distribution",
     );
-    await user.click(screen.getByRole("button", { name: "Request early access" }));
+    await user.click(screen.getByRole("button", { name: "Join the waitlist" }));
 
     expect(screen.getByText("Enter a valid email address.")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe("WaitlistModal", () => {
       screen.getByLabelText("Biggest growth challenge"),
       "distribution",
     );
-    await user.click(screen.getByRole("button", { name: "Request early access" }));
+    await user.click(screen.getByRole("button", { name: "Join the waitlist" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
@@ -129,7 +129,7 @@ describe("WaitlistModal", () => {
       screen.getByPlaceholderText("Tell us what is getting in the way."),
       "We need to understand which creator partners can convert.",
     );
-    await user.click(screen.getByRole("button", { name: "Request early access" }));
+    await user.click(screen.getByRole("button", { name: "Join the waitlist" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
