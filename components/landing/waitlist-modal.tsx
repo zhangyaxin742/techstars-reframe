@@ -177,8 +177,8 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
           Get early access
         </h2>
         <p className="mt-4 max-w-sm text-sm leading-6 text-warm">
-          Tell us where growth is stuck. We&apos;ll use it to prioritize
-          founders who need Reframe most.
+          Share what you&apos;re focused on growing right now. We&apos;ll use it
+          to make your early access experience more useful from day one.
         </p>
 
         {state === "success" ? (
