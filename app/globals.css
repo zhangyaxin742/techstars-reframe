@@ -285,8 +285,8 @@ a {
       inset 0 1px 0 rgba(245, 239, 224, 0.12),
       0 16px 38px rgba(0, 0, 0, 0.32);
     flex: none;
-    height: 3.35rem;
-    line-height: 3.35rem;
+    height: 3.55rem;
+    line-height: 3.55rem;
     padding: 0 1.2rem;
   }
 
@@ -303,7 +303,6 @@ a {
 
   .landing-waitlist-form input,
   .landing-waitlist-form button {
-    min-height: 3.35rem;
     width: 100%;
   }
 
