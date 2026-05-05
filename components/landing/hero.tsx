@@ -16,6 +16,8 @@ function easeOutCubic(progress: number) {
 
 function BackgroundFrame({ priority = false }: { priority?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -23,6 +25,10 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
 
     if (!video) {
       return;
+    }
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      setIsReady(true);
     }
 
     if (window.matchMedia(reducedMotionQuery).matches) {
@@ -87,60 +93,112 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
   }, []);
 
   return (
-    <video
-      ref={videoRef}
-      data-testid="landing-background-video"
-      aria-hidden="true"
-      className="landing-background-video size-full object-cover object-center"
-      autoPlay
-      muted
-      playsInline
-      poster="/assets/landing.png"
-      preload={priority ? "auto" : "metadata"}
-    >
-      <source src="/assets/landing-video.mp4" type="video/mp4" />
-    </video>
+    <>
+      <img
+        data-testid="landing-background-fallback"
+        src="/assets/landing.png"
+        alt=""
+        aria-hidden="true"
+        className="size-full object-cover object-center"
+        loading={priority ? "eager" : "lazy"}
+      />
+      {!hasError ? (
+        <video
+          ref={videoRef}
+          data-testid="landing-background-video"
+          aria-hidden="true"
+          className={`landing-background-video absolute inset-0 size-full object-cover object-center transition-opacity duration-500 ${
+            isReady ? "opacity-100" : "opacity-0"
+          }`}
+          autoPlay
+          muted
+          playsInline
+          poster="/assets/landing.png"
+          preload={priority ? "auto" : "metadata"}
+          onCanPlay={() => setIsReady(true)}
+          onLoadedData={() => setIsReady(true)}
+          onError={() => setHasError(true)}
+        >
+          <source src="/assets/landing-video.mp4" type="video/mp4" />
+        </video>
+      ) : null}
+    </>
   );
 }
 
 function DemoPreview() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const handlePlayClick = () => {
+  const handlePlayClick = async () => {
     const video = videoRef.current;
 
     if (!video) {
       return;
     }
 
-    void video.play();
+    if (video.ended) {
+      video.currentTime = 0;
+    }
+
+    try {
+      if (video.readyState === HTMLMediaElement.HAVE_NOTHING) {
+        video.load();
+      }
+
+      await video.play();
+    } catch {
+      setIsPlaying(false);
+    }
   };
 
   return (
-    <div className="landing-demo-card" data-testid="landing-demo-card">
-      <video
-        ref={videoRef}
-        data-testid="landing-demo-video"
-        className="landing-demo-video"
-        controls
-        playsInline
-        preload="metadata"
-        poster="/assets/demo-4k-poster.jpg"
-        onEnded={() => setIsPlaying(false)}
-        onPause={() => setIsPlaying(false)}
-        onPlay={() => setIsPlaying(true)}
-      >
-        <source src="/assets/demo-4k-optimized.mp4" type="video/mp4" />
-      </video>
+    <div className="landing-demo-card group" data-testid="landing-demo-card">
+      <img
+        data-testid="landing-demo-poster"
+        src="/assets/demo-4k-poster.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 size-full object-cover object-center"
+        loading="eager"
+      />
+      {!hasError ? (
+        <video
+          ref={videoRef}
+          data-testid="landing-demo-video"
+          className={`landing-demo-video absolute inset-0 ${
+            isPlaying ? "" : "pointer-events-none"
+          } ${isReady ? "opacity-100" : "opacity-0"}`}
+          controls={isPlaying}
+          playsInline
+          preload="metadata"
+          poster="/assets/demo-4k-poster.jpg"
+          onCanPlay={() => setIsReady(true)}
+          onLoadedData={() => setIsReady(true)}
+          onEnded={() => setIsPlaying(false)}
+          onError={() => setHasError(true)}
+          onPause={() => setIsPlaying(false)}
+          onPlay={() => setIsPlaying(true)}
+        >
+          <source src="/assets/demo-4k-optimized.mp4" type="video/mp4" />
+          <source src="/assets/demo_video.mp4" type="video/mp4" />
+        </video>
+      ) : null}
       {!isPlaying ? (
         <button
           type="button"
-          className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition duration-300 ease-out hover:scale-105 hover:border-cream/50 hover:bg-black/55 hover:shadow-[0_22px_64px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-cream/60 active:scale-100 motion-reduce:transition-none sm:size-20"
+          data-testid="landing-demo-play-button"
+          className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out hover:scale-105 hover:border-cream/50 hover:bg-black/55 hover:text-cream hover:shadow-[0_22px_64px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-cream/60 active:scale-100 motion-reduce:transition-none sm:size-20"
           aria-label="Play demo video"
           onClick={handlePlayClick}
         >
-          <Play className="ml-1 size-7 sm:size-9" weight="fill" aria-hidden="true" />
+          <Play
+            className="ml-1 size-7 transition-transform duration-300 group-hover:scale-105 sm:size-9"
+            weight="fill"
+            aria-hidden="true"
+          />
         </button>
       ) : null}
     </div>
@@ -156,6 +214,10 @@ export function Hero() {
     event.preventDefault();
     setModalEmail(email.trim());
     setWaitlistOpen(true);
+  };
+
+  const handleWaitlistSuccess = () => {
+    setEmail("");
   };
 
   return (
@@ -226,6 +288,7 @@ export function Hero() {
         open={waitlistOpen}
         onOpenChange={setWaitlistOpen}
         initialEmail={modalEmail}
+        onSuccess={handleWaitlistSuccess}
       />
     </>
   );

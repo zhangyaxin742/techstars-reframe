@@ -7,6 +7,7 @@ type WaitlistModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialEmail?: string;
+  onSuccess?: () => void;
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
@@ -37,7 +38,12 @@ function readTrackingMetadata() {
   };
 }
 
-export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: WaitlistModalProps) {
+export function WaitlistModal({
+  open,
+  onOpenChange,
+  initialEmail = "",
+  onSuccess,
+}: WaitlistModalProps) {
   const [email, setEmail] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
   const [growthChallenge, setGrowthChallenge] = useState("");
@@ -141,6 +147,7 @@ export function WaitlistModal({ open, onOpenChange, initialEmail = "" }: Waitlis
 
       setState("success");
       setMessage("");
+      onSuccess?.();
     } catch (error) {
       setState("error");
       setMessage(
