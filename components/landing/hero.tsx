@@ -17,9 +17,45 @@ function easeOutCubic(progress: number) {
 }
 
 function BackgroundFrame({ priority = false }: { priority?: boolean }) {
+  const fallbackImageRef = useRef<HTMLImageElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    const fallbackImage = fallbackImageRef.current;
+    let frameId = 0;
+    let settleFrameId = 0;
+
+    if (!fallbackImage) {
+      return;
+    }
+
+    const markFallbackReady = () => {
+      frameId = requestAnimationFrame(() => {
+        settleFrameId = requestAnimationFrame(() => {
+          setCanPlayVideo(true);
+        });
+      });
+    };
+
+    if (fallbackImage.complete) {
+      markFallbackReady();
+      return () => {
+        cancelAnimationFrame(frameId);
+        cancelAnimationFrame(settleFrameId);
+      };
+    }
+
+    fallbackImage.addEventListener("load", markFallbackReady, { once: true });
+
+    return () => {
+      fallbackImage.removeEventListener("load", markFallbackReady);
+      cancelAnimationFrame(frameId);
+      cancelAnimationFrame(settleFrameId);
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -94,9 +130,27 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
     };
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (!canPlayVideo || hasError) {
+      video.pause();
+      return;
+    }
+
+    void video.play().catch(() => {
+      setHasError(true);
+    });
+  }, [canPlayVideo, hasError]);
+
   return (
     <>
       <img
+        ref={fallbackImageRef}
         data-testid="landing-background-fallback"
         src="/assets/landing.png"
         alt=""
@@ -110,9 +164,8 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
           data-testid="landing-background-video"
           aria-hidden="true"
           className={`landing-background-video absolute inset-0 size-full object-cover object-center transition-opacity duration-500 ${
-            isReady ? "opacity-100" : "opacity-0"
+            canPlayVideo && isReady ? "opacity-100" : "opacity-0"
           }`}
-          autoPlay
           muted
           playsInline
           poster="/assets/landing.png"

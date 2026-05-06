@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { REFRAME_DEMO_YOUTUBE_VIDEO_ID } from "@/src/lib/demo-video";
@@ -37,16 +37,20 @@ describe("Hero", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the scrollable landing page with video background and demo preview", () => {
+  it("renders the scrollable landing page with video background and demo preview", async () => {
     const user = userEvent.setup();
     const { container } = render(<Hero />);
+    const fallbackImage = screen.getByTestId("landing-background-fallback");
+    const backgroundVideo = screen.getByTestId("landing-background-video");
 
     expect(screen.getByTestId("landing-background")).toBeInTheDocument();
-    expect(screen.getByTestId("landing-background-fallback")).toBeInTheDocument();
-    expect(screen.getByTestId("landing-background-video")).not.toHaveAttribute("loop");
+    expect(fallbackImage).toBeInTheDocument();
+    expect(backgroundVideo).not.toHaveAttribute("loop");
     expect(container.querySelector('source[src="/assets/landing-video.mp4"]')).toBeInTheDocument();
     expect(container.querySelector('video[poster="/assets/landing.png"]')).toBeInTheDocument();
     expect(container.querySelector('img[src="/assets/start-frame.png"]')).not.toBeInTheDocument();
+    expect(backgroundVideo).toHaveClass("opacity-0");
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
     expect(screen.queryByTestId("landing-intake-chat")).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-card")).toBeInTheDocument();
@@ -56,12 +60,18 @@ describe("Hero", () => {
     expect(screen.queryByText("Play demo")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Join the waitlist" })).toBeInTheDocument();
 
-    return user.click(screen.getByRole("button", { name: "Play demo video" })).then(() => {
-      expect(screen.getByTestId("landing-demo-video")).toHaveAttribute(
-        "src",
-        expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
-      );
+    fireEvent.load(fallbackImage);
+
+    await waitFor(() => {
+      expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
     });
+
+    await user.click(screen.getByRole("button", { name: "Play demo video" }));
+
+    expect(screen.getByTestId("landing-demo-video")).toHaveAttribute(
+      "src",
+      expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
+    );
   });
 
   it("opens the waitlist modal with the entered email", async () => {
