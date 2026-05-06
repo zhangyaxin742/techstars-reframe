@@ -67,6 +67,7 @@ describe("Hero", () => {
     expect(screen.queryByTestId("landing-intake-chat")).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-card")).toBeInTheDocument();
+    expect(screen.getByTestId("landing-demo-viewport")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-poster")).toBeInTheDocument();
     expect(screen.queryByTestId("landing-demo-video")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Play demo video" })).toBeInTheDocument();

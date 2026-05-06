@@ -262,6 +262,14 @@ a {
   width: min(calc(100vw - 3rem), 38rem);
 }
 
+.landing-demo-viewport {
+  background: rgba(12, 10, 7, 0.92);
+  border-radius: inherit;
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
 .landing-demo-video {
   background: rgba(12, 10, 7, 0.92);
   border: 0;
@@ -284,6 +292,16 @@ a {
     max-height: none;
     max-width: min(calc(100vw - 4rem), 76rem);
     width: min(calc(100vw - 4rem), 76rem);
+  }
+}
+
+@media (min-width: 721px) {
+  .landing-demo-viewport {
+    border-radius: 1.12rem;
+    box-shadow:
+      inset 0 1px 0 rgba(245, 239, 224, 0.08),
+      0 0 0 1px rgba(245, 239, 224, 0.08);
+    inset: clamp(0.95rem, 1.35vw, 1.4rem);
   }
 }
 

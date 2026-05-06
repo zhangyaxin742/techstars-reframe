@@ -188,42 +188,44 @@ function DemoPreview() {
 
   return (
     <div className="landing-demo-card group" data-testid="landing-demo-card">
-      {!showPlayer ? (
-        <img
-          data-testid="landing-demo-poster"
-          src={REFRAME_DEMO_YOUTUBE_THUMBNAIL_URL}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 size-full object-cover object-center"
-          loading="eager"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <YouTubePlayer
-          videoUrl={REFRAME_DEMO_YOUTUBE_URL}
-          title="Reframe demo video"
-          testId="landing-demo-video"
-          className="landing-demo-video absolute inset-0 size-full"
-          autoPlay
-          playing
-          loading="eager"
-        />
-      )}
-      {!showPlayer ? (
-        <button
-          type="button"
-          data-testid="landing-demo-play-button"
-          className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out hover:scale-105 hover:border-cream/50 hover:bg-black/55 hover:text-cream hover:shadow-[0_22px_64px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-cream/60 active:scale-100 motion-reduce:transition-none sm:size-20"
-          aria-label="Play demo video"
-          onClick={() => setShowPlayer(true)}
-        >
-          <Play
-            className="ml-1 size-7 transition-transform duration-300 group-hover:scale-105 sm:size-9"
-            weight="fill"
+      <div className="landing-demo-viewport" data-testid="landing-demo-viewport">
+        {!showPlayer ? (
+          <img
+            data-testid="landing-demo-poster"
+            src={REFRAME_DEMO_YOUTUBE_THUMBNAIL_URL}
+            alt=""
             aria-hidden="true"
+            className="absolute inset-0 size-full object-cover object-center"
+            loading="eager"
+            referrerPolicy="no-referrer"
           />
-        </button>
-      ) : null}
+        ) : (
+          <YouTubePlayer
+            videoUrl={REFRAME_DEMO_YOUTUBE_URL}
+            title="Reframe demo video"
+            testId="landing-demo-video"
+            className="landing-demo-video absolute inset-0 size-full"
+            autoPlay
+            playing
+            loading="eager"
+          />
+        )}
+        {!showPlayer ? (
+          <button
+            type="button"
+            data-testid="landing-demo-play-button"
+            className="absolute left-1/2 top-1/2 z-10 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/35 bg-black/45 text-cream shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out hover:scale-105 hover:border-cream/50 hover:bg-black/55 hover:text-cream hover:shadow-[0_22px_64px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-cream/60 active:scale-100 motion-reduce:transition-none sm:size-20"
+            aria-label="Play demo video"
+            onClick={() => setShowPlayer(true)}
+          >
+            <Play
+              className="ml-1 size-7 transition-transform duration-300 group-hover:scale-105 sm:size-9"
+              weight="fill"
+              aria-hidden="true"
+            />
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
