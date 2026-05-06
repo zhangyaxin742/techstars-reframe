@@ -1,11 +1,24 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import React from "react";
 import { REFRAME_DEMO_YOUTUBE_VIDEO_ID } from "@/src/lib/demo-video";
 import { Hero } from "./hero";
 
 const mockPush = vi.fn();
 const originalFetch = global.fetch;
+const landingBackgroundPosterSrc = "/videos/landing-background-poster.png";
+const landingBackgroundVideoSrc = "/videos/landing-background.mp4";
+
+function expectPublicMediaAsset(assetPath: string, minimumBytes: number) {
+  const localPath = join(process.cwd(), "public", assetPath.replace(/^\//, ""));
+  const contentStart = readFileSync(localPath).subarray(0, 64).toString("utf8");
+
+  expect(existsSync(localPath)).toBe(true);
+  expect(statSync(localPath).size).toBeGreaterThan(minimumBytes);
+  expect(contentStart.startsWith("version https://git-lfs.github.com/spec")).toBe(false);
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
@@ -46,8 +59,8 @@ describe("Hero", () => {
     expect(screen.getByTestId("landing-background")).toBeInTheDocument();
     expect(fallbackImage).toBeInTheDocument();
     expect(backgroundVideo).not.toHaveAttribute("loop");
-    expect(container.querySelector('source[src="/assets/landing-video.mp4"]')).toBeInTheDocument();
-    expect(container.querySelector('video[poster="/assets/landing.png"]')).toBeInTheDocument();
+    expect(container.querySelector(`source[src="${landingBackgroundVideoSrc}"]`)).toBeInTheDocument();
+    expect(container.querySelector(`video[poster="${landingBackgroundPosterSrc}"]`)).toBeInTheDocument();
     expect(container.querySelector('img[src="/assets/start-frame.png"]')).not.toBeInTheDocument();
     expect(backgroundVideo).toHaveClass("opacity-0");
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
@@ -72,6 +85,11 @@ describe("Hero", () => {
       "src",
       expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
     );
+  });
+
+  it("keeps landing background media on non-lfs deployment paths", () => {
+    expectPublicMediaAsset(landingBackgroundPosterSrc, 100_000);
+    expectPublicMediaAsset(landingBackgroundVideoSrc, 1_000_000);
   });
 
   it("opens the waitlist modal with the entered email", async () => {

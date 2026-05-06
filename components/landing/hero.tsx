@@ -11,6 +11,8 @@ const backgroundStartPlaybackRate = 5.6;
 const backgroundEndPlaybackRate = 1.25;
 const backgroundPlaybackEaseMs = 3_500;
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
+const landingBackgroundPosterSrc = "/videos/landing-background-poster.png";
+const landingBackgroundVideoSrc = "/videos/landing-background.mp4";
 
 function easeOutCubic(progress: number) {
   return 1 - Math.pow(1 - progress, 3);
@@ -152,7 +154,7 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
       <img
         ref={fallbackImageRef}
         data-testid="landing-background-fallback"
-        src="/assets/landing.png"
+        src={landingBackgroundPosterSrc}
         alt=""
         aria-hidden="true"
         className="size-full object-cover object-center"
@@ -168,13 +170,13 @@ function BackgroundFrame({ priority = false }: { priority?: boolean }) {
           }`}
           muted
           playsInline
-          poster="/assets/landing.png"
+          poster={landingBackgroundPosterSrc}
           preload={priority ? "auto" : "metadata"}
           onCanPlay={() => setIsReady(true)}
           onLoadedData={() => setIsReady(true)}
           onError={() => setHasError(true)}
         >
-          <source src="/assets/landing-video.mp4" type="video/mp4" />
+          <source src={landingBackgroundVideoSrc} type="video/mp4" />
         </video>
       ) : null}
     </>
