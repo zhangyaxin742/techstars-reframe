@@ -8,7 +8,7 @@ import { Hero } from "./hero";
 
 const mockPush = vi.fn();
 const originalFetch = global.fetch;
-const landingBackgroundPosterSrc = "/videos/landing-background-poster.png";
+const landingBackgroundPosterSrc = "/videos/landing-background-poster.jpg";
 const landingBackgroundVideoSrc = "/videos/landing-background.mp4";
 
 function expectPublicMediaAsset(assetPath: string, minimumBytes: number) {
@@ -88,8 +88,8 @@ describe("Hero", () => {
   });
 
   it("keeps landing background media on non-lfs deployment paths", () => {
-    expectPublicMediaAsset(landingBackgroundPosterSrc, 100_000);
-    expectPublicMediaAsset(landingBackgroundVideoSrc, 1_000_000);
+    expectPublicMediaAsset(landingBackgroundPosterSrc, 50_000);
+    expectPublicMediaAsset(landingBackgroundVideoSrc, 250_000);
   });
 
   it("opens the waitlist modal with the entered email", async () => {

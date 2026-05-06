@@ -11,7 +11,7 @@ const backgroundStartPlaybackRate = 5.6;
 const backgroundEndPlaybackRate = 1.25;
 const backgroundPlaybackEaseMs = 3_500;
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
-const landingBackgroundPosterSrc = "/videos/landing-background-poster.png";
+const landingBackgroundPosterSrc = "/videos/landing-background-poster.jpg";
 const landingBackgroundVideoSrc = "/videos/landing-background.mp4";
 
 function easeOutCubic(progress: number) {
