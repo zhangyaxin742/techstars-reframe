@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { REFRAME_DEMO_YOUTUBE_VIDEO_ID } from "@/src/lib/demo-video";
 import { Hero } from "./hero";
 
 const mockPush = vi.fn();
@@ -37,6 +38,7 @@ describe("Hero", () => {
   });
 
   it("renders the scrollable landing page with video background and demo preview", () => {
+    const user = userEvent.setup();
     const { container } = render(<Hero />);
 
     expect(screen.getByTestId("landing-background")).toBeInTheDocument();
@@ -49,13 +51,17 @@ describe("Hero", () => {
     expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-card")).toBeInTheDocument();
     expect(screen.getByTestId("landing-demo-poster")).toBeInTheDocument();
-    expect(screen.getByTestId("landing-demo-video")).toBeInTheDocument();
-    expect(container.querySelector('source[src="/assets/demo-4k-optimized.mp4"]')).toBeInTheDocument();
-    expect(container.querySelector('source[src="/assets/demo_video.mp4"]')).toBeInTheDocument();
-    expect(container.querySelector('video[poster="/assets/demo-4k-poster.jpg"]')).toBeInTheDocument();
+    expect(screen.queryByTestId("landing-demo-video")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Play demo video" })).toBeInTheDocument();
     expect(screen.queryByText("Play demo")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Join the waitlist" })).toBeInTheDocument();
+
+    return user.click(screen.getByRole("button", { name: "Play demo video" })).then(() => {
+      expect(screen.getByTestId("landing-demo-video")).toHaveAttribute(
+        "src",
+        expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
+      );
+    });
   });
 
   it("opens the waitlist modal with the entered email", async () => {

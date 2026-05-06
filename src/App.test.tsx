@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { App } from "./App";
 import { brandContext, libraryMediaAssets } from "./data/reframe-demo";
+import { REFRAME_DEMO_YOUTUBE_VIDEO_ID } from "./lib/demo-video";
 
 describe("App", () => {
   beforeEach(() => {
@@ -310,7 +311,7 @@ describe("App", () => {
     ).toHaveAttribute("data-preview-variant", "node");
     expect(within(previewNode).getByLabelText("Timeline preview video")).toHaveAttribute(
       "src",
-      "/videos/final.mp4"
+      expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
     );
   });
 

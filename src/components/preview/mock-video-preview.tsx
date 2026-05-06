@@ -1,7 +1,9 @@
 import { FilmSlate, Pause, Play, X } from "@phosphor-icons/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { TimelineSegment } from "../../data/reframe-demo";
+import { REFRAME_DEMO_YOUTUBE_URL, isYouTubeVideoUrl } from "../../lib/demo-video";
 import { cn } from "../../lib/utils";
+import { YouTubePlayer } from "../media/youtube-player";
 
 interface MockVideoPreviewProps {
   segments: TimelineSegment[];
@@ -29,10 +31,11 @@ export function MockVideoPreview({
   open,
   onClose,
   variant = "modal",
-  videoSrc = "/videos/final.mp4",
+  videoSrc = REFRAME_DEMO_YOUTUBE_URL,
   previewTimeMs = null,
   className,
 }: MockVideoPreviewProps) {
+  const isYouTube = isYouTubeVideoUrl(videoSrc);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [currentMs, setCurrentMs] = useState(0);
@@ -40,6 +43,8 @@ export function MockVideoPreview({
   const totalMs = Math.max(durationMs, 1);
 
   useEffect(() => {
+    if (isYouTube) return;
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -49,29 +54,35 @@ export function MockVideoPreview({
     }
 
     void video.play().catch(() => setPlaying(false));
-  }, [open, playing]);
+  }, [isYouTube, open, playing]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || previewTimeMs === null) return;
+    if (previewTimeMs === null) return;
 
     const nextTimeMs = Math.min(Math.max(previewTimeMs, 0), totalMs);
-    const nextTimeSeconds = nextTimeMs / 1000;
 
-    if (Math.abs(video.currentTime - nextTimeSeconds) > 0.02) {
-      video.currentTime = nextTimeSeconds;
+    if (!isYouTube) {
+      const video = videoRef.current;
+      if (!video) return;
+
+      const nextTimeSeconds = nextTimeMs / 1000;
+
+      if (Math.abs(video.currentTime - nextTimeSeconds) > 0.02) {
+        video.currentTime = nextTimeSeconds;
+      }
     }
+
     setCurrentMs(nextTimeMs);
-  }, [previewTimeMs, totalMs]);
+  }, [isYouTube, previewTimeMs, totalMs]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
-    if (video && currentMs >= totalMs - 100) {
+    if (video && !isYouTube && currentMs >= totalMs - 100) {
       video.currentTime = 0;
       setCurrentMs(0);
     }
     setPlaying((v) => !v);
-  }, [currentMs, totalMs]);
+  }, [currentMs, isYouTube, totalMs]);
 
   const handleLoadedMetadata = useCallback(() => {
     const duration = videoRef.current?.duration;
@@ -91,6 +102,25 @@ export function MockVideoPreview({
     setCurrentMs(0);
     setPlaying(false);
   }, []);
+
+  const handleYouTubeStateChange = useCallback(
+    (state: "unstarted" | "ended" | "playing" | "paused" | "buffering" | "cued") => {
+      if (state === "ended") {
+        handleEnded();
+        return;
+      }
+
+      if (state === "playing") {
+        setPlaying(true);
+        return;
+      }
+
+      if (state === "paused" || state === "cued") {
+        setPlaying(false);
+      }
+    },
+    [handleEnded]
+  );
 
   if (!open) return null;
 
@@ -133,17 +163,40 @@ export function MockVideoPreview({
           isInline ? "min-h-0 flex-1" : "aspect-[9/16]"
         )}
       >
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          className="absolute inset-0 size-full object-cover"
-          playsInline
-          preload="metadata"
-          aria-label="Timeline preview video"
-          onLoadedMetadata={handleLoadedMetadata}
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={handleEnded}
-        />
+        {isYouTube ? (
+          <YouTubePlayer
+            videoUrl={videoSrc}
+            title="Timeline preview video"
+            testId="timeline-preview-iframe"
+            className="absolute inset-0 size-full"
+            controls
+            playing={open && playing}
+            seekToSeconds={previewTimeMs === null ? null : previewTimeMs / 1000}
+            onCurrentTimeChange={(seconds) => {
+              if (previewTimeMs === null) {
+                setCurrentMs(seconds * 1000);
+              }
+            }}
+            onDurationChange={(seconds) => {
+              if (Number.isFinite(seconds) && seconds > 0) {
+                setDurationMs(seconds * 1000);
+              }
+            }}
+            onPlaybackStateChange={handleYouTubeStateChange}
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            className="absolute inset-0 size-full object-cover"
+            playsInline
+            preload="metadata"
+            aria-label="Timeline preview video"
+            onLoadedMetadata={handleLoadedMetadata}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleEnded}
+          />
+        )}
         {missingScrubSegment ? (
           <div
             className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white"
@@ -188,7 +241,7 @@ export function MockVideoPreview({
           <span className="text-xs tabular-nums text-neutral-400">
             {(currentMs / 1000).toFixed(1)}s / {(totalMs / 1000).toFixed(1)}s
           </span>
-          {!isInline ? <span className="text-xs text-neutral-500">final.mp4</span> : null}
+          {!isInline ? <span className="text-xs text-neutral-500">YouTube</span> : null}
         </div>
       </div>
     </div>

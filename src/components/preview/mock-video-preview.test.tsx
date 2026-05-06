@@ -1,21 +1,11 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { timelineSegments } from "../../data/reframe-demo";
+import { REFRAME_DEMO_YOUTUBE_VIDEO_ID } from "../../lib/demo-video";
 import { MockVideoPreview } from "./mock-video-preview";
 
 describe("MockVideoPreview", () => {
-  beforeEach(() => {
-    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
-    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it("renders the final video asset in the preview player", () => {
+  it("renders the hosted YouTube demo in the preview player", () => {
     render(<MockVideoPreview segments={timelineSegments} open variant="floating" />);
 
     expect(screen.getByTestId("mock-video-preview")).toHaveAttribute(
@@ -24,13 +14,8 @@ describe("MockVideoPreview", () => {
     );
     expect(screen.getByLabelText("Timeline preview video")).toHaveAttribute(
       "src",
-      "/videos/final.mp4"
+      expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
     );
-    expect(screen.getByLabelText("Timeline preview video")).not.toHaveAttribute("muted");
-  });
-
-  it("keeps the default final preview video available in public assets", () => {
-    expect(existsSync(join(process.cwd(), "public/videos/final.mp4"))).toBe(true);
   });
 
   it("does not render timeline text over the preview video", () => {
@@ -49,9 +34,8 @@ describe("MockVideoPreview", () => {
     expect(screen.getByTestId("mock-video-preview")).toHaveClass("h-full");
     expect(screen.getByLabelText("Timeline preview video")).toHaveAttribute(
       "src",
-      "/videos/final.mp4"
+      expect.stringContaining(`youtube.com/embed/${REFRAME_DEMO_YOUTUBE_VIDEO_ID}`)
     );
-    expect(screen.getByLabelText("Timeline preview video")).not.toHaveAttribute("muted");
   });
 
   it("seeks the preview video when a timeline scrub time is provided", async () => {
@@ -64,10 +48,7 @@ describe("MockVideoPreview", () => {
       />
     );
 
-    const video = screen.getByLabelText("Timeline preview video") as HTMLVideoElement;
-
-    await waitFor(() => expect(video.currentTime).toBe(9));
-    expect(screen.getByText("9.0s / 18.0s")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("9.0s / 18.0s")).toBeInTheDocument());
   });
 
   it("shows a black missing-shot frame while scrubbing over a missing segment", async () => {
@@ -80,9 +61,7 @@ describe("MockVideoPreview", () => {
       />
     );
 
-    const video = screen.getByLabelText("Timeline preview video") as HTMLVideoElement;
-
-    await waitFor(() => expect(video.currentTime).toBe(7));
+    await waitFor(() => expect(screen.getByText("7.0s / 18.0s")).toBeInTheDocument());
     expect(screen.getByTestId("preview-missing-shot-frame")).toHaveClass("bg-black");
     expect(screen.getByText("shot missing")).toBeInTheDocument();
   });
