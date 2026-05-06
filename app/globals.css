@@ -312,24 +312,22 @@ a {
 
 @media (min-width: 721px) {
   .landing-demo-card {
-    -webkit-backdrop-filter: blur(22px) saturate(0.92);
-    backdrop-filter: blur(22px) saturate(0.92);
     background:
-      linear-gradient(180deg, rgba(245, 239, 224, 0.08), rgba(245, 239, 224, 0.04)),
-      rgba(24, 18, 10, 0.18);
-    border-color: rgba(245, 239, 224, 0.22);
+      linear-gradient(180deg, rgba(245, 239, 224, 0.06), rgba(245, 239, 224, 0.03)),
+      rgba(24, 18, 10, 0.14);
+    border-color: rgba(245, 239, 224, 0.18);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.14),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.04),
-      0 28px 72px rgba(0, 0, 0, 0.42);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+      0 28px 72px rgba(0, 0, 0, 0.36);
     isolation: isolate;
-    padding: clamp(0.95rem, 1.35vw, 1.4rem);
+    padding: 1.1rem;
   }
 
   .landing-demo-card::before {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0)),
-      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 58%);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), transparent 58%);
   }
 
   .landing-demo-viewport {
