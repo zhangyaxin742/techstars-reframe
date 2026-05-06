@@ -263,15 +263,15 @@ a {
 }
 
 .landing-demo-viewport {
-  background: rgba(12, 10, 7, 0.92);
   border-radius: inherit;
   inset: 0;
   overflow: hidden;
   position: absolute;
 }
 
+.landing-demo-media,
 .landing-demo-video {
-  background: rgba(12, 10, 7, 0.92);
+  border-radius: inherit;
   border: 0;
   display: block;
   height: 100%;
@@ -296,6 +296,10 @@ a {
 }
 
 @media (min-width: 721px) {
+  .landing-demo-card {
+    background: transparent;
+  }
+
   .landing-demo-viewport {
     border-radius: 1.12rem;
     box-shadow:

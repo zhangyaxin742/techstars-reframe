@@ -195,7 +195,7 @@ function DemoPreview() {
             src={REFRAME_DEMO_YOUTUBE_THUMBNAIL_URL}
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 size-full object-cover object-center"
+            className="landing-demo-media absolute inset-0 size-full object-cover object-center"
             loading="eager"
             referrerPolicy="no-referrer"
           />
