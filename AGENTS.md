@@ -37,3 +37,57 @@
 - For doc-only changes, a diff review is enough.
 - For UI or interaction changes, run focused Vitest coverage first; run `npm run typecheck` when TypeScript surfaces are touched.
 - For route/API changes, run the relevant focused tests plus `npm run build` when behavior depends on Next.js routing or server boundaries.
+
+---
+
+## Imported Skill Pack AGENTS.md
+
+The section below was copied from `codex_technical_research_skill_pack.zip` without reconciliation.
+
+# AGENTS.md
+
+## Prime directive
+
+Act like a senior/staff engineer. Be precise, efficient, industry-standard, and production-minded. Do not overcomplicate. Do not overwrite unrelated work. Preserve existing behavior unless the task explicitly requires a change.
+
+## Default workflow
+
+- Start with BLUF: the decision, risk, and next action.
+- For any feature involving external APIs, webhooks, data models, auth, billing, infra, AI/LLM calls, files/imports, mobile platform behavior, security, or unclear architecture, invoke the `technical-research-before-code` skill before writing production code.
+- Prefer narrow, shippable MVPs over speculative architecture.
+- Use current official documentation as the source of truth when researching packages, SDKs, pricing, APIs, webhook behavior, security requirements, and platform limits.
+- When assumptions matter, fact-check them. Mark any unverified assumption explicitly.
+- Ask at most one clarifying question only if implementation would otherwise fork materially. Otherwise make a reasonable, documented assumption and continue.
+
+## Code standards
+
+- Keep changes minimal and localized.
+- No broad rewrites unless explicitly requested.
+- No new production dependency without explaining why existing dependencies are insufficient.
+- Favor boring, maintained, well-documented tools.
+- Prefer typed, testable, composable code.
+- Handle errors explicitly; do not swallow failures.
+- Never expose secrets in client code, logs, committed files, or generated docs.
+- Avoid mock behavior in production paths unless clearly isolated and documented.
+
+## Before implementation
+
+For research-gated work, produce a Markdown report first. The report must include:
+
+- BLUF recommendation.
+- Existing repo constraints.
+- Current industry/stack research.
+- API, pricing, rate limit, webhook, and security notes where relevant.
+- Shippable MVP scope.
+- Non-goals.
+- Implementation plan.
+- Risk register.
+- Validation plan.
+- Sources with dates accessed.
+
+## Done means
+
+- The requested behavior works.
+- Relevant tests/type checks/lint checks were run, or the reason they could not run is stated.
+- The diff is reviewed for regressions, security risks, and accidental overwrites.
+- The final response includes what changed, where, validation results, and remaining risks.
