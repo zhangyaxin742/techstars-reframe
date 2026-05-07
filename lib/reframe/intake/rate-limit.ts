@@ -68,6 +68,35 @@ export function checkOtpStartRateLimit(input: {
   return consumeRateLimits(checks);
 }
 
+export function checkOtpVerifyRateLimit(input: {
+  ipAddress: string | null;
+  emailHash: string;
+  draftTokenHash: string;
+}): IntakeRateLimitResult {
+  const checks: RateLimitConfig[] = [
+    {
+      key: `intake:verify:email:${input.emailHash}`,
+      limit: 8,
+      windowMs: 15 * 60 * 1_000,
+    },
+    {
+      key: `intake:verify:draft:${input.draftTokenHash}`,
+      limit: 8,
+      windowMs: 15 * 60 * 1_000,
+    },
+  ];
+
+  if (input.ipAddress) {
+    checks.push({
+      key: `intake:verify:ip:${input.ipAddress}`,
+      limit: 30,
+      windowMs: 15 * 60 * 1_000,
+    });
+  }
+
+  return consumeRateLimits(checks);
+}
+
 export function resetIntakeRateLimiter() {
   buckets.clear();
 }
