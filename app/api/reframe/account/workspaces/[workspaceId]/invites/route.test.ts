@@ -58,6 +58,7 @@ describe("workspace invite create route", () => {
             {
               invite_id: INVITE_ID,
               workspace_id: WORKSPACE_ID,
+              workspace_name: "My Workspace",
               email_display: "member@example.com",
               role: "member",
               status: "pending",

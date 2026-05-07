@@ -438,6 +438,7 @@ create or replace function public.create_workspace_invite(
 returns table (
   invite_id uuid,
   workspace_id uuid,
+  workspace_name text,
   email_display text,
   role text,
   status text,
@@ -512,6 +513,7 @@ begin
     select
       v_existing.id,
       v_existing.workspace_id,
+      (select w.name from public.workspaces w where w.id = v_existing.workspace_id),
       v_existing.email_display,
       v_existing.role,
       v_existing.status,
@@ -546,6 +548,7 @@ begin
   select
     v_inserted.id,
     v_inserted.workspace_id,
+    (select w.name from public.workspaces w where w.id = v_inserted.workspace_id),
     v_inserted.email_display,
     v_inserted.role,
     v_inserted.status,

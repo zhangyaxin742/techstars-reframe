@@ -34,6 +34,7 @@ import { createSupabaseRouteClient } from "@/lib/supabase/route";
 type InviteCreateRow = {
   invite_id: string;
   workspace_id: string;
+  workspace_name?: string;
   email_display: string;
   role: "admin" | "member";
   status: "pending";
@@ -204,7 +205,7 @@ async function sendInviteAndRecordDelivery(input: {
       inviteId: input.invite.invite_id,
       email: input.invite.email_display,
       token: input.token,
-      workspaceName: "Reframe workspace",
+      workspaceName: input.invite.workspace_name ?? "Reframe workspace",
       inviterName: input.inviterName,
       role: input.invite.role,
       expiresAt: input.invite.expires_at,
