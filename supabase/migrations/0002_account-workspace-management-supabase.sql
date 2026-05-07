@@ -71,6 +71,9 @@ create table if not exists public.workspaces (
   constraint workspaces_name_length check (length(name) between 2 and 80)
 );
 
+alter table public.workspaces
+  add column if not exists archived_at timestamptz;
+
 create table if not exists public.workspace_memberships (
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -81,6 +84,9 @@ create table if not exists public.workspace_memberships (
   primary key (workspace_id, user_id),
   constraint workspace_memberships_role_check check (role in ('owner', 'admin', 'member'))
 );
+
+alter table public.workspace_memberships
+  add column if not exists joined_at timestamptz not null default now();
 
 create table if not exists public.workspace_invites (
   id uuid primary key default extensions.gen_random_uuid(),
@@ -318,7 +324,7 @@ begin
     join public.workspaces w on w.id = wm.workspace_id
     where wm.user_id = v_user_id
       and w.archived_at is null
-    order by wm.joined_at asc, wm.created_at asc
+    order by coalesce(wm.joined_at, wm.created_at) asc
     limit 1;
   end if;
 
