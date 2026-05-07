@@ -6,22 +6,34 @@ type EditorLogoProps = {
   className?: string;
 };
 
-const editorLogoSrc: Record<ExportTarget["id"], string> = {
+const editorLogoSrc: Record<string, string> = {
   capcut: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Capcut-icon.svg",
   "premiere-pro": "https://main--cc--adobecom.aem.live/cc-shared/assets/img/product-icons/svg/premiere-pro.svg",
   "davinci-resolve": "https://commons.wikimedia.org/wiki/Special:Redirect/file/DaVinci_Resolve_17_logo.svg",
 };
 
-const editorLogoAlt: Record<ExportTarget["id"], string> = {
+const editorLogoAlt: Record<string, string> = {
   capcut: "CapCut",
   "premiere-pro": "Adobe Premiere Pro",
   "davinci-resolve": "DaVinci Resolve",
 };
 
 export function EditorLogo({ targetId, className }: EditorLogoProps) {
+  const logoSrc = editorLogoSrc[targetId];
+
+  if (!logoSrc) {
+    return (
+      <span
+        aria-hidden="true"
+        className={className}
+        data-testid={`editor-logo-${targetId}`}
+      />
+    );
+  }
+
   return (
     <img
-      src={editorLogoSrc[targetId]}
+      src={logoSrc}
       alt=""
       aria-hidden="true"
       className={className}

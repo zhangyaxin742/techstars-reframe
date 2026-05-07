@@ -31,7 +31,7 @@ export type CanvasNodeKind =
 
 export interface CanvasVideoData {
   src: string;
-  label?: "trend" | "explore" | "media";
+  label?: "trend" | "format" | "explore" | "media";
   meta?: string;
   detailsImage?: {
     src: string;
@@ -69,7 +69,10 @@ export interface CanvasNode {
 }
 
 export function isTrendSourceNode(node: CanvasNode) {
-  return node.kind === "trend-recipe" || (node.kind === "video" && node.video?.label === "trend");
+  return (
+    node.kind === "trend-recipe" ||
+    (node.kind === "video" && (node.video?.label === "trend" || node.video?.label === "format"))
+  );
 }
 
 export interface CanvasConnection {

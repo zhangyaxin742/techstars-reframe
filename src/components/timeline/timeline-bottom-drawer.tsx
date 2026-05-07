@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { MediaAsset, TimelineSegment } from "../../data/reframe-demo";
 import { cn } from "../../lib/utils";
 import { MockVideoPreview } from "../preview/mock-video-preview";
-import { TimelineAssembly } from "./timeline-assembly";
+import { TimelineAssembly, type TimelineAssemblyLabels } from "./timeline-assembly";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const DURATION_SECONDS = 0.2;
@@ -23,6 +23,9 @@ interface TimelineBottomDrawerProps {
   onGenerateMissingShotWithAi?: (segmentId: string, newAsset: MediaAsset) => void;
   aiGeneratingSegmentId?: string | null;
   aiGeneratedSegmentIds?: Set<string>;
+  title?: string;
+  description?: string;
+  assemblyLabels?: TimelineAssemblyLabels;
   className?: string;
 }
 
@@ -37,6 +40,9 @@ export function TimelineBottomDrawer({
   onGenerateMissingShotWithAi,
   aiGeneratingSegmentId,
   aiGeneratedSegmentIds,
+  title = "Founder Confessional",
+  description = "Inspect matched clips, missing shots, overlays, and audio timing.",
+  assemblyLabels,
   className,
 }: TimelineBottomDrawerProps) {
   const [exiting, setExiting] = useState(false);
@@ -137,10 +143,10 @@ export function TimelineBottomDrawer({
                     </span>
                     <div className="min-w-0">
                       <DialogPrimitive.Title className="truncate text-sm font-semibold">
-                        Founder Confessional
+                        {title}
                       </DialogPrimitive.Title>
                       <DialogPrimitive.Description className="truncate text-xs text-muted-foreground">
-                        Inspect matched clips, missing shots, overlays, and audio timing.
+                        {description}
                       </DialogPrimitive.Description>
                     </div>
                   </div>
@@ -164,6 +170,7 @@ export function TimelineBottomDrawer({
                     aiGeneratingSegmentId={aiGeneratingSegmentId}
                     aiGeneratedSegmentIds={aiGeneratedSegmentIds}
                     onScrubPreviewTimeChange={setScrubPreviewTimeMs}
+                    labels={assemblyLabels}
                     variant="drawer"
                   />
                 </div>

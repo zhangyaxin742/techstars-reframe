@@ -67,6 +67,7 @@ interface ChatHistoryPanelProps {
   promptBusy?: boolean;
   promptPlaceholder?: string;
   promptSourceImageUrl?: string;
+  stepLabels?: Partial<Record<NonNullable<ChatMessage["step"]>, string>>;
   chromeHidden?: boolean;
   onPromptChange?: (value: string) => void;
   onPromptSubmit?: (value: string) => void;
@@ -79,6 +80,7 @@ export function ChatHistoryPanel({
   promptBusy = false,
   promptPlaceholder = "Ask Reframe anything...",
   promptSourceImageUrl,
+  stepLabels,
   chromeHidden = false,
   onPromptChange,
   onPromptSubmit,
@@ -92,7 +94,7 @@ export function ChatHistoryPanel({
   );
   const latestStep =
     steppedMessages.length > 0 ? steppedMessages[steppedMessages.length - 1].step : undefined;
-  const label = latestStep ? stepLabel[latestStep] : "Chat History";
+  const label = latestStep ? (stepLabels?.[latestStep] ?? stepLabel[latestStep]) : "Chat History";
   const isActive = messages.some(
     (m) => m.thinkingText || m.toolCalls?.some((tc) => tc.state === "running")
   );

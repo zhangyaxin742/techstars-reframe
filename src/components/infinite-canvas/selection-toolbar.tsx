@@ -1,5 +1,5 @@
 import React from "react";
-import { CaretDown, DownloadSimple, Export, InstagramLogo, Trash } from "@phosphor-icons/react";
+import { CaretDown, DownloadSimple, Export, FileText, InstagramLogo, Trash } from "@phosphor-icons/react";
 import type { ExportTarget } from "../../data/reframe-demo";
 import { Button } from "../ui/button";
 import {
@@ -28,6 +28,12 @@ interface SelectionToolbarProps {
   onExportTimeline?: (targetId: ExportTarget["id"]) => void;
   onDownloadPreview?: () => void;
   onPublishPreview?: () => void;
+  labels?: {
+    exportTimeline?: string;
+    downloadPreview?: string;
+    publishPreview?: string;
+    deleteSelected?: string;
+  };
 }
 
 export function SelectionToolbar({
@@ -40,6 +46,7 @@ export function SelectionToolbar({
   onExportTimeline,
   onDownloadPreview,
   onPublishPreview,
+  labels,
 }: SelectionToolbarProps) {
   if (!bounds) return null;
 
@@ -53,6 +60,11 @@ export function SelectionToolbar({
   );
   const left = Math.min(Math.max(topCenter.x, 80), Math.max(80, size.width - 80));
   const top = Math.max(12, topCenter.y - 76);
+
+  const exportLabel = labels?.exportTimeline ?? "Export timeline";
+  const downloadLabel = labels?.downloadPreview ?? "Download preview";
+  const publishLabel = labels?.publishPreview ?? "Post to Instagram";
+  const deleteLabel = labels?.deleteSelected ?? "Delete selected nodes";
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -72,7 +84,7 @@ export function SelectionToolbar({
                     variant="ghost"
                     size="icon"
                     className="w-auto gap-1.5 px-2.5"
-                    aria-label="Export timeline"
+                    aria-label={exportLabel}
                     disabled={!onExportTimeline}
                   >
                     <Export />
@@ -80,7 +92,7 @@ export function SelectionToolbar({
                   </Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
-              <TooltipContent side="top">Export timeline</TooltipContent>
+              <TooltipContent side="top">{exportLabel}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="center">
               {exportTargets.map((target) => (
@@ -89,7 +101,13 @@ export function SelectionToolbar({
                   onSelect={() => onExportTimeline?.(target.id)}
                   className="gap-2"
                 >
-                  <EditorLogo targetId={target.id} className="size-4 rounded-sm object-contain" />
+                  {target.id === "capcut" ||
+                  target.id === "premiere-pro" ||
+                  target.id === "davinci-resolve" ? (
+                    <EditorLogo targetId={target.id} className="size-4 rounded-sm object-contain" />
+                  ) : (
+                    <FileText className="size-4 text-accent" weight="bold" />
+                  )}
                   <span>{target.editor}</span>
                 </DropdownMenuItem>
               ))}
@@ -104,14 +122,14 @@ export function SelectionToolbar({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label="Download preview"
+                  aria-label={downloadLabel}
                   onClick={onDownloadPreview}
                   disabled={!onDownloadPreview}
                 >
                   <DownloadSimple />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Download preview</TooltipContent>
+              <TooltipContent side="top">{downloadLabel}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -119,14 +137,14 @@ export function SelectionToolbar({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label="Post to Instagram"
+                  aria-label={publishLabel}
                   onClick={onPublishPreview}
                   disabled={!onPublishPreview}
                 >
                   <InstagramLogo />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Post to Instagram</TooltipContent>
+              <TooltipContent side="top">{publishLabel}</TooltipContent>
             </Tooltip>
           </>
         ) : null}
@@ -136,14 +154,14 @@ export function SelectionToolbar({
               type="button"
               variant="ghost"
               size="icon"
-              aria-label="Delete selected nodes"
+              aria-label={deleteLabel}
               onClick={onDelete}
               disabled={!onDelete}
             >
               <Trash />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="top">Delete selected nodes</TooltipContent>
+          <TooltipContent side="top">{deleteLabel}</TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>

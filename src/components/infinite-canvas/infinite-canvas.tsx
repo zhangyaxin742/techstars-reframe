@@ -62,6 +62,11 @@ interface InfiniteCanvasProps {
   timelinePhase?: TimelinePhase;
   previewSegments?: TimelineSegment[];
   previewPublishState?: PreviewPublishState;
+  toolbarLabels?: React.ComponentProps<typeof SelectionToolbar>["labels"];
+  nodeViewLabels?: React.ComponentProps<typeof CanvasNodeView>["labels"];
+  brandContextCardData?: React.ComponentProps<typeof CanvasNodeView>["brandContextCardData"];
+  brandName?: React.ComponentProps<typeof CanvasNodeView>["brandName"];
+  libraryAssets?: React.ComponentProps<typeof CanvasNodeView>["libraryAssets"];
   chromeHidden?: boolean;
   className?: string;
 }
@@ -189,6 +194,11 @@ export function InfiniteCanvas({
   timelinePhase,
   previewSegments,
   previewPublishState,
+  toolbarLabels,
+  nodeViewLabels,
+  brandContextCardData,
+  brandName,
+  libraryAssets,
   chromeHidden = false,
   className,
 }: InfiniteCanvasProps) {
@@ -703,6 +713,10 @@ export function InfiniteCanvas({
             timelinePhase={timelinePhase}
             previewSegments={previewSegments}
             previewPublishState={previewPublishState}
+            labels={nodeViewLabels}
+            brandContextCardData={brandContextCardData}
+            brandName={brandName}
+            libraryAssets={libraryAssets}
             resolveImageUrl={resolveImageUrl}
             onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
@@ -737,6 +751,7 @@ export function InfiniteCanvas({
               ? () => onPublishPreview(new Set(selection))
               : undefined
           }
+          labels={toolbarLabels}
         />
       ) : null}
       {!chromeHidden ? <CanvasNavigationRail /> : null}

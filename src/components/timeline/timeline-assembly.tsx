@@ -28,9 +28,24 @@ interface TimelineAssemblyProps {
   aiGeneratingSegmentId?: string | null;
   aiGeneratedSegmentIds?: Set<string>;
   onScrubPreviewTimeChange?: (timeMs: number | null) => void;
+  labels?: TimelineAssemblyLabels;
   variant?: "compact" | "drawer";
   className?: string;
 }
+
+export interface TimelineAssemblyLabels {
+  missingShotGenerate?: string;
+  missingShotGenerating?: string;
+  missingShotUpload?: string;
+  generatedBadge?: string;
+}
+
+const defaultLabels: Required<TimelineAssemblyLabels> = {
+  missingShotGenerate: "Generate with AI",
+  missingShotGenerating: "Generating shot...",
+  missingShotUpload: "Drag and drop or click to upload video",
+  generatedBadge: "AI generated",
+};
 
 function formatMs(ms: number): string {
   const totalSecs = Math.floor(ms / 1000);
@@ -64,6 +79,7 @@ export function TimelineAssembly({
   aiGeneratingSegmentId = null,
   aiGeneratedSegmentIds,
   onScrubPreviewTimeChange,
+  labels,
   variant = "compact",
   className,
 }: TimelineAssemblyProps) {
@@ -148,7 +164,11 @@ export function TimelineAssembly({
               ) : (
                 <MagicWand className="size-4 shrink-0 text-accent" weight="bold" />
               )}
-              <span className="text-pretty">{isGeneratingAi ? "Generating shot..." : "Generate with AI"}</span>
+              <span className="text-pretty">
+                {isGeneratingAi
+                  ? (labels?.missingShotGenerating ?? defaultLabels.missingShotGenerating)
+                  : (labels?.missingShotGenerate ?? defaultLabels.missingShotGenerate)}
+              </span>
             </button>
             <button
               type="button"
@@ -157,7 +177,9 @@ export function TimelineAssembly({
               data-testid="missing-shot-upload"
             >
               <UploadSimple className="size-4 shrink-0 text-accent" weight="bold" />
-              <span className="text-pretty">Drag and drop or click to upload video</span>
+              <span className="text-pretty">
+                {labels?.missingShotUpload ?? defaultLabels.missingShotUpload}
+              </span>
             </button>
           </div>
         </div>
@@ -302,7 +324,7 @@ export function TimelineAssembly({
                                 className="absolute right-1 top-1 rounded border border-accent/40 bg-background/90 px-1.5 py-0.5 text-[9px] font-medium text-accent"
                                 data-testid={`timeline-segment-${seg.id}-ai-generated`}
                               >
-                                AI generated
+                                {labels?.generatedBadge ?? defaultLabels.generatedBadge}
                               </span>
                             ) : null}
                           </>
@@ -500,7 +522,7 @@ export function TimelineAssembly({
                         className="absolute right-1 top-1 rounded border border-accent/40 bg-background/90 px-1 py-0.5 text-[8px] font-medium text-accent"
                         data-testid={`timeline-segment-${seg.id}-ai-generated`}
                       >
-                        AI generated
+                        {labels?.generatedBadge ?? defaultLabels.generatedBadge}
                       </span>
                     ) : null}
                   </>

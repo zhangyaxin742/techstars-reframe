@@ -49,6 +49,9 @@ const statVariants = {
 interface BrandContextCardProps {
   data: BrandContextCardData;
   animateIn?: boolean;
+  labels?: {
+    trendSignalsTitle?: string;
+  };
 }
 
 function makePlaceholderSvg(_color: string): string {
@@ -86,6 +89,7 @@ function ToneBar({
 export const BrandContextCard = memo(function BrandContextCard({
   data,
   animateIn = false,
+  labels,
 }: BrandContextCardProps) {
   const animate = animateIn ? "visible" : undefined;
   const initial = animateIn ? "hidden" : undefined;
@@ -332,7 +336,7 @@ export const BrandContextCard = memo(function BrandContextCard({
             initial={initial}
             animate={animate}
           >
-            Trend Matching Signals
+            {labels?.trendSignalsTitle ?? "Trend Matching Signals"}
           </motion.p>
           <div className="space-y-1">
             {data.trendSignals.map((sig, idx) => (

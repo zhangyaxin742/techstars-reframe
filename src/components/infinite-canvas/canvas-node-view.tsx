@@ -23,12 +23,53 @@ import { CanvasPromptBox } from "./canvas-prompt-box";
 import { BrandContextCard } from "./brand-context-card";
 import { Skeleton } from "../ui/skeleton";
 import { MockVideoPreview } from "../preview/mock-video-preview";
-import { brandContext, libraryMediaAssets, type MediaAsset, type TimelineSegment } from "../../data/reframe-demo";
+import {
+  brandContext,
+  libraryMediaAssets,
+  type BrandContextCardData,
+  type MediaAsset,
+  type TimelineSegment,
+} from "../../data/reframe-demo";
 
 export type BrandCtxPhase = "skeleton" | "revealing";
 export type TrendRecipePhase = "hidden" | "skeleton" | "revealing";
 export type TimelinePhase = "hidden" | "skeleton" | "revealing";
 export type PreviewPublishStatus = "idle" | "publishing" | "published";
+
+export interface CanvasNodeViewLabels {
+  kindLabels?: Partial<Record<CanvasNode["kind"], string>>;
+  createTimelineLabel?: (nodeTitle: string) => string;
+  brandContextLoadingLabel?: string;
+  recipeLoadingLabel?: string;
+  formatLoadingLabel?: string;
+  timelineLoadingLabel?: string;
+  timelinePreviewLabel?: string;
+  libraryTagLabel?: string;
+  libraryMatchLabel?: string;
+  libraryReadyLabel?: string;
+  brandTrendSignalsTitle?: string;
+  videoAriaLabel?: (nodeTitle: string) => string;
+  detailsTitle?: (nodeTitle: string) => string;
+  detailsDescription?: (nodeTitle: string) => string;
+  detailsCloseLabel?: string;
+}
+
+const defaultLabels: Required<Omit<CanvasNodeViewLabels, "kindLabels">> = {
+  createTimelineLabel: (nodeTitle) => `Generate timeline from ${nodeTitle}`,
+  brandContextLoadingLabel: "Loading brand context",
+  recipeLoadingLabel: "Loading trend recipe",
+  formatLoadingLabel: "Loading trend video",
+  timelineLoadingLabel: "Loading timeline",
+  timelinePreviewLabel: "Timeline preview",
+  libraryTagLabel: "AI tags",
+  libraryMatchLabel: "Matched to trend moments",
+  libraryReadyLabel: "Ready for timeline swaps",
+  brandTrendSignalsTitle: "Trend Matching Signals",
+  videoAriaLabel: (nodeTitle) => `${nodeTitle} trend video`,
+  detailsTitle: (nodeTitle) => `${nodeTitle} trend breakdown`,
+  detailsDescription: (nodeTitle) => `Detailed visual breakdown of the ${nodeTitle} video trend.`,
+  detailsCloseLabel: "Close trend breakdown",
+};
 
 const videoChromeTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
 const dialogMotionTransition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
@@ -51,6 +92,10 @@ interface CanvasNodeViewProps {
   position: CanvasPoint;
   zoom: number;
   selected: boolean;
+  labels?: CanvasNodeViewLabels;
+  brandContextCardData?: BrandContextCardData;
+  brandName?: string;
+  libraryAssets?: MediaAsset[];
   brandCtxPhase?: BrandCtxPhase;
   trendRecipePhase?: TrendRecipePhase;
   timelinePhase?: TimelinePhase;
@@ -139,11 +184,17 @@ function NodeLoadingSkeleton({
   );
 }
 
-function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
+function TimelinePreviewSurface({
+  mode,
+  labels = defaultLabels,
+}: {
+  mode: "preview" | "loading";
+  labels?: Pick<CanvasNodeViewLabels, "timelineLoadingLabel" | "timelinePreviewLabel">;
+}) {
   if (mode === "loading") {
     return (
       <NodeLoadingSkeleton
-        label="Loading timeline"
+        label={labels.timelineLoadingLabel ?? defaultLabels.timelineLoadingLabel}
         variant="darker"
         className="rounded-xl border border-dashed border-muted-foreground/45"
       />
@@ -152,7 +203,7 @@ function TimelinePreviewSurface({ mode }: { mode: "preview" | "loading" }) {
 
   return (
     <NodeLoadingSkeleton
-      label="Timeline preview"
+      label={labels.timelinePreviewLabel ?? defaultLabels.timelinePreviewLabel}
       shimmer={false}
       variant="darker-light"
       className="rounded-xl border border-dashed border-border/80"
@@ -349,9 +400,11 @@ function PreviewPublishCard({ state }: { state: PreviewPublishState }) {
 function TimelineGhostPreview({
   nodeId,
   persistent,
+  labels,
 }: {
   nodeId: string;
   persistent: boolean;
+  labels?: CanvasNodeViewLabels;
 }) {
   return (
     <>
@@ -376,7 +429,7 @@ function TimelineGhostPreview({
             : "scale-95 opacity-0 peer-hover:scale-100 peer-hover:opacity-100 peer-focus-visible:scale-100 peer-focus-visible:opacity-100"
         )}
       >
-        <TimelinePreviewSurface mode="preview" />
+        <TimelinePreviewSurface mode="preview" labels={labels} />
       </div>
     </>
   );
@@ -446,9 +499,11 @@ function TrendRecipeRevealCard({ node }: { node: CanvasNode }) {
 function TrendDetailsDialog({
   node,
   children,
+  labels = defaultLabels,
 }: {
   node: CanvasNode;
   children: React.ReactNode;
+  labels?: CanvasNodeViewLabels;
 }) {
   const [open, setOpen] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -519,9 +574,11 @@ function TrendDetailsDialog({
               }
               transition={dialogMotionTransition}
             >
-              <DialogPrimitive.Title className="sr-only">{node.title} trend breakdown</DialogPrimitive.Title>
+              <DialogPrimitive.Title className="sr-only">
+                {(labels.detailsTitle ?? defaultLabels.detailsTitle)(node.title)}
+              </DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">
-                Detailed visual breakdown of the {node.title} video trend.
+                {(labels.detailsDescription ?? defaultLabels.detailsDescription)(node.title)}
               </DialogPrimitive.Description>
               <button
                 type="button"
@@ -531,7 +588,7 @@ function TrendDetailsDialog({
                 }}
                 onClick={requestClose}
                 className="absolute right-0 top-0 z-10 flex size-8 items-center justify-center rounded-md border border-white/20 bg-black/55 text-white/85 shadow-sm transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                aria-label="Close trend breakdown"
+                aria-label={labels.detailsCloseLabel ?? defaultLabels.detailsCloseLabel}
               >
                 <X className="size-4" />
               </button>
@@ -556,7 +613,13 @@ function TrendDetailsDialog({
   );
 }
 
-function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
+function CanvasVideoNodeCard({
+  node,
+  labels = defaultLabels,
+}: {
+  node: CanvasNode;
+  labels?: CanvasNodeViewLabels;
+}) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [active, setActive] = useState(false);
 
@@ -616,7 +679,7 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
       <video
         ref={videoRef}
         data-testid={`canvas-node-video-${node.id}`}
-        aria-label={`${node.title} trend video`}
+        aria-label={(labels.videoAriaLabel ?? defaultLabels.videoAriaLabel)(node.title)}
         src={node.video.src}
         loop
         muted
@@ -670,9 +733,11 @@ function CanvasVideoNodeCard({ node }: { node: CanvasNode }) {
 function LibraryCard({
   node,
   assets = libraryMediaAssets,
+  labels = defaultLabels,
 }: {
   node: CanvasNode;
   assets?: MediaAsset[];
+  labels?: CanvasNodeViewLabels;
 }) {
   const visibleAssets = assets.slice(0, 30);
   const tagCount = new Set(visibleAssets.flatMap((asset) => asset.tags)).size;
@@ -745,10 +810,11 @@ function LibraryCard({
         variants={cardRevealSoftSection}
       >
         <span>
-          <span className="tabular-nums tracking-tight text-foreground">{tagCount}</span> AI tags
+          <span className="tabular-nums tracking-tight text-foreground">{tagCount}</span>{" "}
+          {labels.libraryTagLabel ?? defaultLabels.libraryTagLabel}
         </span>
-        <span>Matched to trend moments</span>
-        <span>Ready for timeline swaps</span>
+        <span>{labels.libraryMatchLabel ?? defaultLabels.libraryMatchLabel}</span>
+        <span>{labels.libraryReadyLabel ?? defaultLabels.libraryReadyLabel}</span>
       </motion.div>
     </motion.div>
   );
@@ -757,9 +823,11 @@ function LibraryCard({
 function TimelineRevealCard({
   node,
   segments,
+  labels,
 }: {
   node: CanvasNode;
   segments: TimelineSegment[];
+  labels?: CanvasNodeViewLabels;
 }) {
   const bodySections = splitNodeBody(node.body);
   const totalMs = Math.max(...segments.map((segment) => segment.endMs), 0);
@@ -955,6 +1023,10 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   position,
   zoom,
   selected,
+  labels = defaultLabels,
+  brandContextCardData = brandContext.card,
+  brandName = brandContext.name,
+  libraryAssets = libraryMediaAssets,
   brandCtxPhase,
   trendRecipePhase = "revealing",
   timelinePhase = "revealing",
@@ -997,6 +1069,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
   }
 
   const meta = kindMeta[node.kind];
+  const kindLabel = meta ? (labels.kindLabels?.[node.kind] ?? meta.label) : undefined;
   const isTrendSource = isTrendSourceNode(node);
   const isRevealedTrendSource = isTrendSource && trendRecipePhase === "revealing";
   const isTimelineSource = isRevealedTrendSource && timelineSourceNodeId === node.id;
@@ -1019,7 +1092,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
         <button
           type="button"
           data-testid={`canvas-node-create-timeline-${node.id}`}
-          aria-label={`Generate timeline from ${node.title}`}
+          aria-label={(labels.createTimelineLabel ?? defaultLabels.createTimelineLabel)(node.title)}
           className={cn(
             "peer absolute left-1/2 top-full z-30 mt-3 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border",
             "border-accent bg-accent text-accent-foreground shadow-[rgba(0,0,0,0.12)_0px_5px_12px_0px]",
@@ -1039,7 +1112,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
       ) : null}
       {isRevealedTrendSource && !isTimelineSource ? (
         <>
-          <TimelineGhostPreview nodeId={node.id} persistent={false} />
+          <TimelineGhostPreview nodeId={node.id} persistent={false} labels={labels} />
         </>
       ) : null}
       {isTimelineSource ? (
@@ -1085,13 +1158,13 @@ export const CanvasNodeView = memo(function CanvasNodeView({
             <div className="mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
               <div className="flex items-center gap-1 rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-foreground/60 shadow-[rgba(0,0,0,0.06)_0px_1px_3px_0px]">
                 <meta.Icon className="size-3 shrink-0" weight="bold" />
-                <span>{meta.label}</span>
+                <span>{kindLabel}</span>
                 {node.kind === "brand-context" && (
-                  <span className="text-foreground/35">· {brandContext.name}</span>
+                  <span className="text-foreground/35">· {brandName}</span>
                 )}
               </div>
               {node.video?.detailsImage ? (
-                <TrendDetailsDialog node={node}>
+                <TrendDetailsDialog node={node} labels={labels}>
                   <button
                     type="button"
                     data-testid={`trend-video-more-info-${node.id}`}
@@ -1152,7 +1225,9 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.65, ease: "easeOut" }}
               >
-                <NodeLoadingSkeleton label="Loading brand context" />
+                <NodeLoadingSkeleton
+                  label={labels.brandContextLoadingLabel ?? defaultLabels.brandContextLoadingLabel}
+                />
               </motion.div>
             ) : (
               <motion.div
@@ -1161,7 +1236,14 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: "easeOut" }}
               >
-                <BrandContextCard data={brandContext.card} animateIn />
+                <BrandContextCard
+                  data={brandContextCardData}
+                  labels={{
+                    trendSignalsTitle:
+                      labels.brandTrendSignalsTitle ?? defaultLabels.brandTrendSignalsTitle,
+                  }}
+                  animateIn
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -1177,7 +1259,7 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               >
-                <NodeLoadingSkeleton label="Loading trend recipe" />
+                <NodeLoadingSkeleton label={labels.recipeLoadingLabel ?? defaultLabels.recipeLoadingLabel} />
               </motion.div>
             ) : (
               <TrendRecipeRevealCard node={node} />
@@ -1195,14 +1277,14 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               >
-                <NodeLoadingSkeleton label="Loading trend video" />
+                <NodeLoadingSkeleton label={labels.formatLoadingLabel ?? defaultLabels.formatLoadingLabel} />
               </motion.div>
             ) : (
-              <CanvasVideoNodeCard node={node} />
+              <CanvasVideoNodeCard node={node} labels={labels} />
             )}
           </>
         ) : node.kind === "media" ? (
-          <LibraryCard node={node} />
+          <LibraryCard node={node} assets={libraryAssets} labels={labels} />
         ) : node.kind === "timeline" ? (
           <AnimatePresence>
             {timelinePhase === "skeleton" ? (
@@ -1214,10 +1296,10 @@ export const CanvasNodeView = memo(function CanvasNodeView({
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               >
-                <TimelinePreviewSurface mode="loading" />
+                <TimelinePreviewSurface mode="loading" labels={labels} />
               </motion.div>
             ) : (
-              <TimelineRevealCard node={node} segments={previewSegments} />
+              <TimelineRevealCard node={node} segments={previewSegments} labels={labels} />
             )}
           </AnimatePresence>
         ) : node.kind === "preview" ? (

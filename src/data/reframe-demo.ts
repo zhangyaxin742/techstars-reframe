@@ -126,7 +126,7 @@ export interface TrendRecipe {
 // ---------------------------------------------------------------------------
 
 export interface ExportTarget {
-  id: "capcut" | "premiere-pro" | "davinci-resolve";
+  id: string;
   editor: string;
   description: string;
 }
