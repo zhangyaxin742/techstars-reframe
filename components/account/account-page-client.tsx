@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowSquareOut,
   Check,
   EnvelopeSimple,
   SignOut,
@@ -319,15 +320,26 @@ export function AccountPageClient({
             </p>
           </div>
           {account ? (
-            <button
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50"
-              disabled={busy === "sign-out"}
-              onClick={signOut}
-              type="button"
-            >
-              <SignOut size={16} />
-              Sign out
-            </button>
+            <div className="flex flex-wrap gap-2">
+              {activeWorkspace ? (
+                <a
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-90"
+                  href="/app"
+                >
+                  <ArrowSquareOut size={16} />
+                  Open workspace
+                </a>
+              ) : null}
+              <button
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50"
+                disabled={busy === "sign-out"}
+                onClick={signOut}
+                type="button"
+              >
+                <SignOut size={16} />
+                Sign out
+              </button>
+            </div>
           ) : null}
         </header>
 
