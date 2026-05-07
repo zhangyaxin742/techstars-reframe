@@ -402,10 +402,10 @@ begin
     v_repaired_workspace := true;
   end if;
 
-  update public.profiles
+  update public.profiles as p
   set active_workspace_id = v_workspace_id
-  where id = v_user_id
-    and active_workspace_id is distinct from v_workspace_id;
+  where p.id = v_user_id
+    and p.active_workspace_id is distinct from v_workspace_id;
 
   return query
   select
@@ -483,9 +483,9 @@ begin
   insert into public.workspace_memberships (workspace_id, user_id, role)
   values (v_workspace_id, v_user_id, 'owner');
 
-  update public.profiles
+  update public.profiles as p
   set active_workspace_id = v_workspace_id
-  where id = v_user_id;
+  where p.id = v_user_id;
 
   return query
   select v_workspace_id, v_workspace_slug, v_workspace_name, 'owner'::text;
@@ -698,12 +698,12 @@ begin
     raise exception 'workspace_invite_forbidden' using errcode = 'P0001';
   end if;
 
-  update public.workspace_invites
+  update public.workspace_invites as wi
   set status = 'revoked',
       revoked_at = now()
-  where id = p_invite_id
-    and workspace_id = p_workspace_id
-    and status = 'pending'
+  where wi.id = p_invite_id
+    and wi.workspace_id = p_workspace_id
+    and wi.status = 'pending'
   returning * into v_invite;
 
   if not found then
@@ -809,9 +809,9 @@ begin
 
   v_existing_membership := exists (
     select 1
-    from public.workspace_memberships
-    where workspace_id = v_invite.workspace_id
-      and user_id = v_user_id
+    from public.workspace_memberships as wm
+    where wm.workspace_id = v_invite.workspace_id
+      and wm.user_id = v_user_id
   );
 
   insert into public.workspace_memberships (workspace_id, user_id, role)
