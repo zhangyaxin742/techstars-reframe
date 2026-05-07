@@ -5,6 +5,22 @@ import {
   readClaimRpcRow,
 } from "@/lib/reframe/intake/claim";
 import {
+  AccountEmailHashConfigError,
+  hashAccountEmail,
+} from "@/lib/reframe/account/email";
+import { checkAccountOtpVerifyRateLimit } from "@/lib/reframe/account/rate-limit";
+import {
+  accountErrorStatus,
+  readFirstRpcRow,
+} from "@/lib/reframe/account/service";
+import type { RpcWorkspaceRow } from "@/lib/reframe/account/types";
+import {
+  ACCOUNT_AUTH_MAX_PAYLOAD_BYTES,
+  parseJsonPayload,
+  type OtpVerifyPayload,
+  validateOtpVerifyPayload,
+} from "@/lib/reframe/account/validation";
+import {
   getExpiredIntakeDraftCookieOptions,
   hashIntakeDraftToken,
   IntakeDraftTokenConfigError,
@@ -15,19 +31,18 @@ import { restoreIntakeDraft } from "@/lib/reframe/intake/draft-store";
 import {
   hashIntakeEmail,
   IntakeEmailHashConfigError,
-  normalizeIntakeEmail,
 } from "@/lib/reframe/intake/email";
 import {
   getClientIpAddress,
   readRequestCookie,
 } from "@/lib/reframe/intake/http";
-import { checkOtpVerifyRateLimit } from "@/lib/reframe/intake/rate-limit";
+import {
+  checkOtpVerifyRateLimit as checkIntakeOtpVerifyRateLimit,
+} from "@/lib/reframe/intake/rate-limit";
 import { CsrfConfigError, verifyCsrfRequest } from "@/lib/security/csrf";
 import { SupabaseAdminConfigError } from "@/lib/supabase/admin";
 import { SupabaseBrowserConfigError } from "@/lib/supabase/env";
 import { createSupabaseRouteClient } from "@/lib/supabase/route";
-
-const MAX_VERIFY_PAYLOAD_BYTES = 2_000;
 
 export async function POST(request: Request) {
   let csrf;
@@ -57,7 +72,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const parsed = await parseVerifyBody(request);
+  const parsed = await parseJsonPayload(
+    request,
+    ACCOUNT_AUTH_MAX_PAYLOAD_BYTES,
+    validateOtpVerifyPayload,
+  );
   if (!parsed.ok) {
     return NextResponse.json(
       {
@@ -65,6 +84,7 @@ export async function POST(request: Request) {
         error: {
           code: "invalid_verify_request",
           message: "Could not continue with that code.",
+          fields: parsed.errors,
         },
       },
       { status: parsed.status },
@@ -76,6 +96,14 @@ export async function POST(request: Request) {
     REFRAME_INTAKE_DRAFT_COOKIE,
   );
 
+  const shouldClaimIntake =
+    parsed.value.returnTo === "/intake/verify" ||
+    isValidIntakeDraftToken(draftToken);
+
+  if (!shouldClaimIntake) {
+    return verifyAccountOtp(request, parsed.value);
+  }
+
   if (!isValidIntakeDraftToken(draftToken)) {
     return clearDraftCookie(
       {
@@ -86,10 +114,150 @@ export async function POST(request: Request) {
     );
   }
 
+  return verifyIntakeOtp(request, parsed.value, draftToken);
+}
+
+async function verifyAccountOtp(request: Request, parsed: OtpVerifyPayload) {
+  try {
+    const emailHash = hashAccountEmail(parsed.email);
+    const rateLimit = checkAccountOtpVerifyRateLimit({
+      ipAddress: getClientIpAddress(request.headers),
+      emailHash,
+    });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "rate_limited",
+            message: "Too many verification attempts. Try again shortly.",
+          },
+          retryAfterSeconds: rateLimit.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
+    const { supabase, applyToResponse } = createSupabaseRouteClient(request);
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: parsed.email,
+      token: parsed.token,
+      type: "email",
+    });
+
+    if (verifyError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "verification_failed",
+            message: "Could not continue with that code.",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    const { data, error: accountError } = await supabase.rpc(
+      "ensure_account_workspace",
+      {
+        p_email_display: parsed.email,
+        p_email_hash: emailHash,
+        p_workspace_name: "My Workspace",
+      },
+    );
+
+    if (accountError) {
+      return applyToResponse(
+        NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: "account_workspace_failed",
+              message: "Could not open the account workspace.",
+            },
+          },
+          { status: accountErrorStatus(accountError.message) },
+        ),
+      );
+    }
+
+    const account = readFirstRpcRow<RpcWorkspaceRow>(data);
+    if (!account) {
+      return applyToResponse(
+        NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: "account_workspace_failed",
+              message: "Could not open the account workspace.",
+            },
+          },
+          { status: 500 },
+        ),
+      );
+    }
+
+    return applyToResponse(
+      NextResponse.json({
+        ok: true,
+        redirectTo: "/account",
+        account: {
+          activeWorkspaceId:
+            account.active_workspace_id ?? account.workspace_id ?? null,
+          activeWorkspaceSlug:
+            account.active_workspace_slug ?? account.workspace_slug ?? null,
+          activeWorkspaceRole:
+            account.active_workspace_role ?? account.membership_role ?? null,
+          repairedProfile: Boolean(account.repaired_profile),
+          repairedWorkspace: Boolean(account.repaired_workspace),
+        },
+      }),
+    );
+  } catch (error) {
+    if (error instanceof AccountEmailHashConfigError) {
+      return configError(
+        "account_auth_not_configured",
+        "Account auth protection is not configured.",
+      );
+    }
+
+    if (error instanceof SupabaseBrowserConfigError) {
+      return configError(
+        "account_provider_not_configured",
+        "Account auth is not configured.",
+      );
+    }
+
+    console.error("Failed to verify account auth handoff.", error);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "account_verify_failed",
+          message: "Could not verify right now.",
+        },
+      },
+      { status: 500 },
+    );
+  }
+}
+
+async function verifyIntakeOtp(
+  request: Request,
+  parsed: OtpVerifyPayload,
+  draftToken: string,
+) {
   try {
     const draftTokenHash = hashIntakeDraftToken(draftToken);
     const emailHash = hashIntakeEmail(parsed.email);
-    const rateLimit = checkOtpVerifyRateLimit({
+    const rateLimit = checkIntakeOtpVerifyRateLimit({
       ipAddress: getClientIpAddress(request.headers),
       emailHash,
       draftTokenHash,
@@ -225,50 +393,6 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
-
-async function parseVerifyBody(request: Request) {
-  const rawBody = await request.text();
-  if (Buffer.byteLength(rawBody, "utf8") > MAX_VERIFY_PAYLOAD_BYTES) {
-    return {
-      ok: false as const,
-      status: 413,
-    };
-  }
-
-  let payload: unknown;
-  try {
-    payload = JSON.parse(rawBody);
-  } catch {
-    return {
-      ok: false as const,
-      status: 400,
-    };
-  }
-
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    return {
-      ok: false as const,
-      status: 400,
-    };
-  }
-
-  const input = payload as Record<string, unknown>;
-  const email = normalizeIntakeEmail(input.email);
-  const token = typeof input.token === "string" ? input.token.trim() : "";
-
-  if (!email || !/^\d{6}$/.test(token)) {
-    return {
-      ok: false as const,
-      status: 400,
-    };
-  }
-
-  return {
-    ok: true as const,
-    email,
-    token,
-  };
 }
 
 function handleClaimError(message: string) {

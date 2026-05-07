@@ -5,6 +5,8 @@ import {
   hashIntakeDraftToken,
   REFRAME_INTAKE_DRAFT_COOKIE,
 } from "@/lib/reframe/intake/draft-cookie";
+import { hashAccountEmail } from "@/lib/reframe/account/email";
+import { resetAccountRateLimiter } from "@/lib/reframe/account/rate-limit";
 import { hashIntakeEmail } from "@/lib/reframe/intake/email";
 import { resetIntakeRateLimiter } from "@/lib/reframe/intake/rate-limit";
 import {
@@ -41,6 +43,7 @@ describe("intake auth verify route", () => {
   };
 
   beforeEach(() => {
+    resetAccountRateLimiter();
     resetIntakeRateLimiter();
     process.env.SUPABASE_URL = "https://project.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project.supabase.co";
@@ -129,6 +132,62 @@ describe("intake auth verify route", () => {
     expect(response.headers.get("set-cookie")).toContain(
       `${REFRAME_INTAKE_DRAFT_COOKIE}=;`,
     );
+  });
+
+  it("verifies account OTP and repairs the default account workspace without an intake draft", async () => {
+    const emailHash = hashAccountEmail("founder@example.com", SERVICE_ROLE_KEY);
+    const fetchMock = vi.fn();
+    global.fetch = fetchMock as typeof fetch;
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          profile_id: "00000000-0000-4000-8000-000000000001",
+          active_workspace_id: "00000000-0000-4000-8000-000000000002",
+          active_workspace_slug: "my-workspace",
+          active_workspace_role: "owner",
+          repaired_profile: true,
+          repaired_workspace: true,
+        },
+      ],
+      error: null,
+    });
+
+    const response = await POST(
+      buildVerifyRequest({
+        includeDraftCookie: false,
+        body: {
+          email: "Founder@Example.com",
+          token: "123456",
+          returnTo: "/account",
+        },
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      ok: true,
+      redirectTo: "/account",
+      account: {
+        activeWorkspaceId: "00000000-0000-4000-8000-000000000002",
+        activeWorkspaceSlug: "my-workspace",
+        activeWorkspaceRole: "owner",
+        repairedProfile: true,
+        repairedWorkspace: true,
+      },
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(verifyOtpMock).toHaveBeenCalledWith({
+      email: "founder@example.com",
+      token: "123456",
+      type: "email",
+    });
+    expect(rpcMock).toHaveBeenCalledWith("ensure_account_workspace", {
+      p_email_display: "founder@example.com",
+      p_email_hash: emailHash,
+      p_workspace_name: "My Workspace",
+    });
+    expect(response.headers.get("set-cookie")).toContain("sb-test-auth-token=");
   });
 
   it("rejects invalid OTP input before calling Supabase", async () => {
@@ -230,20 +289,31 @@ describe("intake auth verify route", () => {
   });
 });
 
-function buildVerifyRequest(input: { body?: Record<string, unknown> } = {}) {
+function buildVerifyRequest(
+  input: {
+    body?: Record<string, unknown>;
+    includeDraftCookie?: boolean;
+  } = {},
+) {
   const csrf = issueCsrfToken({
     secret: CSRF_SECRET,
     randomBytesFn: (size) => Buffer.alloc(size, 9),
   });
+  const cookies = [
+    `${REFRAME_CSRF_COOKIE}=${encodeURIComponent(csrf.cookie.value)}`,
+  ];
+
+  if (input.includeDraftCookie !== false) {
+    cookies.push(
+      `${REFRAME_INTAKE_DRAFT_COOKIE}=${encodeURIComponent(DRAFT_TOKEN)}`,
+    );
+  }
 
   return new Request("https://app.example.com/api/reframe/auth/verify", {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      cookie: [
-        `${REFRAME_CSRF_COOKIE}=${encodeURIComponent(csrf.cookie.value)}`,
-        `${REFRAME_INTAKE_DRAFT_COOKIE}=${encodeURIComponent(DRAFT_TOKEN)}`,
-      ].join("; "),
+      cookie: cookies.join("; "),
       host: "app.example.com",
       origin: "https://app.example.com",
       "sec-fetch-site": "same-origin",

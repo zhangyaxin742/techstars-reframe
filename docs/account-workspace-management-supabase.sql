@@ -115,6 +115,8 @@ create index if not exists workspace_memberships_user_id_idx on public.workspace
 create index if not exists workspace_memberships_workspace_id_idx on public.workspace_memberships (workspace_id);
 create index if not exists workspace_invites_workspace_status_idx on public.workspace_invites (workspace_id, status);
 create index if not exists workspace_invites_email_status_idx on public.workspace_invites (email_hash, status);
+create unique index if not exists workspace_invites_token_hash_key
+  on public.workspace_invites (token_hash);
 
 create unique index if not exists workspace_invites_pending_workspace_email_key
   on public.workspace_invites (workspace_id, email_hash)
@@ -747,6 +749,66 @@ begin
 end;
 $$;
 
+create or replace function public.resolve_workspace_invite_for_otp(
+  p_token_hash text,
+  p_email_hash text
+)
+returns table (
+  valid boolean,
+  state text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_invite public.workspace_invites%rowtype;
+begin
+  if p_token_hash is null or length(p_token_hash) < 32 or p_email_hash is null or length(p_email_hash) < 32 then
+    return query select false, 'invalid_request'::text;
+    return;
+  end if;
+
+  select *
+  into v_invite
+  from public.workspace_invites
+  where token_hash = p_token_hash
+  limit 1;
+
+  if not found then
+    return query select false, 'not_found'::text;
+    return;
+  end if;
+
+  if v_invite.status = 'revoked' then
+    return query select false, 'revoked'::text;
+    return;
+  end if;
+
+  if v_invite.status = 'accepted' then
+    return query select false, 'accepted'::text;
+    return;
+  end if;
+
+  if v_invite.status = 'expired' or v_invite.expires_at <= now() then
+    update public.workspace_invites
+    set status = 'expired'
+    where id = v_invite.id
+      and status = 'pending';
+
+    return query select false, 'expired'::text;
+    return;
+  end if;
+
+  if v_invite.email_hash <> p_email_hash then
+    return query select false, 'email_mismatch'::text;
+    return;
+  end if;
+
+  return query select true, 'pending'::text;
+end;
+$$;
+
 revoke all on function security.ensure_account_workspace(text, text, text) from public, anon, authenticated;
 revoke all on function public.ensure_account_workspace(text, text, text) from public, anon;
 revoke all on function public.create_workspace(text) from public, anon;
@@ -754,6 +816,7 @@ revoke all on function public.create_workspace_invite(uuid, text, text, text, te
 revoke all on function public.mark_workspace_invite_delivery(uuid, uuid, text, text, text) from public, anon;
 revoke all on function public.revoke_workspace_invite(uuid, uuid) from public, anon;
 revoke all on function public.accept_workspace_invite(text, text, text) from public, anon;
+revoke all on function public.resolve_workspace_invite_for_otp(text, text) from public;
 
 grant execute on function public.ensure_account_workspace(text, text, text) to authenticated;
 grant execute on function public.create_workspace(text) to authenticated;
@@ -761,3 +824,4 @@ grant execute on function public.create_workspace_invite(uuid, text, text, text,
 grant execute on function public.mark_workspace_invite_delivery(uuid, uuid, text, text, text) to authenticated;
 grant execute on function public.revoke_workspace_invite(uuid, uuid) to authenticated;
 grant execute on function public.accept_workspace_invite(text, text, text) to authenticated;
+grant execute on function public.resolve_workspace_invite_for_otp(text, text) to anon, authenticated;

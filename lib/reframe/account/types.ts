@@ -49,11 +49,16 @@ export type AccountPayload = {
 };
 
 export type RpcWorkspaceRow = {
-  workspace_id: string;
-  workspace_slug: string;
+  profile_id?: string;
+  workspace_id?: string;
+  workspace_slug?: string;
   workspace_name?: string;
   membership_role?: WorkspaceRole;
+  active_workspace_id?: string;
+  active_workspace_slug?: string;
   active_workspace_role?: WorkspaceRole;
+  repaired_profile?: boolean;
+  repaired_workspace?: boolean;
 };
 
 export type ProfileRow = {
