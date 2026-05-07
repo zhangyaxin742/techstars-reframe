@@ -195,10 +195,16 @@ export function IntakeForm() {
     });
     const draftBody = (await draftResponse.json()) as DraftSaveResponse;
 
-    if (!draftResponse.ok || !draftBody.ok) {
+    if (!draftBody.ok) {
       setState("error");
       setMessage(draftBody.error?.message || "Check the intake fields.");
       setFieldErrors(draftBody.error?.fields ?? {});
+      return;
+    }
+
+    if (!draftResponse.ok) {
+      setState("error");
+      setMessage("Check the intake fields.");
       return;
     }
 
@@ -212,7 +218,7 @@ export function IntakeForm() {
     });
     const claimBody = (await claimResponse.json()) as ClaimResponse;
 
-    if (claimResponse.ok && claimBody.ok) {
+    if (claimBody.ok) {
       setState("success");
       setMessage("Context saved. Opening your workspace...");
       window.location.assign(claimBody.redirectTo);
@@ -253,7 +259,7 @@ export function IntakeForm() {
     });
     const body = (await response.json()) as ContinueResponse;
 
-    if (response.ok && body.ok) {
+    if (body.ok) {
       setState("success");
       setMessage(`Code sent to ${body.maskedEmail}.`);
       window.location.assign("/intake/verify");

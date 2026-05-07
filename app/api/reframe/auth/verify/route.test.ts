@@ -1,4 +1,5 @@
 import { POST } from "./route";
+import type { NextResponse } from "next/server";
 
 import {
   hashIntakeDraftToken,
@@ -66,7 +67,7 @@ describe("intake auth verify route", () => {
         },
         rpc: rpcMock,
       },
-      applyToResponse(response) {
+      applyToResponse(response: NextResponse) {
         response.cookies.set("sb-test-auth-token", "session", {
           httpOnly: true,
           path: "/",

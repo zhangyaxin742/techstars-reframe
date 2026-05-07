@@ -1,4 +1,5 @@
 import { POST } from "./route";
+import type { NextResponse } from "next/server";
 
 import {
   hashIntakeDraftToken,
@@ -83,7 +84,7 @@ describe("intake claim route", () => {
         },
         rpc: rpcMock,
       },
-      applyToResponse(response) {
+      applyToResponse(response: NextResponse) {
         return response;
       },
     } as unknown as ReturnType<typeof createSupabaseRouteClient>);
