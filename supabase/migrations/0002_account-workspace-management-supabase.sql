@@ -53,6 +53,12 @@ create table if not exists public.profiles (
   constraint profiles_avatar_url_length check (avatar_url is null or length(avatar_url) <= 2048)
 );
 
+alter table public.profiles
+  add column if not exists avatar_url text;
+
+alter table public.profiles
+  add column if not exists active_workspace_id uuid;
+
 create table if not exists public.workspaces (
   id uuid primary key default extensions.gen_random_uuid(),
   slug text not null unique,

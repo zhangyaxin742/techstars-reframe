@@ -1,6 +1,6 @@
 # Account Workspace Management DB/RLS Checklist
 
-Use this checklist after running [account-workspace-management-supabase.sql](/C:/Users/user/Documents/GitHub/techstars-reframe/docs/account-workspace-management-supabase.sql:1) in Supabase. This repo does not currently include a local Supabase test harness, so these checks are the required manual SQL matrix until automated DB tests exist.
+Use this checklist after running [`0002_account-workspace-management-supabase.sql`](../supabase/migrations/0002_account-workspace-management-supabase.sql) in Supabase. This repo does not currently include a local Supabase test harness, so these checks are the required manual SQL matrix until automated DB tests exist.
 
 ## Privilege Review
 

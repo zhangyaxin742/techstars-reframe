@@ -27,7 +27,7 @@ Optional:
 
 ## Database setup
 
-Run [waitlist-resend-supabase.sql](/C:/Users/user/Documents/GitHub/techstars-reframe/docs/waitlist-resend-supabase.sql:1) in the Supabase SQL editor.
+Run [supabase/migrations/0003_waitlist-resend-supabase.sql](../supabase/migrations/0003_waitlist-resend-supabase.sql) in the Supabase SQL editor.
 
 The table stores the submitted signup fields:
 

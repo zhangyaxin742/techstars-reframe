@@ -2,7 +2,7 @@
 
 ## SQL
 
-Apply `docs/account-workspace-management-supabase.sql` before enabling `/account`.
+Apply [`0002_account-workspace-management-supabase.sql`](../supabase/migrations/0002_account-workspace-management-supabase.sql) before enabling `/account`.
 
 Then execute the RLS matrix in `docs/account-workspace-management-db-rls-checklist.md`.
 

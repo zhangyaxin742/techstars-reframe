@@ -42,8 +42,8 @@ BLUF: the repo already has most of the auth foundation, but `/account`, account 
   - Reframe API routes exist for intake draft/continue/verify/CSRF only.
 
 - Migration structure:
-  - No `supabase/migrations` directory.
-  - SQL lives as docs: `docs/intake-auth-handoff-supabase.sql`, plus `docs/intake-auth-handoff-db-rls-checklist.md`.
+- `supabase/migrations` directory present.
+- SQL lives as: `supabase/migrations/0001_intake-auth-handoff-supabase.sql`, plus `docs/intake-auth-handoff-db-rls-checklist.md`.
   - Account implementation should add an account SQL/checklist doc or explicitly supersede the intake SQL doc to avoid schema drift.
 
 Sources checked: Supabase SSR says protect server data with `getClaims()` and not `getSession()` alone; Supabase OTP docs support `signInWithOtp`, `shouldCreateUser`, and `verifyOtp({ type: "email" })`; Supabase docs confirm service/secret keys bypass RLS; Resend supports idempotency keys for email sends.  
@@ -91,7 +91,7 @@ Commit: `docs(account): add implementation research baseline`
 
 Objective: define the database contract before route code depends on it.
 
-Files likely touched: `docs/account-workspace-management-supabase.sql`, `docs/account-workspace-management-db-rls-checklist.md`, possibly `docs/intake-auth-handoff-supabase.sql` if consolidating shared tables.
+Files likely touched: `supabase/migrations/0002_account-workspace-management-supabase.sql`, `docs/account-workspace-management-db-rls-checklist.md`, possibly `supabase/migrations/0001_intake-auth-handoff-supabase.sql` if consolidating shared tables.
 
 Exact work: add idempotent SQL for account columns, `workspace_invites`, indexes, constraints, helper functions, account repair RPC, workspace create RPC, invite accept RPC, and RLS policies. Include delivery metadata for invite email side effects.
 

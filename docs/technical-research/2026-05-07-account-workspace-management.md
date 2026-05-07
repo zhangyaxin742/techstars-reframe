@@ -31,7 +31,7 @@ Implement `/account` as the account and workspace control plane using the existi
 - Shared CSRF exists at `lib/security/csrf.ts`, but currently assumes `POST` only and needs support for `PATCH`.
 - Existing Reframe route handlers use typed manual parsers, `NextResponse.json`, explicit JSON/content/origin checks, and focused route tests.
 - Existing email side effects use Resend through raw `fetch` in `lib/waitlist/submit.ts`; do not add a new provider or SDK.
-- SQL migration convention is currently docs-based, not `supabase/migrations`.
+- SQL migration convention is now `supabase/migrations`.
 - `/demo` must remain untouched.
 - Do not edit `.env`; document required runtime configuration.
 - The working tree contains unrelated dirty/staged files, so commits must target explicit paths only.

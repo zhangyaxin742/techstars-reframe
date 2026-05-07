@@ -1,6 +1,6 @@
 # Intake Auth Handoff DB/RLS Checklist
 
-Use this checklist after running [intake-auth-handoff-supabase.sql](/C:/Users/user/Documents/GitHub/techstars-reframe/docs/intake-auth-handoff-supabase.sql:1) in Supabase. It exists because this repo does not yet include a local Supabase test harness.
+Use this checklist after running [`0001_intake-auth-handoff-supabase.sql`](../supabase/migrations/0001_intake-auth-handoff-supabase.sql) in Supabase. It exists because this repo does not yet include a local Supabase test harness.
 
 ## Privilege Review
 
