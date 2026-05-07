@@ -29,6 +29,10 @@ type MembershipRow = {
   } | null;
 };
 
+type MembershipQueryRow = Omit<MembershipRow, "workspaces"> & {
+  workspaces?: MembershipRow["workspaces"] | NonNullable<MembershipRow["workspaces"]>[];
+};
+
 export async function PATCH(request: Request) {
   const csrfResponse = verifyAccountMutationCsrf(request, ["PATCH"]);
   if (csrfResponse) {
@@ -115,7 +119,7 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const membershipRow = membership as MembershipRow;
+  const membershipRow = toMembershipRow(membership as unknown as MembershipQueryRow);
   const workspace = membershipRow.workspaces;
 
   return applyToResponse(
@@ -133,6 +137,16 @@ export async function PATCH(request: Request) {
         : null,
     }),
   );
+}
+
+function toMembershipRow(row: MembershipQueryRow): MembershipRow {
+  return {
+    workspace_id: row.workspace_id,
+    role: row.role,
+    workspaces: Array.isArray(row.workspaces)
+      ? row.workspaces[0] ?? null
+      : row.workspaces ?? null,
+  };
 }
 
 function toProfile(profile: ProfileRow) {

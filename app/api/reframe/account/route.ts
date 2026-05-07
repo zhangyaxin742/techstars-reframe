@@ -36,6 +36,12 @@ type WorkspaceInviteRpcRow = {
   delivery_status?: WorkspaceInviteRow["delivery_status"];
 };
 
+type WorkspaceMembershipQueryRow = Omit<WorkspaceMembershipRow, "workspaces"> & {
+  workspaces?:
+    | WorkspaceMembershipRow["workspaces"]
+    | NonNullable<WorkspaceMembershipRow["workspaces"]>[];
+};
+
 export async function GET(request: Request) {
   const { supabase, applyToResponse } = createSupabaseRouteClient(request);
   const actor = await getVerifiedActor(supabase);
@@ -93,7 +99,8 @@ export async function GET(request: Request) {
   }
 
   const profileRow = profile as ProfileRow;
-  const membershipRows = (memberships ?? []) as WorkspaceMembershipRow[];
+  const membershipRows = ((memberships ?? []) as unknown as WorkspaceMembershipQueryRow[])
+    .map(toWorkspaceMembershipRow);
   const accountProfile = toAccountProfile(profileRow);
   const workspaceRows = toMembershipWorkspaces(membershipRows);
   const activeWorkspace = chooseActiveWorkspace({
@@ -164,6 +171,23 @@ function toWorkspaceMemberRow(row: WorkspaceMemberRpcRow): WorkspaceMemberRow {
       email_display: row.email_display,
       avatar_url: row.avatar_url,
     },
+  };
+}
+
+function toWorkspaceMembershipRow(
+  row: WorkspaceMembershipQueryRow,
+): WorkspaceMembershipRow {
+  const workspace = Array.isArray(row.workspaces)
+    ? row.workspaces[0] ?? null
+    : row.workspaces ?? null;
+
+  return {
+    workspace_id: row.workspace_id,
+    user_id: row.user_id,
+    role: row.role,
+    joined_at: row.joined_at,
+    created_at: row.created_at,
+    workspaces: workspace,
   };
 }
 
