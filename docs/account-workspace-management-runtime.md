@@ -19,7 +19,7 @@ Do not commit these values.
 - `REFRAME_INVITE_EMAIL_FROM`
 - `REFRAME_APP_URL`
 
-Fallbacks exist for some secrets during local setup, but production should use dedicated `REFRAME_*` secrets instead of relying on `SUPABASE_SERVICE_ROLE_KEY`.
+Account email hashes and invite token hashes require dedicated `REFRAME_*` secrets. Do not reuse `SUPABASE_SERVICE_ROLE_KEY` for account/workspace token material.
 
 ## Auth
 

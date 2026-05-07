@@ -25,13 +25,11 @@ export function hashWorkspaceInviteToken(
 }
 
 export function readWorkspaceInviteTokenSecret() {
-  const secret =
-    process.env.REFRAME_INVITE_TOKEN_SECRET?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const secret = process.env.REFRAME_INVITE_TOKEN_SECRET?.trim();
 
   if (!secret || secret.length < 32) {
     throw new WorkspaceInviteTokenConfigError(
-      "Set REFRAME_INVITE_TOKEN_SECRET or a 32+ character SUPABASE_SERVICE_ROLE_KEY before enabling workspace invites.",
+      "Set a 32+ character REFRAME_INVITE_TOKEN_SECRET before enabling workspace invites.",
     );
   }
 

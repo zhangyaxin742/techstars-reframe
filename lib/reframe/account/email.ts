@@ -50,13 +50,11 @@ export function hashAccountEmail(
 }
 
 export function readAccountEmailHashSecret() {
-  const secret =
-    process.env.REFRAME_EMAIL_HASH_SECRET?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const secret = process.env.REFRAME_EMAIL_HASH_SECRET?.trim();
 
   if (!secret || secret.length < 32) {
     throw new AccountEmailHashConfigError(
-      "Set REFRAME_EMAIL_HASH_SECRET or a 32+ character SUPABASE_SERVICE_ROLE_KEY before enabling account auth.",
+      "Set a 32+ character REFRAME_EMAIL_HASH_SECRET before enabling account auth.",
     );
   }
 
