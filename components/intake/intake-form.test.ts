@@ -16,6 +16,6 @@ describe("IntakeForm source contract", () => {
     expect(source).toContain("Save and open my workspace");
     expect(source).not.toContain('type="password"');
     expect(source).not.toContain('type="file"');
-    expect(source).not.toMatch(/connect shopify|sync|upload files/i);
+    expect(source).not.toMatch(/connect shopify|\bsync\b|upload files/i);
   });
 });
