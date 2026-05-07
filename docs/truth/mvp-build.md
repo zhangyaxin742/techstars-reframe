@@ -987,7 +987,7 @@ Sources S1-S29 accessed on 2026-05-06. Sources S30-S36 accessed on 2026-05-07.
 - [S16] LinkedIn Posts API docs: https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api
 - [S17] YouTube Data API `videos.insert`: https://developers.google.com/youtube/v3/docs/videos/insert
 - [S18] YouTube Data API `search.list`: https://developers.google.com/youtube/v3/docs/search/list
-- [S19] Local audit, `reframe-demo-audit.md`
+- [S19] Local audit, `docs/archive/demo-audit.md`
 - [S20] Local PRD, `docs/plans/2026-05-02-reframe-prd.md`
 - [S21] Supabase, Next.js server-side auth guide: https://supabase.com/docs/guides/auth/server-side/nextjs
 - [S22] Supabase, Auth users guide: https://supabase.com/docs/guides/auth/users
