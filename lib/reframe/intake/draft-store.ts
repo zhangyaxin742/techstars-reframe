@@ -195,6 +195,27 @@ export async function markIntakeDraftExpired(tokenHash: string) {
   );
 }
 
+export async function markIntakeDraftVerificationPending(input: {
+  tokenHash: string;
+  emailHash: string;
+}) {
+  await fetchRows(
+    `${TABLE}?token_hash=eq.${encodeFilterValue(input.tokenHash)}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        status: "verification_pending",
+        email_hash: input.emailHash,
+      }),
+    },
+    false,
+  );
+}
+
 async function getDraftMetadata(tokenHash: string) {
   const rows = await fetchRows<IntakeDraftMetadataRow>(
     `${TABLE}?select=id,status,expires_at&token_hash=eq.${encodeFilterValue(tokenHash)}&limit=1`,

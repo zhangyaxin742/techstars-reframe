@@ -39,6 +39,35 @@ export function checkDraftSaveRateLimit(input: {
   return consumeRateLimits(checks);
 }
 
+export function checkOtpStartRateLimit(input: {
+  ipAddress: string | null;
+  emailHash: string;
+  draftTokenHash: string;
+}): IntakeRateLimitResult {
+  const checks: RateLimitConfig[] = [
+    {
+      key: `intake:otp:email:${input.emailHash}`,
+      limit: 5,
+      windowMs: 60 * 60 * 1_000,
+    },
+    {
+      key: `intake:otp:draft:${input.draftTokenHash}`,
+      limit: 5,
+      windowMs: 15 * 60 * 1_000,
+    },
+  ];
+
+  if (input.ipAddress) {
+    checks.push({
+      key: `intake:otp:ip:${input.ipAddress}`,
+      limit: 20,
+      windowMs: 10 * 60 * 1_000,
+    });
+  }
+
+  return consumeRateLimits(checks);
+}
+
 export function resetIntakeRateLimiter() {
   buckets.clear();
 }
