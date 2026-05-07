@@ -19,6 +19,10 @@ import {
 import { getClientIpAddress } from "@/lib/reframe/intake/http";
 import { CsrfConfigError, verifyCsrfRequest } from "@/lib/security/csrf";
 import { createSupabasePasswordlessAuthClient } from "@/lib/supabase/auth";
+import {
+  createSupabaseServiceRoleClient,
+  SupabaseAdminConfigError,
+} from "@/lib/supabase/admin";
 import { SupabaseBrowserConfigError } from "@/lib/supabase/env";
 
 const RESEND_AFTER_SECONDS = 60;
@@ -128,7 +132,6 @@ export async function POST(request: Request) {
 
     if (mode === "invite_accept") {
       const allowed = await isInviteOtpStartAllowed({
-        supabase,
         emailHash,
         inviteTokenHash,
       });
@@ -172,6 +175,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (error instanceof SupabaseAdminConfigError) {
+      return configError(
+        "account_invite_gate_not_configured",
+        "Workspace invite auth is not configured.",
+      );
+    }
+
     console.error("Failed to start account auth handoff.", error);
     return NextResponse.json(
       {
@@ -187,10 +197,6 @@ export async function POST(request: Request) {
 }
 
 async function isInviteOtpStartAllowed(input: {
-  supabase: Pick<
-    ReturnType<typeof createSupabasePasswordlessAuthClient>,
-    "rpc"
-  >;
   emailHash: string;
   inviteTokenHash?: string;
 }) {
@@ -198,7 +204,8 @@ async function isInviteOtpStartAllowed(input: {
     return false;
   }
 
-  const { data, error } = await input.supabase.rpc(
+  const supabase = createSupabaseServiceRoleClient();
+  const { data, error } = await supabase.rpc(
     "resolve_workspace_invite_for_otp",
     {
       p_token_hash: input.inviteTokenHash,

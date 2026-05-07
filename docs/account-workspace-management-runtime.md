@@ -12,6 +12,7 @@ Do not commit these values.
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `REFRAME_CSRF_SECRET`
 - `REFRAME_EMAIL_HASH_SECRET`
 - `REFRAME_INVITE_TOKEN_SECRET`
@@ -32,6 +33,8 @@ Do not add password fields, password reset, email/password signup, or Supabase A
 Account and workspace routes use the normal Supabase server/route client and validated `getClaims()` actor identity.
 
 Do not use the service-role client for account payload reads, member list reads, active workspace switching, user-scoped profile updates, app-level invite acceptance, or ordinary workspace mutations.
+
+The pre-auth invite OTP gate is the narrow exception: `/api/reframe/auth/otp/start` validates CSRF, request shape, email hash, invite-token hash, and rate limits, then calls `resolve_workspace_invite_for_otp` with the server-only service-role key. That RPC is not executable by `anon` or `authenticated`, so clients cannot call it directly.
 
 Any future service-role operation must first authenticate the requester with the normal server Supabase client, derive the actor user ID, verify workspace membership/role, and only then perform the service-role operation.
 

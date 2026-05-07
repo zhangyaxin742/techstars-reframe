@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 export class SupabaseAdminConfigError extends Error {
   constructor(message = "Supabase admin configuration is missing.") {
     super(message);
@@ -33,4 +35,16 @@ export function buildSupabaseAdminHeaders(config: SupabaseAdminConfig) {
     apikey: config.serviceRoleKey,
     Authorization: `Bearer ${config.serviceRoleKey}`,
   };
+}
+
+export function createSupabaseServiceRoleClient() {
+  const { url, serviceRoleKey } = readSupabaseAdminConfig();
+
+  return createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      persistSession: false,
+    },
+  });
 }

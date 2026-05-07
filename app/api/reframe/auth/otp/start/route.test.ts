@@ -12,9 +12,14 @@ import {
   REFRAME_CSRF_HEADER,
 } from "@/lib/security/csrf";
 import { createSupabasePasswordlessAuthClient } from "@/lib/supabase/auth";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/admin";
 
 vi.mock("@/lib/supabase/auth", () => ({
   createSupabasePasswordlessAuthClient: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase/admin", () => ({
+  createSupabaseServiceRoleClient: vi.fn(),
 }));
 
 const CSRF_SECRET = "csrf_account_otp_secret_32_characters";
@@ -23,8 +28,9 @@ const INVITE_SECRET = "workspace_invite_secret_32_characters";
 const INVITE_TOKEN = "invite_token_abcdefghijklmnopqrstuvwxyz0123456789";
 
 const signInWithOtpMock = vi.fn();
-const rpcMock = vi.fn();
+const inviteGateRpcMock = vi.fn();
 const createAuthClientMock = vi.mocked(createSupabasePasswordlessAuthClient);
+const createServiceRoleClientMock = vi.mocked(createSupabaseServiceRoleClient);
 
 describe("account OTP start route", () => {
   const originalEnv = {
@@ -44,7 +50,7 @@ describe("account OTP start route", () => {
     process.env.REFRAME_EMAIL_HASH_SECRET = ACCOUNT_SECRET;
     process.env.REFRAME_INVITE_TOKEN_SECRET = INVITE_SECRET;
     signInWithOtpMock.mockResolvedValue({ data: {}, error: null });
-    rpcMock.mockResolvedValue({
+    inviteGateRpcMock.mockResolvedValue({
       data: [{ valid: true, state: "pending" }],
       error: null,
     });
@@ -52,8 +58,10 @@ describe("account OTP start route", () => {
       auth: {
         signInWithOtp: signInWithOtpMock,
       },
-      rpc: rpcMock,
     } as unknown as ReturnType<typeof createSupabasePasswordlessAuthClient>);
+    createServiceRoleClientMock.mockReturnValue({
+      rpc: inviteGateRpcMock,
+    } as unknown as ReturnType<typeof createSupabaseServiceRoleClient>);
   });
 
   afterEach(() => {
@@ -86,7 +94,7 @@ describe("account OTP start route", () => {
         shouldCreateUser: true,
       },
     });
-    expect(rpcMock).not.toHaveBeenCalled();
+    expect(inviteGateRpcMock).not.toHaveBeenCalled();
   });
 
   it("starts recovery OTP with shouldCreateUser false", async () => {
@@ -123,7 +131,7 @@ describe("account OTP start route", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(rpcMock).toHaveBeenCalledWith("resolve_workspace_invite_for_otp", {
+    expect(inviteGateRpcMock).toHaveBeenCalledWith("resolve_workspace_invite_for_otp", {
       p_token_hash: tokenHash,
       p_email_hash: emailHash,
     });
@@ -136,7 +144,7 @@ describe("account OTP start route", () => {
   });
 
   it("does not create users when the invite token and email do not match", async () => {
-    rpcMock.mockResolvedValueOnce({
+    inviteGateRpcMock.mockResolvedValueOnce({
       data: [{ valid: false, state: "email_mismatch" }],
       error: null,
     });

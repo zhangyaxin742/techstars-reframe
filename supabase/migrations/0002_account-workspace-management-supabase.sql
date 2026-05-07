@@ -59,6 +59,34 @@ alter table public.profiles
 alter table public.profiles
   add column if not exists active_workspace_id uuid;
 
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_display_name_length'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_display_name_length
+      check (display_name is null or length(display_name) <= 120)
+      not valid;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_avatar_url_length'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_avatar_url_length
+      check (avatar_url is null or length(avatar_url) <= 2048)
+      not valid;
+  end if;
+end;
+$$;
+
 create table if not exists public.workspaces (
   id uuid primary key default extensions.gen_random_uuid(),
   slug text not null unique,
@@ -73,6 +101,22 @@ create table if not exists public.workspaces (
 
 alter table public.workspaces
   add column if not exists archived_at timestamptz;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'workspaces_name_length'
+      and conrelid = 'public.workspaces'::regclass
+  ) then
+    alter table public.workspaces
+      add constraint workspaces_name_length
+      check (name is null or length(name) between 2 and 80)
+      not valid;
+  end if;
+end;
+$$;
 
 create table if not exists public.workspace_memberships (
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
@@ -253,6 +297,7 @@ to authenticated
 using (security.is_workspace_member(id, (select auth.uid())));
 
 drop policy if exists workspace_memberships_select_member_workspace on public.workspace_memberships;
+drop policy if exists workspace_memberships_select_own on public.workspace_memberships;
 create policy workspace_memberships_select_member_workspace
 on public.workspace_memberships
 for select
@@ -340,7 +385,15 @@ begin
 
     insert into public.workspaces (slug, name, created_by)
     values (v_workspace_slug, v_workspace_name, v_user_id)
+    on conflict (slug) do nothing
     returning id, slug into v_workspace_id, v_workspace_slug;
+
+    if v_workspace_id is null then
+      select id, slug
+      into v_workspace_id, v_workspace_slug
+      from public.workspaces
+      where slug = security.slugify(v_workspace_name, 'workspace') || '-' || v_user_suffix;
+    end if;
 
     insert into public.workspace_memberships (workspace_id, user_id, role)
     values (v_workspace_id, v_user_id, 'owner');
@@ -937,7 +990,7 @@ revoke all on function public.create_workspace_invite(uuid, text, text, text, te
 revoke all on function public.mark_workspace_invite_delivery(uuid, uuid, text, text, text) from public, anon;
 revoke all on function public.revoke_workspace_invite(uuid, uuid) from public, anon;
 revoke all on function public.accept_workspace_invite(text, text, text) from public, anon;
-revoke all on function public.resolve_workspace_invite_for_otp(text, text) from public;
+revoke all on function public.resolve_workspace_invite_for_otp(text, text) from public, anon, authenticated;
 revoke all on function public.get_workspace_account_members(uuid) from public, anon;
 revoke all on function public.get_workspace_pending_invites(uuid) from public, anon;
 
@@ -947,6 +1000,6 @@ grant execute on function public.create_workspace_invite(uuid, text, text, text,
 grant execute on function public.mark_workspace_invite_delivery(uuid, uuid, text, text, text) to authenticated;
 grant execute on function public.revoke_workspace_invite(uuid, uuid) to authenticated;
 grant execute on function public.accept_workspace_invite(text, text, text) to authenticated;
-grant execute on function public.resolve_workspace_invite_for_otp(text, text) to anon, authenticated;
+grant execute on function public.resolve_workspace_invite_for_otp(text, text) to service_role;
 grant execute on function public.get_workspace_account_members(uuid) to authenticated;
 grant execute on function public.get_workspace_pending_invites(uuid) to authenticated;

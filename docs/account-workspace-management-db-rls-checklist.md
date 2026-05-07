@@ -57,6 +57,7 @@ order by tablename, policyname;
 - Security-definer functions must schema-qualify table/function references.
 - Execute on `security.ensure_account_workspace` must be revoked from `public`, `anon`, and `authenticated`; use the public wrapper only.
 - Execute on public account RPCs must be granted to `authenticated` and revoked from `public` and `anon`.
+- Execute on `public.resolve_workspace_invite_for_otp` must be revoked from `public`, `anon`, and `authenticated`; grant it only to `service_role` for the server-side OTP invite gate.
 - No function should use or require a Supabase service/secret key to authorize ordinary account payload reads.
 
 Suggested inspection query:
@@ -79,6 +80,7 @@ where n.nspname in ('public', 'security')
     'create_workspace_invite',
     'mark_workspace_invite_delivery',
     'revoke_workspace_invite',
+    'resolve_workspace_invite_for_otp',
     'accept_workspace_invite'
   )
 order by schema_name, function_name;
