@@ -496,6 +496,18 @@ begin
   limit 1;
 
   if found then
+    update public.workspace_invites
+    set token_hash = p_token_hash,
+        role = p_role,
+        invited_by = v_user_id,
+        delivery_status = 'pending',
+        delivery_error = null,
+        delivery_email_id = null,
+        delivery_attempted_at = null,
+        expires_at = p_expires_at
+    where id = v_existing.id
+    returning * into v_existing;
+
     return query
     select
       v_existing.id,
