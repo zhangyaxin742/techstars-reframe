@@ -19,11 +19,12 @@ function issueFixedToken() {
   });
 }
 
-function buildRequest(headers: HeadersInit = {}) {
+function buildRequest(headers: HeadersInit & { method?: string } = {}) {
   const issued = issueFixedToken();
+  const { method = "POST", ...requestHeaders } = headers;
 
   return new Request("https://app.example.com/api/reframe/intake/drafts", {
-    method: "POST",
+    method,
     headers: {
       "content-type": "application/json",
       cookie: `${REFRAME_CSRF_COOKIE}=${encodeURIComponent(issued.cookie.value)}`,
@@ -31,7 +32,7 @@ function buildRequest(headers: HeadersInit = {}) {
       origin: "https://app.example.com",
       "sec-fetch-site": "same-origin",
       [REFRAME_CSRF_HEADER]: issued.token,
-      ...headers,
+      ...requestHeaders,
     },
   });
 }
@@ -125,6 +126,18 @@ describe("CSRF helpers", () => {
 
   it("validates the full mutating request contract", () => {
     expect(verifyCsrfRequest(buildRequest(), { secret: SECRET, now: NOW })).toEqual({
+      ok: true,
+    });
+  });
+
+  it("allows PATCH when the route opts into that method", () => {
+    expect(
+      verifyCsrfRequest(buildRequest({ method: "PATCH" }), {
+        secret: SECRET,
+        now: NOW,
+        allowedMethods: ["PATCH"],
+      }),
+    ).toEqual({
       ok: true,
     });
   });

@@ -130,13 +130,16 @@ export function verifyCsrfRequest(
   input: {
     secret?: string;
     now?: Date;
+    allowedMethods?: string[];
   } = {},
 ): CsrfVerificationResult {
-  if (request.method !== "POST") {
+  const allowedMethods = input.allowedMethods ?? ["POST"];
+
+  if (!allowedMethods.includes(request.method)) {
     return csrfFailure(
       "csrf_method_not_allowed",
       405,
-      "State-changing requests must use POST.",
+      `State-changing requests must use ${allowedMethods.join(" or ")}.`,
     );
   }
 
