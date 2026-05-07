@@ -809,6 +809,100 @@ begin
 end;
 $$;
 
+create or replace function public.get_workspace_account_members(
+  p_workspace_id uuid
+)
+returns table (
+  workspace_id uuid,
+  user_id uuid,
+  role text,
+  joined_at timestamptz,
+  created_at timestamptz,
+  display_name text,
+  email_display text,
+  avatar_url text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_requester_role text;
+begin
+  if v_user_id is null then
+    raise exception 'not_authenticated' using errcode = 'P0001';
+  end if;
+
+  v_requester_role := security.workspace_role(p_workspace_id, v_user_id);
+
+  if v_requester_role is null then
+    raise exception 'workspace_member_read_forbidden' using errcode = 'P0001';
+  end if;
+
+  return query
+  select
+    wm.workspace_id,
+    wm.user_id,
+    wm.role,
+    wm.joined_at,
+    wm.created_at,
+    p.display_name,
+    case
+      when v_requester_role in ('owner', 'admin') then p.email_display
+      else null
+    end as email_display,
+    p.avatar_url
+  from public.workspace_memberships wm
+  left join public.profiles p on p.id = wm.user_id
+  where wm.workspace_id = p_workspace_id
+  order by wm.created_at asc;
+end;
+$$;
+
+create or replace function public.get_workspace_pending_invites(
+  p_workspace_id uuid
+)
+returns table (
+  id uuid,
+  workspace_id uuid,
+  email_display text,
+  role text,
+  status text,
+  expires_at timestamptz,
+  delivery_status text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if v_user_id is null then
+    raise exception 'not_authenticated' using errcode = 'P0001';
+  end if;
+
+  if not security.is_workspace_admin(p_workspace_id, v_user_id) then
+    raise exception 'workspace_invite_read_forbidden' using errcode = 'P0001';
+  end if;
+
+  return query
+  select
+    wi.id,
+    wi.workspace_id,
+    wi.email_display,
+    wi.role,
+    wi.status,
+    wi.expires_at,
+    wi.delivery_status
+  from public.workspace_invites wi
+  where wi.workspace_id = p_workspace_id
+    and wi.status = 'pending'
+  order by wi.created_at asc;
+end;
+$$;
+
 revoke all on function security.ensure_account_workspace(text, text, text) from public, anon, authenticated;
 revoke all on function public.ensure_account_workspace(text, text, text) from public, anon;
 revoke all on function public.create_workspace(text) from public, anon;
@@ -817,6 +911,8 @@ revoke all on function public.mark_workspace_invite_delivery(uuid, uuid, text, t
 revoke all on function public.revoke_workspace_invite(uuid, uuid) from public, anon;
 revoke all on function public.accept_workspace_invite(text, text, text) from public, anon;
 revoke all on function public.resolve_workspace_invite_for_otp(text, text) from public;
+revoke all on function public.get_workspace_account_members(uuid) from public, anon;
+revoke all on function public.get_workspace_pending_invites(uuid) from public, anon;
 
 grant execute on function public.ensure_account_workspace(text, text, text) to authenticated;
 grant execute on function public.create_workspace(text) to authenticated;
@@ -825,3 +921,5 @@ grant execute on function public.mark_workspace_invite_delivery(uuid, uuid, text
 grant execute on function public.revoke_workspace_invite(uuid, uuid) to authenticated;
 grant execute on function public.accept_workspace_invite(text, text, text) to authenticated;
 grant execute on function public.resolve_workspace_invite_for_otp(text, text) to anon, authenticated;
+grant execute on function public.get_workspace_account_members(uuid) to authenticated;
+grant execute on function public.get_workspace_pending_invites(uuid) to authenticated;
