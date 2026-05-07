@@ -9,6 +9,7 @@ BLUF: the repo already has most of the auth foundation, but `/account`, account 
   - `lib/supabase/proxy.ts` + `proxy.ts`: refreshes session with `supabase.auth.getClaims()`.
   - `lib/supabase/auth.ts`: passwordless auth client using the publishable key.
   - `lib/supabase/admin.ts`: REST header helper for service-role/admin use.
+  - Supabase's current API key model should prefer `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for browser/SSR clients and `SUPABASE_SECRET_KEY` for trusted server operations. `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are legacy compatibility fallbacks only.
 
 - Existing auth helpers:
   - OTP verification exists at `app/api/reframe/auth/verify/route.ts`, but it is currently intake-draft-specific and expects an intake draft cookie.
@@ -48,6 +49,50 @@ BLUF: the repo already has most of the auth foundation, but `/account`, account 
 
 Sources checked: Supabase SSR says protect server data with `getClaims()` and not `getSession()` alone; Supabase OTP docs support `signInWithOtp`, `shouldCreateUser`, and `verifyOtp({ type: "email" })`; Supabase docs confirm service/secret keys bypass RLS; Resend supports idempotency keys for email sends.  
 Links: https://supabase.com/docs/guides/auth/server-side/nextjs, https://supabase.com/docs/guides/auth/auth-email-passwordless, https://supabase.com/docs/guides/getting-started/api-keys, https://supabase.com/docs/guides/database/postgres/row-level-security, https://resend.com/docs/dashboard/emails/idempotency-keys
+
+## 0.1 Supabase API Key Modernization
+
+BLUF: migrate runtime code and docs to Supabase's current publishable/secret key model before removing legacy env vars. Keep SQL role names such as `anon`, `authenticated`, and `service_role` unchanged because those are database roles, not environment key names.
+
+Current desired env shape:
+
+- `SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY`
+
+Legacy compatibility envs to phase out after verification:
+
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Known current code state:
+
+- `lib/supabase/env.ts` already prefers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and falls back to `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- `lib/supabase/admin.ts` currently reads only `SUPABASE_SERVICE_ROLE_KEY`.
+- `lib/waitlist/submit.ts` currently hand-builds Supabase REST headers from `SUPABASE_SERVICE_ROLE_KEY`.
+- `lib/reframe/intake/draft-store.ts` inherits the admin REST header behavior through `lib/supabase/admin.ts`.
+- `lib/security/csrf.ts`, `lib/reframe/intake/email.ts`, and `lib/reframe/intake/draft-cookie.ts` use `SUPABASE_SERVICE_ROLE_KEY` only as fallback entropy. Dedicated `REFRAME_*` secrets now exist and should be required instead of falling back to Supabase keys.
+- `SUPABASE_SECRET_KEY` may already exist in local/deployment env, but current runtime code does not read it yet.
+
+Implementation steps:
+
+1. Update `lib/supabase/admin.ts` to read `SUPABASE_SECRET_KEY` first and temporarily fall back to `SUPABASE_SERVICE_ROLE_KEY`.
+2. Rename internal admin helper fields from `serviceRoleKey` to `adminKey` or `secretKey` so call sites do not encode legacy terminology.
+3. Update waitlist/intake draft admin REST helpers to use the shared admin config after the rename.
+4. Prefer Supabase JS admin clients for new trusted-server operations instead of adding new hand-rolled REST paths.
+5. Remove `SUPABASE_SERVICE_ROLE_KEY` fallback entropy from CSRF, intake draft token, and email hashing once `REFRAME_CSRF_SECRET`, `REFRAME_DRAFT_TOKEN_SECRET`, and `REFRAME_EMAIL_HASH_SECRET` are confirmed in every environment.
+6. Update runtime docs to mark `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` as legacy fallback only.
+7. After staging passes, remove `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from deployment envs and local env templates.
+
+Verification:
+
+- `npm run test:run -- lib/supabase lib/waitlist lib/reframe/intake app/api/reframe/intake app/api/reframe/auth`
+- `npm run typecheck`
+- Manual smoke: waitlist submit persists, intake draft save/restore works, account OTP invite gate can call the service-only invite resolver, and no client bundle references `SUPABASE_SECRET_KEY`.
+- Static review: `rg -n "SUPABASE_SERVICE_ROLE_KEY|NEXT_PUBLIC_SUPABASE_ANON_KEY|serviceRoleKey" app lib components docs`
+
+Risk note: new Supabase `sb_secret_...` keys differ from legacy JWT service-role keys, especially for raw REST/header behavior. Migrate hand-built REST paths carefully and test against the real Supabase project before deleting legacy env vars.
 
 ## 1. Implementation Strategy
 

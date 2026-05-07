@@ -96,3 +96,89 @@ docs/
 - Do not delete one lockfile without choosing package-manager strategy.
 - Do not rewrite PRDs wholesale.
 - Do not bulk-delete Instagram assets without deciding whether the full scrape library is intentionally retained.
+
+
+## DEMO VS WORKSPACE BS 
+
+• The key distinction in code is simple: /workspace and /
+  demo are currently identical legacy seeded surfaces. The
+  route you actually want for “dummy account + full MVP
+  workspace experience” is /app/[workspaceSlug]/projects/
+  [projectSlug], but that route is not yet enforcing
+  session/workspace authorization or loading real project
+  data.
+
+───────────────────────────────────────────────────────────
+
+• Current behavior:
+
+  | Route | What It Does Now | Auth? | Purpose |
+  | --- | --- | --- | --- |
+  | /demo | Renders src/App.tsx | No | Frozen seeded
+  investor/demo experience |
+  | /workspace | Also renders src/App.tsx | No | Redundant
+  alias of /demo |
+  | /app/[workspaceSlug]/projects/[projectSlug] | Renders
+  src/reframe-mvp/AppWorkspace.tsx | Not enforced yet |
+  Real MVP workspace route shape |
+  | /account | OTP sign-in/account/workspace/member UI |
+  Yes, via APIs | Account/workspace control plane |
+
+  So right now /workspace has no meaningful distinction
+  from /demo. It should not be the dev-authenticated
+  workspace route.
+
+  What you want is:
+
+  1. /demo
+      - Public.
+      - No auth.
+      - Frozen seeded sales/demo artifact.
+  2. /app/[workspaceSlug]/projects/[projectSlug]
+      - Authenticated.
+      - Full workspace experience.
+      - For dummy account testing, you sign in through /
+        account, then open a real workspace/project slug.
+
+  Minimum viable fix:
+
+  - Redirect /workspace to /demo.
+  - Keep /demo public.
+  - Add auth/session gating to /app/[workspaceSlug]/
+    projects/[projectSlug].
+  - For now, allow the MVP workspace to render seeded
+    content after verifying the signed-in user belongs to
+    workspaceSlug.
+  - Later, replace seeded content with DB-backed project
+    data.
+
+  For dummy testing, the desired flow should be:
+
+  /account
+    -> sign in with email OTP
+    -> account is repaired/created via
+  ensure_account_workspace
+    -> obtain workspace slug
+    -> visit /app/<workspaceSlug>/projects/<projectSlug>
+    -> see full MVP workspace
+
+  Current gap:
+
+  - /app/[workspaceSlug]/projects/[projectSlug] accepts
+    slugs as props but does not verify them against
+    Supabase membership.
+  - projectSlug is currently display/export context, not a
+    DB-loaded project.
+  - There is no dev shortcut like /app/dev or “open active
+    workspace” button wired from /account yet.
+
+  My recommendation:
+
+  - Treat /workspace as obsolete and redirect it to /demo.
+  - Make /app/... the only real workspace route.
+  - Add a small dev/pilot convenience path later: after /
+    account loads active workspace, show “Open workspace”
+    linking to /app/{activeWorkspace.slug}/projects/
+    {knownProjectSlug}. For now that project slug can be a
+    deterministic seeded one like campaign-demo until
+    project persistence is wired.
