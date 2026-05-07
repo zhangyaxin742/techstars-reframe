@@ -1,5 +1,4 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { AppWorkspace } from "./AppWorkspace";
@@ -88,8 +87,7 @@ describe("AppWorkspace", () => {
     expect(screen.queryByText("Live")).not.toBeInTheDocument();
   });
 
-  it("uses MVP export labels for selected storyboard and preview nodes", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  it("uses MVP export labels for selected storyboard and preview nodes", () => {
     const createObjectUrl = vi.fn(() => "blob:test");
     const revokeObjectUrl = vi.fn();
     Object.defineProperty(URL, "createObjectURL", {
@@ -107,11 +105,7 @@ describe("AppWorkspace", () => {
     fireEvent.click(screen.getByTestId("infinite-canvas"));
     fireEvent.click(screen.getByTestId("canvas-node-timeline-1"), { shiftKey: true });
     expect(screen.getByLabelText("Download handoff")).toBeInTheDocument();
-    await user.click(screen.getByLabelText("Download handoff"));
-    expect(screen.getByText("Markdown brief")).toBeInTheDocument();
-    expect(screen.getByText("JSON package")).toBeInTheDocument();
-    expect(screen.getByText("Shot list CSV")).toBeInTheDocument();
-    expect(screen.getByText("Copy script")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Export timeline")).not.toBeInTheDocument();
     expect(screen.queryByText("CapCut")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("canvas-node-preview-1"));

@@ -61,10 +61,10 @@ interface AppWorkspaceProps {
 const BRAND_CONTEXT_HANDOFF_PAUSE_MS = 2400;
 const CONNECTION_DRAW_IN_MS = 550;
 
-function toolCallsThroughIndex(toolCalls: SimulatedToolCall[], activeIndex: number) {
+function toolCallsThroughIndex(toolCalls: SimulatedToolCall[], activeIndex: number): SimulatedToolCall[] {
   return toolCalls.slice(0, activeIndex + 1).map((toolCall, index) => ({
     ...toolCall,
-    state: index < activeIndex ? "completed" : "running",
+    state: index < activeIndex ? ("completed" as const) : ("running" as const),
   }));
 }
 
