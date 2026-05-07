@@ -49,6 +49,8 @@ export type InviteAcceptPayload = {
   token: string;
 };
 
+export type EmptyPayload = Record<string, never>;
+
 export async function parseJsonPayload<T>(
   request: Request,
   maxBytes: number,
@@ -314,6 +316,19 @@ export function validateInviteAcceptPayload(
     value: {
       token,
     },
+  };
+}
+
+export function validateEmptyPayload(
+  payload: unknown,
+): AccountValidationResult<EmptyPayload> {
+  if (!isRecord(payload)) {
+    return invalidBody();
+  }
+
+  return {
+    ok: true,
+    value: {},
   };
 }
 
