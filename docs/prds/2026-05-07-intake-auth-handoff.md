@@ -20,7 +20,7 @@ Build `/intake` as the founder context intake and auth handoff because Reframe's
 | Primary user | Founder or early team member starting Reframe from the landing CTA. |
 | MVP scope | `/intake` + `/intake/verify` + intake/auth/claim API contracts that create one owned project from one draft. |
 | Non-goals | No live trend search, social sync, Shopify OAuth, AI extraction UI, media labeling, publishing, or full workspace editor in this slice. |
-| Success metric | At least 40% of saved intake drafts are claimed into a workspace in the MVP pilot; duplicate project creation from claim retries is 0. |
+| Success metric | Implementation success is 0 duplicate projects from claim retries; draft-to-claim conversion is tracked as pilot analytics, not an implementation gate. |
 | Engineering risk | Secure draft-token storage, Supabase SSR session setup, RLS policy correctness, and claim idempotency. |
 | Design risk | Auth must feel like saving the work, not a detached account gate. |
 | Launch risk | Misleading copy could imply connected accounts, live scraping, or uploaded media persistence before those paths are real. |
@@ -136,7 +136,7 @@ Build `/intake` as the founder context intake and auth handoff because Reframe's
 | State | Required behavior | Copy/content | Notes |
 |---|---|---|---|
 | Empty | Show form with clear required fields and source-reference language. | "Start with what is already true about the business." | No blank AI chat box. |
-| Draft restored | Load saved draft fields through server validation. | "Draft restored. Continue when ready." | Do not expose token in URL or client storage. |
+| Draft restored | Load only minimum safe draft fields through server validation. | "Draft restored. Continue when ready." | Draft tokens are bearer credentials; never expose token, email hash, claim IDs, token hash, or internal ownership metadata to the client. |
 | Loading save | Disable primary action, keep entered data visible, announce progress. | "Saving your context..." | Use `aria-live` for progress. |
 | Auth required | Keep form context visible and ask for email only. | "Continue to save this workspace." | Do not say "we found your account." |
 | Verification pending | Show code entry, resend affordance, masked email display. | "Enter the code we emailed to continue." | No draft token in query params. |
@@ -236,6 +236,8 @@ Build `/intake` as the founder context intake and auth handoff because Reframe's
 |---|---|---|---|---|
 | `reframe_intake_draft` | Raw random draft token | `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/` | 24 hours | Set and refreshed only by route handlers; cleared or rotated after claim. |
 
+Draft tokens are bearer credentials. Possession of the raw draft cookie is enough to restore or continue an unclaimed draft until expiry, so restore responses must return only `businessUrl`, `productUrl`, `campaignGoal`, `founderNote`, `sourceReferences`, `expiresAt`, and coarse `status`. They must not return raw tokens, token hashes, email hashes, claimed IDs, user IDs, workspace IDs, project IDs, or owner/account state.
+
 ### API surface
 
 | Endpoint/action | Input | Output | Auth | Failure behavior |
@@ -250,19 +252,21 @@ Build `/intake` as the founder context intake and auth handoff because Reframe's
 
 | Step | Required behavior |
 |---|---|
-| OTP start | `POST /api/reframe/intake/continue` validates draft, email, CSRF, and rate limit, then calls `supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })`. It ignores account-state differences and always returns the public verify-email shape on provider success. |
+| OTP start | `POST /api/reframe/intake/continue` validates draft, email, CSRF, and app-level IP/email-hash/draft-token rate limits, then calls `supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })`. It ignores account-state differences and always returns the public verify-email shape on provider success. It must not create `profiles`, `workspaces`, `workspace_memberships`, or `projects`; those are created only after successful OTP verification and claim. |
 | OTP email template | Supabase Magic Link email template must include `{{ .Token }}` and product copy for a six-digit email code. Password fields and password reset links are not part of P0. |
 | OTP verify | `POST /api/reframe/auth/verify` creates a cookie-aware server Supabase client and calls `supabase.auth.verifyOtp({ email, token, type: "email" })`. |
 | Session cookies | On successful `verifyOtp`, the route handler must persist Supabase auth cookies onto the `NextResponse` through the `@supabase/ssr` server-client cookie adapter before returning. |
 | Session validation | Server routes and protected pages must use `supabase.auth.getClaims()` or an equivalent verified-user call after cookie refresh; do not trust `getSession()` alone in server code. |
-| Claim | After OTP verification, the route calls `public.claim_intake_draft(token_hash)` as the authenticated user and redirects to the returned project URL. |
+| Claim | After OTP verification, the route calls the claim RPC as the authenticated user and redirects to the returned project URL. |
 
 ### Claim transaction/RPC
 
-`public.claim_intake_draft(p_token_hash text)` is the only operation that creates a project from a draft.
+The claim RPC is the only operation that creates a project from a draft. Prefer `security.claim_intake_draft(p_token_hash text)` or another non-public/private schema if repo and Supabase RPC conventions allow it. If the implementation must expose an RPC through `public`, use a minimal `public.claim_intake_draft` wrapper that delegates to a schema-qualified private function and exposes no table access.
 
-- Implement as a Postgres function executed in one transaction; grant execute to `authenticated` only and revoke execute from `public` and `anon`.
+- Implement as a Postgres function executed in one transaction.
+- Explicitly `revoke execute` from `public` and `anon`; grant execute only to `authenticated` on the callable function.
 - If `security definer` is required to read/update `intake_drafts`, set `search_path` explicitly and enforce `auth.uid() is not null` inside the function.
+- Schema-qualify every table, helper function, and enum reference inside the function body.
 - Lock the draft row with `select ... for update` by `token_hash`.
 - If the draft is expired, mark it `expired` and return an expired error.
 - If the draft is already claimed by the same `auth.uid()`, return the existing workspace/project slugs.
@@ -276,15 +280,16 @@ Build `/intake` as the founder context intake and auth handoff because Reframe's
 | Table/function | Operation | Predicate / rule |
 |---|---|---|
 | `profiles` | `select` | `auth.uid() = id` |
-| `profiles` | `insert`, `update` | `auth.uid() = id`; email hash is server/RPC-managed. |
-| `workspaces` | `select` | `exists (select 1 from workspace_memberships where workspace_id = workspaces.id and user_id = auth.uid())` |
+| `profiles` | `insert` | Direct insert denied in this slice; profile creation happens only through the claim RPC after successful OTP verification. |
+| `profiles` | `update` | Direct update denied in this slice unless a later `/account` settings PRD limits updates to explicitly safe fields. |
+| `workspaces` | `select` | User can read workspaces only if a non-recursive security-definer helper such as `security.is_workspace_member(workspaces.id, auth.uid())` returns true. |
 | `workspaces` | `insert`, `update`, `delete` | Direct table mutation denied in this slice; default workspace is created by `claim_intake_draft`. |
-| `workspace_memberships` | `select` | User can read memberships for workspaces where they are a member. |
+| `workspace_memberships` | `select` | `user_id = auth.uid()` for P0 to avoid self-recursive membership policies. |
 | `workspace_memberships` | `insert`, `update`, `delete` | Direct table mutation denied in this slice; owner membership is created by `claim_intake_draft`. |
 | `intake_drafts` | all direct operations | Direct table access denied to `anon` and `authenticated`; anonymous draft writes go through server route handlers, claim goes through RPC. |
-| `projects` | `select` | User can read projects for workspaces where they are a member. |
+| `projects` | `select` | User can read projects only if the same non-recursive workspace-membership helper returns true for `projects.workspace_id` and `auth.uid()`. |
 | `projects` | `insert`, `update`, `delete` | Direct table mutation denied in this slice; project creation is only through `claim_intake_draft`. |
-| `claim_intake_draft` | execute | Grant only to `authenticated`; function checks `auth.uid()`, draft status, expiry, and claim ownership. |
+| `claim_intake_draft` | execute | Revoke from `public` and `anon`; grant only to `authenticated`; function checks `auth.uid()`, draft status, expiry, and claim ownership. |
 
 ### External integrations
 
@@ -319,7 +324,7 @@ The draft payload must still be treated as untrusted future AI input:
 | Metric | Definition | Target | Instrumentation |
 |---|---|---|---|
 | Draft save rate | `% of /intake visitors who create a valid draft` | Establish MVP baseline; monitor weekly. | `intake_draft_saved` / `intake_started`. |
-| Claim completion rate | `% of saved drafts that become projects` | 40%+ in pilot. | `intake_claimed` / `intake_draft_saved`. |
+| Claim completion rate | `% of saved drafts that become projects` | Pilot analytics target of 40%+; not an implementation acceptance gate. | `intake_claimed` / `intake_draft_saved`. |
 | Duplicate claim count | Projects created more than once for one `intake_draft_id`. | 0. | DB unique constraint + server metric. |
 | Auth handoff failure rate | Auth/verify/claim failures per saved draft. | Under 10% after pilot fixes. | Route-level counters by coarse reason. |
 | Enumeration regression | Automated tests that detect distinct public responses for email existence. | 0 failing tests. | Security test suite. |
@@ -358,8 +363,11 @@ The draft payload must still be treated as untrusted future AI input:
 - **Access control:** anonymous users can only create/update a draft with the valid draft cookie. Workspace/project reads and writes require verified Supabase session and workspace membership.
 - **Secret handling:** service role or secret keys stay server-only. The client may receive only publishable/anon keys required by Supabase SSR/client setup.
 - **Draft token safety:** raw draft token is generated server-side, stored only in a secure `HttpOnly` cookie, hashed before persistence, and cleared or rotated after claim.
+- **Draft restore minimization:** treat the draft cookie as a bearer credential and return only minimum editable form fields plus expiry/status; never return internal IDs, token hashes, email hashes, or claim metadata.
+- **OTP-start abuse:** `continue` may create Supabase Auth users when `shouldCreateUser: true`, but no application profile, workspace, membership, or project may be created until `verifyOtp` succeeds and claim runs. Add app-level limits by IP, email hash, and draft token around draft save, OTP start/resend, verify, and claim attempts.
 - **Account enumeration:** no standalone or embedded email-existence response. `continue` must not branch publicly by account state; email hashes may be stored only for rate limiting, audit, or internal dedupe.
 - **CSRF strategy:** every state-changing route requires `POST`, `Content-Type: application/json`, a valid `Origin` that matches `Host` or `X-Forwarded-Host`, and an `X-Reframe-CSRF` header. `/intake` issues a random CSRF token, stores only its HMAC in a `Secure`, `SameSite=Lax`, `HttpOnly` cookie, and passes the raw token to the page as a server-rendered form value. Route handlers compare the header token HMAC to the cookie value and reject missing/mismatched tokens with `403`. If `Sec-Fetch-Site` is present, only `same-origin` or `same-site` is accepted.
+- **Bot defense:** before public launch, add CAPTCHA or an equivalent stronger bot defense to OTP start and other high-abuse anonymous mutations. This is not required for a controlled pilot but is a launch gate for public traffic.
 - **Abuse cases:** bot draft spam, auth code brute force, credential stuffing, token theft, draft hijack, oversized notes/source payloads, unsafe URLs, and later prompt injection from founder-provided text.
 - **Mitigations:** rate limiting by IP/email hash/draft token, payload size caps, URL normalization, no sensitive logs, RLS policies, transactional claim, generic errors, and automated cross-workspace denial tests.
 
@@ -371,6 +379,7 @@ The draft payload must still be treated as untrusted future AI input:
 | `@supabase/supabase-js` and `@supabase/ssr` | Not currently in `package.json`; implementation needs dependency approval due repo rules. | Engineering | Not installed. |
 | Supabase SQL migrations | `profiles`, `workspaces`, `workspace_memberships`, `intake_drafts`, and `projects` must exist with RLS. | Engineering | Needed. |
 | Supabase SSR utilities | Add `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/proxy.ts`, and root `proxy.ts` or framework-equivalent middleware matcher before auth routes ship. | Engineering | Needed. |
+| Shared CSRF utility | Add one shared CSRF issue/verify utility before implementing state-changing routes so route handlers do not duplicate token logic. | Engineering | Needed. |
 | Existing waitlist raw REST helper | Shows server-side Supabase pattern but is not enough for user sessions. | Engineering | Existing reference only. |
 | Mixed lockfiles | Dependency changes must not change package-manager strategy. | Engineering | Constraint. |
 | `/demo` freeze | New code must not mutate seeded demo behavior or data. | Engineering | Constraint. |
@@ -394,16 +403,17 @@ The draft payload must still be treated as untrusted future AI input:
 
 ### Ordered implementation sequence
 
-1. Add Supabase dependencies after approval without changing package-manager strategy.
-2. Add Supabase SSR client/proxy utilities and document required env vars without editing `.env`.
-3. Add SQL migration for enums/tables, DB constraints, RLS policies, and `claim_intake_draft`.
-4. Add focused DB/RLS tests or a SQL review checklist for cross-workspace denial and claim idempotency.
-5. Add CSRF token issuance on `/intake` and shared state-changing route guard.
-6. Add `POST /api/reframe/intake/drafts` with validation, draft cookie creation, and draft restore coverage.
-7. Add `POST /api/reframe/intake/continue` with email OTP send and identical public response shape.
-8. Add `/intake/verify` UI and `POST /api/reframe/auth/verify` with `verifyOtp`, cookie persistence, and claim RPC call.
-9. Add minimal `/app/[workspaceSlug]/projects/[projectSlug]` placeholder target only if needed for redirect verification.
-10. Switch landing CTA to `/intake` only after route, auth, CSRF, RLS, and idempotency tests pass.
+1. Inspect `package-lock.json`, `pnpm-lock.yaml`, and current package scripts; output the exact package-manager install command for user approval before installing anything.
+2. Add Supabase dependencies after approval without changing package-manager strategy.
+3. Add Supabase SSR client/proxy utilities and document required env vars without editing `.env`.
+4. Add a shared CSRF issue/verify utility with unit tests before implementing any state-changing intake/auth routes.
+5. Add SQL migration for enums/tables, DB constraints, non-recursive RLS policies, helper functions, and the claim RPC.
+6. Add focused DB/RLS tests or a SQL review checklist for cross-workspace denial and claim idempotency.
+7. Add `POST /api/reframe/intake/drafts` with validation, draft cookie creation, and minimum-field draft restore coverage.
+8. Add `POST /api/reframe/intake/continue` with email OTP send, app-level IP/email/draft throttles, and identical public response shape.
+9. Add `/intake/verify` UI and `POST /api/reframe/auth/verify` with `verifyOtp`, cookie persistence, and claim RPC call.
+10. Add minimal `/app/[workspaceSlug]/projects/[projectSlug]` placeholder target only if needed for redirect verification.
+11. Switch landing CTA to `/intake` only after route, auth, CSRF, RLS, idempotency tests pass, and CAPTCHA/stronger bot defense is ready for public launch.
 
 ## 15. Rollout, migration, and rollback
 
@@ -418,8 +428,10 @@ The feature is ready to ship when:
 
 - [ ] Anonymous founder can open `/intake`, enter context, and save a draft without creating an account first.
 - [ ] Draft save creates or updates `intake_drafts`, stores only `token_hash`, and sets `reframe_intake_draft` with `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, and 24-hour expiry.
+- [ ] Draft restore treats the draft cookie as a bearer credential and returns only minimum safe editable fields plus expiry/status.
 - [ ] Authenticated founder submitting `/intake` is redirected to `/app/[workspaceSlug]/projects/[projectSlug]` with a project scoped to a workspace they belong to.
 - [ ] New and existing founders use the same passwordless email OTP flow from intake and receive the same public `continue` response shape.
+- [ ] OTP start creates no `profiles`, `workspaces`, `workspace_memberships`, or `projects`; those application rows are created only after successful verify plus claim.
 - [ ] Valid `verifyOtp({ email, token, type: "email" })` creates/persists a Supabase session cookie and claims the draft through the same idempotent claim path.
 - [ ] Repeating verify/claim requests for one draft/user returns the same project slug and does not create duplicate projects.
 - [ ] Public responses and UI copy do not reveal whether an email address exists.
@@ -428,6 +440,8 @@ The feature is ready to ship when:
 - [ ] Expired drafts cannot be claimed and show a restart path.
 - [ ] RLS policies prevent a user from reading or writing projects/drafts/workspaces owned by another workspace.
 - [ ] Every state-changing intake/auth route rejects missing, cross-origin, or invalid CSRF tokens.
+- [ ] The shared CSRF utility has focused unit tests before route implementation depends on it.
+- [ ] Public launch is blocked until OTP start has CAPTCHA or an equivalent stronger bot defense.
 - [ ] Focused route and component tests pass, including draft restore, expiry, auth-required, verification, idempotent claim, and generic auth error states.
 
 ## 17. QA / validation plan
@@ -437,13 +451,15 @@ The feature is ready to ship when:
 | Intake form required fields | Component | Engineering | Submit disabled or field errors shown until minimum context exists. |
 | Draft save route validation | Route unit | Engineering | Invalid JSON, invalid URLs, oversized payloads, and non-JSON content types return expected errors. |
 | Draft cookie flags | Route unit | Engineering | Set-Cookie includes required security flags and max age. |
-| Restore draft | Integration | Engineering | Valid cookie returns draft; expired cookie returns restart state. |
+| Restore draft | Integration | Engineering | Valid cookie returns only safe editable fields plus expiry/status; expired cookie returns restart state. |
 | Authenticated claim | Integration with mocked Supabase | Engineering | Existing session creates/returns workspace project. |
-| OTP start and verification | Integration with mocked Supabase | Engineering | `signInWithOtp` returns identical public response shape; `verifyOtp` success persists cookies and creates profile/workspace/membership/project. |
+| OTP start and verification | Integration with mocked Supabase | Engineering | `signInWithOtp` returns identical public response shape and creates no application rows; `verifyOtp` success persists cookies and claim creates profile/workspace/membership/project. |
 | Claim idempotency | Unit/integration | Engineering | Concurrent or repeated claim returns one project. |
 | Enumeration resistance | Security unit | Engineering | Existing vs unknown email public response shape/copy remains generic. |
+| CSRF utility | Unit | Engineering | Shared CSRF issue/verify helper rejects missing, malformed, mismatched, and replayed/expired tokens where applicable. |
 | CSRF rejection | Route unit | Engineering | Mutating routes reject missing token, HMAC mismatch, cross-origin `Origin`, and disallowed `Sec-Fetch-Site`. |
 | RLS policy review | SQL/manual | Engineering | Cross-workspace reads/writes are denied. |
+| OTP spam guard | Route/security | Engineering | IP/email-hash/draft-token throttles block excessive OTP starts; public launch checklist includes CAPTCHA/stronger bot defense. |
 | Keyboard and screen reader pass | Manual/component | Design + Engineering | Form, auth, and verification states are keyboard accessible and labeled. |
 
 ### Manual QA script
@@ -466,6 +482,7 @@ The feature is ready to ship when:
 | Risk | Severity | Mitigation | Decision needed? |
 |---|---|---|---|
 | Account enumeration through email lookup or auth error differences | High | Generic response shape/copy, protected lookup only after valid draft token, app-level rate limits, security tests. | No, mitigation required. |
+| OTP-start auth-user spam | High | Create no application rows until verify+claim; throttle by IP/email hash/draft token; add CAPTCHA or stronger bot defense before public launch. | No for public launch; controlled pilot can proceed with throttles. |
 | Draft hijacking through leaked token | High | HttpOnly cookie, hashed token storage, short expiry, claim conflict rules, no query/localStorage token. | No, mitigation required. |
 | RLS misconfiguration exposes private projects | High | Enable RLS on exposed tables, membership-based policies, cross-workspace denial tests. | No, mitigation required. |
 | Pre-auth media expectations exceed safe storage scope | Medium | No file controls in `/intake`; create follow-up PRD if temporary upload becomes necessary. | Yes, only if product insists on pre-auth binary persistence. |
@@ -513,8 +530,10 @@ This PRD does not include OpenAI calls, binary media processing, or storage uplo
 | Gap | Why it matters | Required resolution before code |
 |---|---|---|
 | Supabase dependency approval | `@supabase/supabase-js` and `@supabase/ssr` are not installed, and repo rules require approval before dependency changes. | Choose package manager command and get approval before implementation. |
+| Package-manager command selection | Both `package-lock.json` and `pnpm-lock.yaml` exist, so dependency installation could accidentally change strategy. | Before requesting approval, inspect lockfiles/package scripts and present the exact install command Codex intends to run. |
 | SQL migration ownership | The PRD defines constraints/RLS/RPC behavior but not the final migration file. | Draft SQL migration and run policy review before route work depends on it. |
 | CSRF token transport | The strategy is specified, but the exact server component/client component handoff must match the final `/intake` component shape. | Decide whether `/intake` is server-rendered with a client form child or fully client-rendered with a bootstrap API. |
+| Public bot defense | OTP start can create Supabase Auth users before application claim. | Add CAPTCHA or equivalent stronger bot defense before public launch; keep pilot traffic gated if this is not ready. |
 | Auth email deliverability | OTP UX depends on Supabase email template and provider behavior. | Configure template with `{{ .Token }}` and verify local/staging email delivery. |
 | Redirect target availability | The first slice needs a project URL after claim, but the full app workspace is out of scope. | Add a minimal authenticated project placeholder or defer CTA switch until that route exists. |
 | RLS test harness | Cross-workspace denial must be tested, but no Supabase test harness exists in repo. | Add SQL/manual verification checklist or local Supabase test setup before shipping. |
@@ -523,5 +542,6 @@ This PRD does not include OpenAI calls, binary media processing, or storage uplo
 
 | Date | Change | Author |
 |---|---|---|
+| 2026-05-07 | Patched OTP spam guard, non-recursive RLS rules, profile permissions, hardened claim RPC placement/privileges, bearer-token restore limits, CSRF utility requirement, pilot analytics wording, and dependency install approval step. | Codex |
 | 2026-05-07 | Line-edited auth handoff for OTP-only auth, non-enumerating `continue`, SSR setup, CSRF, RLS matrix, idempotent claim constraints/RPC, readiness gaps, and implementation sequence. | Codex |
 | 2026-05-07 | Initial draft from `docs/reframe-mvp-cutdown.md` `/intake` flow and current official integration docs. | Codex |
